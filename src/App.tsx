@@ -1,3 +1,10 @@
-import App from '@/components/vendely_pro_vende_directo_por_whatsapp';
+import { AuthProvider } from '@/lib/auth-context';
+import VendelyApp from '@/components/vendely_pro_vende_directo_por_whatsapp';
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <VendelyApp />
+    </AuthProvider>
+  );
+}
