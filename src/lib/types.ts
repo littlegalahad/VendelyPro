@@ -14,6 +14,10 @@ export interface Store {
   font: string;
   plan: PlanType;
   payments: PaymentConfig;
+  catalog_layout: string;
+  custom_bg_color: string | null;
+  custom_text_color: string | null;
+  custom_accent_color: string | null;
   created_at?: string;
   updated_at?: string;
 }
