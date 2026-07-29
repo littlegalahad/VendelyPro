@@ -28,7 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .select('*')
       .eq('owner_id', userId)
       .maybeSingle();
-
     if (error) {
       console.error('Error loading store:', error);
       return;
@@ -76,9 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error: storeError } = await supabase.from('stores').insert({
         owner_id: data.user.id,
         name: storeName,
-        slogan: 'Vende directo por WhatsApp',
-        currency_symbol: 'S/',
-        country: 'PE',
+        slogan: 'Your store, direct to WhatsApp',
+        currency_symbol: '$',
+        country: 'US',
         theme: 'proDark',
         font: 'Inter',
         plan: 'free',
