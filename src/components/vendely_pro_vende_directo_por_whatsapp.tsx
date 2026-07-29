@@ -6,10 +6,11 @@ import {
   Package, CheckCircle2, QrCode, Settings, Clock, Smartphone,
   ArrowUpDown, Copy, ExternalLink, Banknote, CreditCard, Building2,
   ShieldCheck, LogOut, Loader2, AlertCircle, Wallet, Eye, EyeOff,
-  LayoutGrid, Rows3, Columns3, Image as ImageIconBanner, Droplet, AlignLeft
+  LayoutGrid, Rows3, Columns3, Image as ImageIconBanner, Droplet, AlignLeft,
+  Users, UserPlus, KeyRound, Grid2x2, Grid3x3, List, GalleryVerticalEnd, Square, BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import type { Store, Product, Category, Banner, Order, OrderItem, CartItem, PlanType } from '@/lib/types';
+import type { Store, Product, Category, Banner, Order, OrderItem, CartItem, PlanType, StoreMember } from '@/lib/types';
 import * as api from '@/lib/store-api';
 import AuthScreen from '@/components/AuthScreen';
 
@@ -24,10 +25,12 @@ export const AVAILABLE_FONTS = [
 ];
 
 export const CATALOG_LAYOUTS = [
-  { id: 'grid2', name: 'Cuadrícula 2', icon: LayoutGrid, desc: '2 columnas clásicas' },
-  { id: 'grid3', name: 'Cuadrícula 3', icon: Columns3, desc: '3 columnas compactas' },
-  { id: 'lista', name: 'Lista', icon: Rows3, desc: 'Filas horizontales' },
-  { id: 'magazine', name: 'Revista', icon: AlignLeft, desc: 'Destacado grande' },
+  { id: 'grid2', name: 'Cuadrícula 2', icon: Grid2x2, desc: '2 columnas clásicas' },
+  { id: 'grid3', name: 'Cuadrícula 3', icon: Grid3x3, desc: '3 columnas compactas' },
+  { id: 'lista', name: 'Lista', icon: List, desc: 'Filas horizontales' },
+  { id: 'magazine', name: 'Revista', icon: BookOpen, desc: 'Destacado grande' },
+  { id: 'compact', name: 'Compacto', icon: Square, desc: 'Tarjetas pequeñas' },
+  { id: 'gallery', name: 'Galería', icon: GalleryVerticalEnd, desc: 'Imagen completa' },
 ];
 
 export const PLAN_LIMITS: Record<PlanType, {
@@ -42,7 +45,8 @@ export const PLAN_LIMITS: Record<PlanType, {
       'Hasta 8 productos activos', 'Categorías y subcategorías ilimitadas',
       '1 banner destacado', 'Pedidos directos por WhatsApp',
       'Código QR exclusivo para clientes', 'Múltiples métodos de pago',
-      'Ofertas y descuentos', '4 modelos de catálogo'
+      'Ofertas y descuentos', '6 modelos de catálogo',
+      'Hasta 2 colaboradores'
     ]
   },
   monthly: {
@@ -52,7 +56,7 @@ export const PLAN_LIMITS: Record<PlanType, {
       'Productos ILIMITADOS', 'Hasta 5 banners promocionales',
       'Tipografía avanzada con Google Fonts', 'Billeteras digitales, tarjetas y enlaces de pago',
       'Panel de historial de pedidos', 'Soporte prioritario por WhatsApp',
-      'Colores personalizados de la tienda'
+      'Colores personalizados de la tienda', 'Colaboradores ilimitados'
     ]
   },
   yearly: {
@@ -66,6 +70,12 @@ export const PLAN_LIMITS: Record<PlanType, {
   }
 };
 
+const RUBROS = [
+  'Moda y Ropa', 'Comida y Bebidas', 'Hogar y Decoración', 'Tecnología',
+  'Belleza y Cuidado Personal', 'Salud y Farmacia', 'Juguetes', 'Deportes',
+  'Joyería y Accesorios', 'Papelería', 'Artesanías', 'Otros'
+];
+
 const PRESET_IMAGES = [
   'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&q=80&w=600',
   'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=600',
@@ -76,14 +86,14 @@ const PRESET_IMAGES = [
 ];
 
 const ALL_THEMES = [
-  { id: 'proDark', name: 'Pro Oscuro', color: '#10B981', bg: '#090D16' },
-  { id: 'elegante', name: 'Púrpura Noir', color: '#8B5CF6', bg: '#0B0914' },
-  { id: 'goldLuxury', name: 'Lujo Dorado', color: '#F59E0B', bg: '#0F1115' },
-  { id: 'roseGold', name: 'Rosa Oro', color: '#F43F5E', bg: '#FAF5F7' },
-  { id: 'artesanal', name: 'Cálido Artesanal', color: '#D96B43', bg: '#FAF6F0' },
-  { id: 'moderno', name: 'Limpio Moderno', color: '#4F46E5', bg: '#F8FAFC' },
-  { id: 'cyberNeon', name: 'Cyber Neón', color: '#06B6D4', bg: '#050B14' },
-  { id: 'nordicMint', name: 'Menta Nórdica', color: '#059669', bg: '#F2F8F6' },
+  { id: 'proDark', name: 'Pro Oscuro', color: '#10B981', bg: '#090D16', isDark: true },
+  { id: 'elegante', name: 'Púrpura Noir', color: '#8B5CF6', bg: '#0B0914', isDark: true },
+  { id: 'goldLuxury', name: 'Lujo Dorado', color: '#F59E0B', bg: '#0F1115', isDark: true },
+  { id: 'roseGold', name: 'Rosa Oro', color: '#F43F5E', bg: '#FAF5F7', isDark: false },
+  { id: 'artesanal', name: 'Cálido Artesanal', color: '#D96B43', bg: '#FAF6F0', isDark: false },
+  { id: 'moderno', name: 'Limpio Moderno', color: '#4F46E5', bg: '#F8FAFC', isDark: false },
+  { id: 'cyberNeon', name: 'Cyber Neón', color: '#06B6D4', bg: '#050B14', isDark: true },
+  { id: 'nordicMint', name: 'Menta Nórdica', color: '#059669', bg: '#F2F8F6', isDark: false },
 ];
 
 interface ThemeDef {
@@ -91,8 +101,7 @@ interface ThemeDef {
   badge: string; text: string; subtext: string; nav: string; selectBg: string;
   gradientBg: string; cardRadius: string; cardHover: string; borderSubtle: string;
   sectionBg: string; activeText: string; overlayBg: string; modalBg: string;
-  modalInputBg: string; isDark: boolean;
-  accentSolid: string;
+  modalInputBg: string; isDark: boolean; accentSolid: string;
 }
 
 const THEMES: Record<string, ThemeDef> = {
@@ -213,14 +222,19 @@ function dbProductToCart(p: Product): CartItem {
   };
 }
 
-// Construye el estilo inline para colores personalizados (anulan el tema)
-function useCustomStyle(store: Store, theme: ThemeDef): React.CSSProperties {
-  const style: React.CSSProperties = { colorScheme: theme.isDark ? 'dark' : 'light' };
-  if (store.custom_bg_color) {
-    style.backgroundColor = store.custom_bg_color;
-    style.background = store.custom_bg_color;
-  }
-  return style;
+// Props de estilo para selects que respetan el tema
+function selectStyle(theme: ThemeDef, customTextColor?: string): React.CSSProperties {
+  return { colorScheme: theme.isDark ? 'dark' : 'light', color: customTextColor || undefined };
+}
+
+// Lee un archivo de imagen y devuelve base64
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 // ============ MODAL CATEGORÍAS ============
@@ -228,10 +242,10 @@ function useCustomStyle(store: Store, theme: ThemeDef): React.CSSProperties {
 interface CategoryManagerModalProps {
   isOpen: boolean; onClose: () => void;
   categories: Category[]; storeId: string; theme: ThemeDef;
-  onSaved: () => void;
+  onSaved: () => void; customTextColor?: string;
 }
 
-const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onClose, categories, storeId, theme, onSaved }) => {
+const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onClose, categories, storeId, theme, onSaved, customTextColor }) => {
   const [cats, setCats] = useState(categories);
   const [newCatName, setNewCatName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -467,7 +481,7 @@ const PlansView: React.FC<PlansViewProps> = ({ currentPlan, productCount, banner
 
 interface AdminProductsProps {
   products: Product[]; store: Store; theme: ThemeDef; categories: Category[];
-  onRefresh: () => void; onUpgrade: () => void;
+  onRefresh: () => void; onUpgrade: () => void; customTextColor?: string;
 }
 
 type FormState = {
@@ -478,7 +492,7 @@ type FormState = {
 
 const EMPTY_FORM: FormState = { name: '', price: '', category: '', subcategory: '', description: '', image: '', isOffer: false, offerPrice: '', stock: '10', isFeatured: false };
 
-const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, categories, onRefresh, onUpgrade }) => {
+const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, categories, onRefresh, onUpgrade, customTextColor }) => {
   const [showModal, setShowModal] = useState(false);
   const [showCatManager, setShowCatManager] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -502,9 +516,9 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
     setForm({ name: p.name, price: String(p.price), category: p.category, subcategory: p.subcategory || '', description: p.description, image: p.image, isOffer: p.is_offer, offerPrice: p.offer_price ? String(p.offer_price) : '', stock: String(p.stock), isFeatured: p.is_featured });
     setShowModal(true);
   };
-  const handleImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) { const reader = new FileReader(); reader.onloadend = () => setForm(prev => ({ ...prev, image: reader.result as string })); reader.readAsDataURL(file); }
+    if (file) { const base64 = await readFileAsBase64(file); setForm(prev => ({ ...prev, image: base64 })); }
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -608,6 +622,7 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
               <div>
                 <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Categoría</label>
                 <select value={form.category} onChange={e => { const nc = e.target.value; const fs = categories.find(c => c.name === nc)?.subcategories[0] || ''; setForm({...form, category: nc, subcategory: fs}); }}
+                  style={selectStyle(theme, customTextColor)}
                   className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500 font-medium`}>
                   {catNames.map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
@@ -615,6 +630,7 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
               <div>
                 <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Subcategoría</label>
                 <select value={form.subcategory} onChange={e => setForm({...form, subcategory: e.target.value})}
+                  style={selectStyle(theme, customTextColor)}
                   className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`}>
                   <option value="">Sin subcategoría</option>
                   {availableSubs.map(s => <option key={s} value={s}>{s}</option>)}
@@ -648,20 +664,19 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
           </div>
         </div>
       )}
-      <CategoryManagerModal isOpen={showCatManager} onClose={() => setShowCatManager(false)} categories={categories} storeId={store.id} theme={theme} onSaved={onRefresh} />
+      <CategoryManagerModal isOpen={showCatManager} onClose={() => setShowCatManager(false)} categories={categories} storeId={store.id} theme={theme} onSaved={onRefresh} customTextColor={customTextColor} />
     </div>
   );
 };
 
 // ============ VISTA PEDIDOS ============
 
-interface OrdersViewProps { orders: Order[]; store: Store; theme: ThemeDef; onRefresh: () => void; }
+interface OrdersViewProps { orders: Order[]; store: Store; theme: ThemeDef; onRefresh: () => void; customTextColor?: string; }
 
-const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh }) => {
+const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh, customTextColor }) => {
   const handleStatus = async (orderId: string, status: Order['status']) => {
     try { await api.updateOrderStatus(orderId, status); onRefresh(); } catch { alert('Error al actualizar'); }
   };
-  const statusLabels: Record<Order['status'], string> = { pending: 'Pendiente', preparing: 'Preparando', shipped: 'Enviado', delivered: 'Entregado' };
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       <div className={`flex items-center justify-between border-b ${theme.borderSubtle} pb-3`}>
@@ -681,6 +696,7 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
                   <p className="text-[10px] opacity-60">{new Date(order.created_at).toLocaleString('es-ES')} &bull; Pago: <strong className="uppercase">{order.payment_method}</strong></p>
                 </div>
                 <select value={order.status} onChange={e => handleStatus(order.id, e.target.value as Order['status'])}
+                  style={selectStyle(theme, customTextColor)}
                   className={`${theme.selectBg} font-bold border text-[10px] rounded-xl px-2.5 py-1 outline-none`}>
                   <option value="pending">Pendiente</option>
                   <option value="preparing">Preparando</option>
@@ -708,26 +724,48 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
 
 // ============ ADMIN AJUSTES ============
 
-interface AdminSettingsProps { store: Store; theme: ThemeDef; categories: Category[]; onUpdate: (updates: Partial<Store>) => Promise<void>; onUpgrade: () => void; onOpenQR: () => void; onRefresh: () => void; }
+interface AdminSettingsProps { store: Store; theme: ThemeDef; categories: Category[]; onUpdate: (updates: Partial<Store>) => Promise<void>; onUpgrade: () => void; onOpenQR: () => void; onRefresh: () => void; customTextColor?: string; }
 
-const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories, onUpdate, onUpgrade, onOpenQR, onRefresh }) => {
+const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories, onUpdate, onUpgrade, onOpenQR, onRefresh, customTextColor }) => {
   const [showCatModal, setShowCatModal] = useState(false);
-  const [bannerInput, setBannerInput] = useState('');
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [members, setMembers] = useState<StoreMember[]>([]);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [generatingCode, setGeneratingCode] = useState(false);
   const planLimits = PLAN_LIMITS[store.plan] || PLAN_LIMITS.free;
   const payments = store.payments || {};
   const update = (partial: Partial<Store>) => onUpdate(partial);
 
   useEffect(() => {
     api.fetchBanners(store.id).then(setBanners).catch(() => {});
+    api.fetchMembers(store.id).then(setMembers).catch(() => {});
   }, [store.id]);
 
-  const handleAddBanner = async () => {
-    if (!bannerInput.trim()) return;
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     if (banners.length >= planLimits.maxBanners) { alert(`Tu plan permite hasta ${planLimits.maxBanners} banner(s).`); return; }
-    try { await api.addBanner(store.id, bannerInput.trim()); setBannerInput(''); const b = await api.fetchBanners(store.id); setBanners(b); onRefresh(); } catch { alert('Error al agregar banner'); }
+    try {
+      const base64 = await readFileAsBase64(file);
+      await api.addBanner(store.id, base64);
+      const b = await api.fetchBanners(store.id); setBanners(b); onRefresh();
+    } catch { alert('Error al subir el banner'); }
   };
   const handleDeleteBanner = async (id: string) => { try { await api.deleteBanner(id); const b = await api.fetchBanners(store.id); setBanners(b); onRefresh(); } catch { alert('Error'); } };
+
+  const handleGenerateInvite = async () => {
+    setGeneratingCode(true);
+    try {
+      const code = await api.generateInviteCode(store.id);
+      setInviteCode(code);
+      const m = await api.fetchMembers(store.id); setMembers(m);
+    } catch { alert('Error al generar código de invitación'); }
+    setGeneratingCode(false);
+  };
+  const handleDeleteMember = async (memberId: string) => {
+    if (!confirm('¿Eliminar este colaborador?')) return;
+    try { await api.deleteMember(memberId); const m = await api.fetchMembers(store.id); setMembers(m); } catch { alert('Error'); }
+  };
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
@@ -752,6 +790,15 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
         <div>
           <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Eslogan</label>
           <input type="text" value={store.slogan} onChange={e => update({ slogan: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+        </div>
+        <div>
+          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Rubro / Giro</label>
+          <select value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })}
+            style={selectStyle(theme, customTextColor)}
+            className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500 font-medium`}>
+            <option value="">Selecciona un rubro</option>
+            {RUBROS.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
@@ -798,10 +845,10 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
       {/* Banners */}
       <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
         <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><ImageIconBanner size={14} /> Banners promocionales ({banners.length}/{planLimits.maxBanners === Infinity ? '\u221e' : planLimits.maxBanners})</p>
-        <div className="flex gap-2">
-          <input type="text" placeholder="URL de imagen del banner..." value={bannerInput} onChange={e => setBannerInput(e.target.value)} className={`flex-1 ${theme.selectBg} border ${theme.cardRadius} p-2.5 text-xs outline-none`} />
-          <button onClick={handleAddBanner} className={`${theme.primary} px-3 py-2.5 ${theme.cardRadius} text-xs font-bold flex items-center gap-1`}><Plus size={14} /> Agregar</button>
-        </div>
+        <label className={`flex items-center justify-center gap-2 ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold cursor-pointer hover:opacity-90 transition-opacity`}>
+          <ImageIcon size={16} /> Subir banner desde tu dispositivo
+          <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+        </label>
         {banners.length > 0 && (
           <div className="space-y-2">
             {banners.map(b => (
@@ -814,10 +861,43 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
         )}
       </div>
 
+      {/* Colaboradores / Sub-usuarios */}
+      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
+        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Users size={14} /> Colaboradores ({members.filter(m => m.role === 'staff').length})</p>
+        <p className={`text-[11px] ${theme.subtext}`}>Invita a otras personas para que gestionen tu tienda. Ellos crean su cuenta y usan el código de invitación.</p>
+        {inviteCode && (
+          <div className={`${theme.accentBg} p-3 ${theme.cardRadius} flex items-center justify-between`}>
+            <div>
+              <p className="text-[10px] font-bold uppercase opacity-70">Código de invitación:</p>
+              <p className="font-black text-base tracking-wider">{inviteCode}</p>
+            </div>
+            <button onClick={() => { navigator.clipboard?.writeText(inviteCode); alert('¡Código copiado!'); }} className={`p-2 ${theme.primary} ${theme.cardRadius}`}><Copy size={16} /></button>
+          </div>
+        )}
+        <button onClick={handleGenerateInvite} disabled={generatingCode} className={`w-full ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50`}>
+          {generatingCode ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={15} />} {inviteCode ? 'Generar nuevo código' : 'Generar código de invitación'}
+        </button>
+        {members.filter(m => m.role === 'staff').length > 0 && (
+          <div className="space-y-1.5">
+            {members.filter(m => m.role === 'staff').map(m => (
+              <div key={m.id} className={`flex items-center justify-between p-2.5 ${theme.cardRadius} ${theme.sectionBg} border ${theme.borderSubtle}`}>
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 ${theme.cardRadius} ${theme.badge} flex items-center justify-center text-[10px] font-bold`}>?</div>
+                  <div><p className="text-xs font-bold">Colaborador</p><p className={`text-[10px] ${theme.subtext}`}>Código: {m.invite_code || 'N/A'}</p></div>
+                </div>
+                <button onClick={() => handleDeleteMember(m.id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 size={14} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Tipografía */}
       <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
         <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Type size={14} /> Tipografía</p>
-        <select value={store.font} onChange={e => update({ font: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none font-medium`}>
+        <select value={store.font} onChange={e => update({ font: e.target.value })}
+          style={selectStyle(theme, customTextColor)}
+          className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none font-medium`}>
           {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id} style={{ fontFamily: f.family }}>{f.name}</option>)}
         </select>
       </div>
@@ -882,7 +962,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
         </div>
       </div>
 
-      <CategoryManagerModal isOpen={showCatModal} onClose={() => setShowCatModal(false)} categories={categories} storeId={store.id} theme={theme} onSaved={onRefresh} />
+      <CategoryManagerModal isOpen={showCatModal} onClose={() => setShowCatModal(false)} categories={categories} storeId={store.id} theme={theme} onSaved={onRefresh} customTextColor={customTextColor} />
     </div>
   );
 };
@@ -1019,10 +1099,10 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
   if (sortBy === 'high') filtered.sort((a, b) => ((b.is_offer && b.offer_price) ? b.offer_price : b.price) - ((a.is_offer && a.offer_price) ? a.offer_price : a.price));
 
   const layout = store.catalog_layout || 'grid2';
+  const accentColor = store.custom_accent_color || undefined;
 
   const renderProductCard = (p: Product, layoutType: string) => {
     const price = (p.is_offer && p.offer_price) ? p.offer_price : p.price;
-    const accentColor = store.custom_accent_color || undefined;
 
     if (layoutType === 'lista') {
       return (
@@ -1066,6 +1146,43 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
       );
     }
 
+    if (layoutType === 'compact') {
+      return (
+        <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-sm flex flex-col ${theme.cardHover} transition-all group`}>
+          <div className="relative">
+            <img src={p.image} alt={p.name} className="w-full h-24 object-cover group-hover:scale-105 transition-transform" />
+            {p.is_offer && <span className="absolute top-1 left-1 bg-red-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full">OFERTA</span>}
+          </div>
+          <div className="p-2 flex-1 flex flex-col justify-between gap-1">
+            <h3 className="font-bold text-[10px] line-clamp-1">{p.name}</h3>
+            {p.is_offer && p.offer_price ? (<div><span className="text-red-400 font-black text-[11px]">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[8px] opacity-40 line-through ml-0.5">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></div>) : (<span className={`font-black text-[11px] ${theme.accent}`} style={accentColor ? { color: accentColor } : undefined}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
+            <button onClick={() => addToCart(p)} className={`${theme.primary} text-[9px] font-bold py-1.5 ${theme.cardRadius} flex items-center justify-center gap-1 active:scale-95`}><Plus size={11} /> Agregar</button>
+          </div>
+        </div>
+      );
+    }
+
+    if (layoutType === 'gallery') {
+      return (
+        <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-lg flex flex-col ${theme.cardHover} transition-all group`}>
+          <div className="relative">
+            <img src={p.image} alt={p.name} className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" />
+            {p.is_offer && <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg"><Tag size={11} /> OFERTA</span>}
+            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-4 pt-12`}>
+              <h3 className="font-black text-base text-white line-clamp-1">{p.name}</h3>
+              <p className="text-[11px] text-white/80 line-clamp-2">{p.description}</p>
+            </div>
+          </div>
+          <div className="p-3 flex items-center justify-between">
+            <div>
+              {p.is_offer && p.offer_price ? (<div><span className="text-red-400 font-black text-lg">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[10px] opacity-40 line-through ml-1">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></div>) : (<span className={`font-black text-lg ${theme.accent}`} style={accentColor ? { color: accentColor } : undefined}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
+            </div>
+            <button onClick={() => addToCart(p)} className={`${theme.primary} text-xs font-bold px-4 py-2.5 ${theme.cardRadius} flex items-center gap-1.5 active:scale-95 shadow-md`}><Plus size={16} /> Agregar</button>
+          </div>
+        </div>
+      );
+    }
+
     // grid2 o grid3
     return (
       <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-md flex flex-col justify-between ${theme.cardHover} transition-all group`}>
@@ -1087,7 +1204,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
     );
   };
 
-  const gridClass = layout === 'grid3' ? 'grid-cols-3' : layout === 'magazine' ? 'grid-cols-1' : layout === 'lista' ? 'grid-cols-1' : 'grid-cols-2';
+  const gridClass = layout === 'grid3' ? 'grid-cols-3' : layout === 'magazine' || layout === 'gallery' || layout === 'lista' ? 'grid-cols-1' : layout === 'compact' ? 'grid-cols-3' : 'grid-cols-2';
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
@@ -1128,6 +1245,100 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
   );
 };
 
+// ============ CONTENEDOR PRINCIPAL (compartido por admin y cliente) ============
+
+interface StoreContainerProps {
+  store: Store;
+  products: Product[];
+  categories: Category[];
+  banners: Banner[];
+  orders: Order[];
+  cart: CartItem[];
+  setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
+  activeTab: string;
+  setActiveTab: (tab: any) => void;
+  onRefresh: () => void;
+  onOrder: (order: Omit<Order, 'id' | 'store_id' | 'created_at'>) => void;
+  onUpdateStore?: (updates: Partial<Store>) => Promise<void>;
+  onUpgrade?: () => void;
+  onSignOut?: () => void;
+  onOpenQR?: () => void;
+  isAdmin: boolean;
+}
+
+const StoreContainer: React.FC<StoreContainerProps> = ({
+  store, products, categories, banners, orders, cart, setCart, activeTab, setActiveTab,
+  onRefresh, onOrder, onUpdateStore, onUpgrade, onSignOut, onOpenQR, isAdmin
+}) => {
+  const theme = THEMES[store.theme] || THEMES.proDark;
+  const fontObj = AVAILABLE_FONTS.find(f => f.id === store.font) || AVAILABLE_FONTS[0];
+  const customTextColor = store.custom_text_color || undefined;
+  const accentColor = store.custom_accent_color || undefined;
+
+  // Estilo del contenedor: si hay color de fondo personalizado, NO aplicar gradiente
+  const containerStyle: React.CSSProperties = { fontFamily: fontObj.family, colorScheme: theme.isDark ? 'dark' : 'light' };
+  if (store.custom_bg_color) {
+    containerStyle.backgroundColor = store.custom_bg_color;
+    containerStyle.background = store.custom_bg_color;
+  }
+  if (customTextColor) containerStyle.color = customTextColor;
+
+  const containerClass = store.custom_bg_color
+    ? `min-h-screen ${customTextColor ? '' : theme.text} flex justify-center`
+    : `min-h-screen bg-gradient-to-br ${theme.gradientBg} ${customTextColor ? '' : theme.text} flex justify-center`;
+
+  const addToCart = (product: Product) => {
+    setCart(prev => {
+      const ex = prev.find(i => i.id === product.id);
+      if (ex) return prev.map(i => i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
+      return [...prev, dbProductToCart(product)];
+    });
+  };
+
+  const navBtnStyle = (isActive: boolean) => isActive && accentColor ? { color: accentColor } : undefined;
+
+  return (
+    <div className={containerClass} style={containerStyle}>
+      <div className="w-full max-w-md min-h-screen flex flex-col relative shadow-2xl">
+        <header className={`sticky top-0 z-40 ${theme.nav} p-3.5 shadow-md flex items-center justify-between border-b`}>
+          <div className="flex items-center gap-2.5">
+            <div className={`w-10 h-10 ${theme.cardRadius} ${theme.primary} flex items-center justify-center font-black text-lg shadow-md shrink-0`}>{store.name.charAt(0)}</div>
+            <div>
+              <h1 className="font-black text-sm leading-tight" style={customTextColor ? { color: customTextColor } : undefined}>{store.name}</h1>
+              <p className={`text-[10px] ${theme.subtext} truncate max-w-[150px]`}>{store.slogan}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {isAdmin && onOpenQR && <button onClick={onOpenQR} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`} title="Código QR"><QrCode size={16} /></button>}
+            <button onClick={() => setActiveTab('cart')} className={`relative p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`}>
+              <ShoppingBag size={18} style={customTextColor ? { color: customTextColor } : undefined} />
+              {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}
+            </button>
+            {isAdmin && onSignOut && <button onClick={onSignOut} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} hover:text-red-400 transition-colors`} title="Cerrar sesión"><LogOut size={16} /></button>}
+          </div>
+        </header>
+        <main className="flex-1 p-4 pb-24 overflow-y-auto">
+          {activeTab === 'catalog' && <CatalogView products={products} store={store} theme={theme} banners={banners} addToCart={addToCart} />}
+          {activeTab === 'cart' && <CartView cart={cart} store={store} theme={theme} onUpdateQty={(id, delta) => setCart(prev => prev.map(i => i.id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i))} onRemove={id => setCart(prev => prev.filter(c => c.id !== id))} onClear={() => setCart([])} onBack={() => setActiveTab('catalog')} onOrder={onOrder} />}
+          {isAdmin && activeTab === 'products' && <AdminProducts products={products} store={store} theme={theme} categories={categories} onRefresh={onRefresh} onUpgrade={onUpgrade || (() => {})} customTextColor={customTextColor} />}
+          {isAdmin && activeTab === 'orders' && <OrdersView orders={orders} store={store} theme={theme} onRefresh={onRefresh} customTextColor={customTextColor} />}
+          {isAdmin && activeTab === 'plans' && <PlansView currentPlan={store.plan} productCount={products.length} bannerCount={banners.length} theme={theme} onSelectPlan={async (plan) => { if (onUpdateStore) { try { await api.updatePlan(store.id, plan); await onUpdateStore({}); } catch { alert('Error al cambiar de plan'); } } }} />}
+          {isAdmin && activeTab === 'settings' && onUpdateStore && <AdminSettings store={store} theme={theme} categories={categories} onUpdate={onUpdateStore} onUpgrade={onUpgrade || (() => {})} onOpenQR={onOpenQR || (() => {})} onRefresh={onRefresh} customTextColor={customTextColor} />}
+        </main>
+        <nav className={`fixed bottom-0 left-0 right-0 ${theme.nav} border-t p-2 z-40 backdrop-blur-lg`}>
+          <div className={`max-w-md mx-auto grid ${isAdmin ? 'grid-cols-5' : 'grid-cols-2'} gap-1 text-center`}>
+            <button onClick={() => setActiveTab('catalog')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'catalog' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'catalog')}><StoreIcon size={18} /><span className="text-[9px]">Catálogo</span></button>
+            <button onClick={() => setActiveTab('cart')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all relative ${activeTab === 'cart' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'cart')}><ShoppingBag size={18} /><span className="text-[9px]">Carrito</span>{cart.length > 0 && <span className="absolute top-1 right-3 bg-red-500 text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}</button>
+            {isAdmin && <button onClick={() => setActiveTab('products')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'products' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'products')}><Package size={18} /><span className="text-[9px]">Productos</span></button>}
+            {isAdmin && <button onClick={() => setActiveTab('orders')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all relative ${activeTab === 'orders' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'orders')}><Clock size={18} /><span className="text-[9px]">Pedidos</span>{orders.filter(o => o.status === 'pending').length > 0 && <span className={`absolute top-1 right-3 ${theme.primary} text-slate-950 text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center`}>{orders.filter(o => o.status === 'pending').length}</span>}</button>}
+            {isAdmin && <button onClick={() => setActiveTab('settings')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'settings' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'settings')}><Settings size={18} /><span className="text-[9px]">Ajustes</span></button>}
+          </div>
+        </nav>
+      </div>
+    </div>
+  );
+};
+
 // ============ VISTA TIENDA CLIENTE (Pública, sin auth) ============
 
 interface ClientStoreViewProps { storeId: string; }
@@ -1136,6 +1347,7 @@ const ClientStoreView: React.FC<ClientStoreViewProps> = ({ storeId }) => {
   const [store, setStore] = useState<Store | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [activeTab, setActiveTab] = useState<'catalog' | 'cart'>('catalog');
   const [loading, setLoading] = useState(true);
@@ -1146,21 +1358,14 @@ const ClientStoreView: React.FC<ClientStoreViewProps> = ({ storeId }) => {
       const s = await api.fetchStoreById(storeId);
       if (!s) { setError('Tienda no encontrada'); setLoading(false); return; }
       setStore(s);
-      const [p, b] = await Promise.all([api.fetchProducts(storeId), api.fetchBanners(storeId)]);
-      setProducts(p); setBanners(b);
+      const [p, b, c] = await Promise.all([api.fetchProducts(storeId), api.fetchBanners(storeId), api.fetchCategories(storeId)]);
+      setProducts(p); setBanners(b); setCategories(c);
     } catch { setError('Error al cargar la tienda'); }
     setLoading(false);
   }, [storeId]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const addToCart = (product: Product) => {
-    setCart(prev => {
-      const ex = prev.find(i => i.id === product.id);
-      if (ex) return prev.map(i => i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
-      return [...prev, dbProductToCart(product)];
-    });
-  };
   const handleOrder = async (order: Omit<Order, 'id' | 'store_id' | 'created_at'>) => {
     try { await api.createOrder(storeId, order); setCart([]); setActiveTab('catalog'); } catch { alert('Error al realizar el pedido'); }
   };
@@ -1168,38 +1373,7 @@ const ClientStoreView: React.FC<ClientStoreViewProps> = ({ storeId }) => {
   if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
   if (error || !store) return <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-3 text-slate-400"><AlertCircle size={40} /><p className="text-sm">{error || 'Tienda no disponible'}</p></div>;
 
-  const theme = THEMES[store.theme] || THEMES.proDark;
-  const fontObj = AVAILABLE_FONTS.find(f => f.id === store.font) || AVAILABLE_FONTS[0];
-  const customStyle: React.CSSProperties = {};
-  if (store.custom_bg_color) { customStyle.backgroundColor = store.custom_bg_color; customStyle.background = store.custom_bg_color; }
-  const customTextColor = store.custom_text_color || undefined;
-
-  return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.gradientBg} ${customTextColor ? '' : theme.text} flex justify-center`} style={{ fontFamily: fontObj.family, colorScheme: theme.isDark ? 'dark' : 'light', ...customStyle, ...(customTextColor ? { color: customTextColor } : {}) }}>
-      <div className="w-full max-w-md min-h-screen flex flex-col relative shadow-2xl">
-        <header className={`sticky top-0 z-40 ${theme.nav} p-3.5 shadow-md flex items-center justify-between border-b`}>
-          <div className="flex items-center gap-2.5">
-            <div className={`w-10 h-10 ${theme.cardRadius} ${theme.primary} flex items-center justify-center font-black text-lg shadow-md shrink-0`}>{store.name.charAt(0)}</div>
-            <div><h1 className="font-black text-sm leading-tight" style={customTextColor ? { color: customTextColor } : undefined}>{store.name}</h1><p className={`text-[10px] ${theme.subtext} truncate max-w-[170px]`}>{store.slogan}</p></div>
-          </div>
-          <button onClick={() => setActiveTab('cart')} className={`relative p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`}>
-            <ShoppingBag size={18} style={customTextColor ? { color: customTextColor } : undefined} />
-            {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}
-          </button>
-        </header>
-        <main className="flex-1 p-4 pb-24 overflow-y-auto">
-          {activeTab === 'catalog' && <CatalogView products={products} store={store} theme={theme} banners={banners} addToCart={addToCart} />}
-          {activeTab === 'cart' && <CartView cart={cart} store={store} theme={theme} onUpdateQty={(id, delta) => setCart(prev => prev.map(i => i.id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i))} onRemove={id => setCart(prev => prev.filter(c => c.id !== id))} onClear={() => setCart([])} onBack={() => setActiveTab('catalog')} onOrder={handleOrder} />}
-        </main>
-        <nav className={`fixed bottom-0 left-0 right-0 ${theme.nav} border-t p-2 z-40 backdrop-blur-lg`}>
-          <div className="max-w-md mx-auto grid grid-cols-2 gap-1 text-center">
-            <button onClick={() => setActiveTab('catalog')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'catalog' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={activeTab === 'catalog' && store.custom_accent_color ? { color: store.custom_accent_color } : undefined}><StoreIcon size={18} /><span className="text-[9px]">Catálogo</span></button>
-            <button onClick={() => setActiveTab('cart')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all relative ${activeTab === 'cart' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={activeTab === 'cart' && store.custom_accent_color ? { color: store.custom_accent_color } : undefined}><ShoppingBag size={18} /><span className="text-[9px]">Carrito</span>{cart.length > 0 && <span className="absolute top-1 right-3 bg-red-500 text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}</button>
-          </div>
-        </nav>
-      </div>
-    </div>
-  );
+  return <StoreContainer store={store} products={products} categories={categories} banners={banners} orders={[]} cart={cart} setCart={setCart} activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={loadData} onOrder={handleOrder} isAdmin={false} />;
 };
 
 // ============ APP ADMIN (comerciante autenticado) ============
@@ -1227,70 +1401,20 @@ const AdminApp: React.FC = () => {
   useEffect(() => { refreshAll(); }, [refreshAll]);
   if (!store) return null;
 
-  const theme = THEMES[store.theme] || THEMES.proDark;
-  const fontObj = AVAILABLE_FONTS.find(f => f.id === store.font) || AVAILABLE_FONTS[0];
-  const customStyle: React.CSSProperties = {};
-  if (store.custom_bg_color) { customStyle.backgroundColor = store.custom_bg_color; customStyle.background = store.custom_bg_color; }
-  const customTextColor = store.custom_text_color || undefined;
-
-  const addToCart = (product: Product) => {
-    setCart(prev => {
-      const ex = prev.find(i => i.id === product.id);
-      if (ex) return prev.map(i => i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
-      return [...prev, dbProductToCart(product)];
-    });
-  };
   const handleUpdateStore = async (updates: Partial<Store>) => {
     try { await api.updateStore(store.id, updates); await refreshStore(); } catch { alert('Error al guardar'); }
   };
   const handleOrder = async (order: Omit<Order, 'id' | 'store_id' | 'created_at'>) => {
     try { await api.createOrder(store.id, order); setCart([]); setActiveTab('catalog'); refreshAll(); } catch { alert('Error al realizar el pedido'); }
   };
-  const handleSelectPlan = async (plan: PlanType) => {
-    try { await api.updatePlan(store.id, plan); await refreshStore(); } catch { alert('Error al cambiar de plan'); }
-  };
+
+  if (loadingData) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.gradientBg} ${customTextColor ? '' : theme.text} flex justify-center`} style={{ fontFamily: fontObj.family, colorScheme: theme.isDark ? 'dark' : 'light', ...customStyle, ...(customTextColor ? { color: customTextColor } : {}) }}>
-      <div className="w-full max-w-md min-h-screen flex flex-col relative shadow-2xl">
-        <header className={`sticky top-0 z-40 ${theme.nav} p-3.5 shadow-md flex items-center justify-between border-b`}>
-          <div className="flex items-center gap-2.5">
-            <div className={`w-10 h-10 ${theme.cardRadius} ${theme.primary} flex items-center justify-center font-black text-lg shadow-md shrink-0`}>{store.name.charAt(0)}</div>
-            <div><h1 className="font-black text-sm leading-tight" style={customTextColor ? { color: customTextColor } : undefined}>{store.name}</h1><p className={`text-[10px] ${theme.subtext} truncate max-w-[150px]`}>{store.slogan}</p></div>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button onClick={() => setShowQR(true)} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`} title="Código QR"><QrCode size={16} /></button>
-            <button onClick={() => setActiveTab('cart')} className={`relative p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`}>
-              <ShoppingBag size={18} style={customTextColor ? { color: customTextColor } : undefined} />
-              {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}
-            </button>
-            <button onClick={signOut} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} hover:text-red-400 transition-colors`} title="Cerrar sesión"><LogOut size={16} /></button>
-          </div>
-        </header>
-        <main className="flex-1 p-4 pb-24 overflow-y-auto">
-          {loadingData ? <div className="flex items-center justify-center py-20"><Loader2 size={28} className={`animate-spin ${theme.accent}`} /></div> : (
-            <>
-              {activeTab === 'catalog' && <CatalogView products={products} store={store} theme={theme} banners={banners} addToCart={addToCart} />}
-              {activeTab === 'cart' && <CartView cart={cart} store={store} theme={theme} onUpdateQty={(id, delta) => setCart(prev => prev.map(i => i.id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i))} onRemove={id => setCart(prev => prev.filter(c => c.id !== id))} onClear={() => setCart([])} onBack={() => setActiveTab('catalog')} onOrder={handleOrder} />}
-              {activeTab === 'products' && <AdminProducts products={products} store={store} theme={theme} categories={categories} onRefresh={refreshAll} onUpgrade={() => setActiveTab('plans')} />}
-              {activeTab === 'orders' && <OrdersView orders={orders} store={store} theme={theme} onRefresh={refreshAll} />}
-              {activeTab === 'plans' && <PlansView currentPlan={store.plan} productCount={products.length} bannerCount={banners.length} theme={theme} onSelectPlan={handleSelectPlan} />}
-              {activeTab === 'settings' && <AdminSettings store={store} theme={theme} categories={categories} onUpdate={handleUpdateStore} onUpgrade={() => setActiveTab('plans')} onOpenQR={() => setShowQR(true)} onRefresh={refreshAll} />}
-            </>
-          )}
-        </main>
-        <nav className={`fixed bottom-0 left-0 right-0 ${theme.nav} border-t p-2 z-40 backdrop-blur-lg`}>
-          <div className="max-w-md mx-auto grid grid-cols-5 gap-1 text-center">
-            <button onClick={() => setActiveTab('catalog')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'catalog' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={activeTab === 'catalog' && store.custom_accent_color ? { color: store.custom_accent_color } : undefined}><StoreIcon size={18} /><span className="text-[9px]">Catálogo</span></button>
-            <button onClick={() => setActiveTab('cart')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all relative ${activeTab === 'cart' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={activeTab === 'cart' && store.custom_accent_color ? { color: store.custom_accent_color } : undefined}><ShoppingBag size={18} /><span className="text-[9px]">Carrito</span>{cart.length > 0 && <span className="absolute top-1 right-3 bg-red-500 text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}</button>
-            <button onClick={() => setActiveTab('products')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'products' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={activeTab === 'products' && store.custom_accent_color ? { color: store.custom_accent_color } : undefined}><Package size={18} /><span className="text-[9px]">Productos</span></button>
-            <button onClick={() => setActiveTab('orders')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all relative ${activeTab === 'orders' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={activeTab === 'orders' && store.custom_accent_color ? { color: store.custom_accent_color } : undefined}><Clock size={18} /><span className="text-[9px]">Pedidos</span>{orders.filter(o => o.status === 'pending').length > 0 && <span className={`absolute top-1 right-3 ${theme.primary} text-slate-950 text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center`}>{orders.filter(o => o.status === 'pending').length}</span>}</button>
-            <button onClick={() => setActiveTab('settings')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'settings' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={activeTab === 'settings' && store.custom_accent_color ? { color: store.custom_accent_color } : undefined}><Settings size={18} /><span className="text-[9px]">Ajustes</span></button>
-          </div>
-        </nav>
-        <QRModal isOpen={showQR} onClose={() => setShowQR(false)} storeId={store.id} storeName={store.name} theme={theme} />
-      </div>
-    </div>
+    <>
+      <StoreContainer store={store} products={products} categories={categories} banners={banners} orders={orders} cart={cart} setCart={setCart} activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={refreshAll} onOrder={handleOrder} onUpdateStore={handleUpdateStore} onUpgrade={() => setActiveTab('plans')} onSignOut={signOut} onOpenQR={() => setShowQR(true)} isAdmin={true} />
+      <QRModal isOpen={showQR} onClose={() => setShowQR(false)} storeId={store.id} storeName={store.name} theme={THEMES[store.theme] || THEMES.proDark} />
+    </>
   );
 };
 

@@ -90,6 +90,15 @@ export interface Order {
   created_at: string;
 }
 
+export interface StoreMember {
+  id: string;
+  store_id: string;
+  user_id: string;
+  role: 'owner' | 'staff';
+  invite_code: string | null;
+  created_at: string;
+}
+
 export interface CartItem {
   id: string;
   name: string;

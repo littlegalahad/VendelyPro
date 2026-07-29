@@ -23,16 +23,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadStore = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
+    // Primero intenta como dueño
+    let { data, error } = await supabase
       .from('stores')
       .select('*')
       .eq('owner_id', userId)
       .maybeSingle();
-    if (error) {
-      console.error('Error loading store:', error);
-      return;
+    if (data) { setStore(data as Store); return; }
+    // Si no es dueño, busca como miembro staff
+    const { data: member } = await supabase
+      .from('store_members')
+      .select('store_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (member) {
+      const { data: storeData } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('id', member.store_id)
+        .maybeSingle();
+      if (storeData) { setStore(storeData as Store); return; }
     }
-    setStore(data as Store | null);
+    if (error) console.error('Error loading store:', error);
+    setStore(null);
   }, []);
 
   useEffect(() => {
