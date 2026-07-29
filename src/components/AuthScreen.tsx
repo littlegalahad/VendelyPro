@@ -5,8 +5,8 @@ import { useAuth } from '@/lib/auth-context';
 export default function AuthScreen() {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
-  const [email, setEmail] = useState('tienda@demo.com');
-  const [password, setPassword] = useState('demo1234');
+  const [email, setEmail] = useState('demo@vendely.com');
+  const [password, setPassword] = useState('Vendely2025!');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [storeName, setStoreName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -133,8 +133,8 @@ export default function AuthScreen() {
           {mode === 'login' && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3 text-[11px] text-emerald-300 space-y-1">
               <p className="font-bold flex items-center gap-1.5"><CheckCircle2 size={13} /> Cuenta de prueba:</p>
-              <p>Correo: <strong>tienda@demo.com</strong></p>
-              <p>Contraseña: <strong>demo1234</strong></p>
+              <p>Correo: <strong>demo@vendely.com</strong></p>
+              <p>Contraseña: <strong>Vendely2025!</strong></p>
             </div>
           )}
           {mode === 'signup' && (
