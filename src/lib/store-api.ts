@@ -1,15 +1,15 @@
 import { supabase } from './supabase';
-import type { Store, Product, Category, Banner, Order, PlanType, StoreMember } from './types';
+import type { Store, Product, Category, Banner, Order, PlanType } from './types';
 
 // ============ STORE ============
-export async function fetchStoreByOwner(ownerId: string): Promise<Store | null> {
+export async function fetchStoresByOwner(ownerId: string): Promise<Store[]> {
   const { data, error } = await supabase
     .from('stores')
     .select('*')
     .eq('owner_id', ownerId)
-    .maybeSingle();
+    .order('created_at', { ascending: true });
   if (error) throw error;
-  return data as Store | null;
+  return (data || []) as Store[];
 }
 
 export async function fetchStoreById(storeId: string): Promise<Store | null> {
@@ -20,6 +20,21 @@ export async function fetchStoreById(storeId: string): Promise<Store | null> {
     .maybeSingle();
   if (error) throw error;
   return data as Store | null;
+}
+
+export async function createStore(ownerId: string, name: string): Promise<Store> {
+  const { data, error } = await supabase
+    .from('stores')
+    .insert({ owner_id: ownerId, name })
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Store;
+}
+
+export async function deleteStore(storeId: string): Promise<void> {
+  const { error } = await supabase.from('stores').delete().eq('id', storeId);
+  if (error) throw error;
 }
 
 export async function updateStore(storeId: string, updates: Partial<Store>): Promise<void> {
@@ -131,44 +146,16 @@ export async function updatePlan(storeId: string, plan: PlanType): Promise<void>
   if (error) throw error;
 }
 
-// ============ STORE MEMBERS ============
-export async function fetchMembers(storeId: string): Promise<StoreMember[]> {
-  const { data, error } = await supabase
-    .from('store_members')
-    .select('*')
-    .eq('store_id', storeId)
-    .order('created_at', { ascending: true });
+// ============ PAYMENT PROOFS ============
+export async function uploadPaymentProof(file: File): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const fileName = `proof_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage
+    .from('payment-proofs')
+    .upload(fileName, file, { contentType: file.type });
   if (error) throw error;
-  return (data || []) as StoreMember[];
+  const { data } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
+  return data.publicUrl;
 }
 
-export async function generateInviteCode(storeId: string): Promise<string> {
-  const code = Math.random().toString(36).substring(2, 10).toUpperCase();
-  const { error } = await supabase
-    .from('store_members')
-    .insert({ store_id: storeId, user_id: (await supabase.auth.getUser()).data.user?.id, role: 'staff', invite_code: code });
-  if (error && !error.message.includes('duplicate')) throw error;
-  return code;
-}
-
-export async function joinStoreByCode(code: string, userId: string): Promise<{ storeId: string | null; error: string | null }> {
-  const { data, error } = await supabase
-    .from('store_members')
-    .select('*')
-    .eq('invite_code', code.toUpperCase())
-    .maybeSingle();
-  if (error) return { storeId: null, error: error.message };
-  if (!data) return { storeId: null, error: 'Código de invitación no válido.' };
-  // Actualizar el member existente con el user_id real
-  const { error: updateError } = await supabase
-    .from('store_members')
-    .update({ user_id: userId })
-    .eq('id', data.id);
-  if (updateError) return { storeId: null, error: updateError.message };
-  return { storeId: data.store_id, error: null };
-}
-
-export async function deleteMember(memberId: string): Promise<void> {
-  const { error } = await supabase.from('store_members').delete().eq('id', memberId);
-  if (error) throw error;
-}
+// ============ STORE MEMBERS (removed — not used) ============

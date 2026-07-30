@@ -86,6 +86,7 @@ export interface Order {
   payment_method: 'yape' | 'card' | 'cash' | 'bank';
   items: OrderItem[];
   total: number;
+  payment_proof: string | null;
   status: 'pending' | 'preparing' | 'shipped' | 'delivered';
   created_at: string;
 }

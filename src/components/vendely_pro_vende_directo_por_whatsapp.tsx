@@ -7,21 +7,32 @@ import {
   ArrowUpDown, Copy, ExternalLink, Banknote, CreditCard, Building2,
   ShieldCheck, LogOut, Loader2, AlertCircle, Wallet, Eye, EyeOff,
   LayoutGrid, Rows3, Columns3, Image as ImageIconBanner, Droplet, AlignLeft,
-  Users, UserPlus, KeyRound, Grid2x2, Grid3x3, List, GalleryVerticalEnd, Square, BookOpen
+  KeyRound, Grid2x2, Grid3x3, List, GalleryVerticalEnd, Square, BookOpen,
+  Phone, Upload, MapPin, User, Receipt, Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import type { Store, Product, Category, Banner, Order, OrderItem, CartItem, PlanType, StoreMember } from '@/lib/types';
+import type { Store, Product, Category, Banner, Order, OrderItem, CartItem, PlanType } from '@/lib/types';
 import * as api from '@/lib/store-api';
+import { uploadPaymentProof } from '@/lib/store-api';
 import AuthScreen from '@/components/AuthScreen';
 
 // ============ CONSTANTES ============
 
 export const AVAILABLE_FONTS = [
   { id: 'Inter', name: 'Inter (Moderna y limpia)', family: "'Inter', sans-serif" },
-  { id: 'Playfair Display', name: 'Playfair (Elegante y de lujo)', family: "'Playfair Display', serif" },
   { id: 'Poppins', name: 'Poppins (Fresca y geométrica)', family: "'Poppins', sans-serif" },
+  { id: 'Montserrat', name: 'Montserrat (Profesional)', family: "'Montserrat', sans-serif" },
   { id: 'Raleway', name: 'Raleway (Sofisticada)', family: "'Raleway', sans-serif" },
-  { id: 'Nunito', name: 'Nunito (Amigable y redondeada)', family: "'Nunito', sans-serif" }
+  { id: 'Nunito', name: 'Nunito (Amigable y redondeada)', family: "'Nunito', sans-serif" },
+  { id: 'DM Sans', name: 'DM Sans (Minimalista)', family: "'DM Sans', sans-serif" },
+  { id: 'Manrope', name: 'Manrope (Contemporánea)', family: "'Manrope', sans-serif" },
+  { id: 'Space Grotesk', name: 'Space Grotesk (Tech)', family: "'Space Grotesk', sans-serif" },
+  { id: 'Karla', name: 'Karla (Clara y elegante)', family: "'Karla', sans-serif" },
+  { id: 'Work Sans', name: 'Work Sans (Versátil)', family: "'Work Sans', sans-serif" },
+  { id: 'Playfair Display', name: 'Playfair Display (Lujo serif)', family: "'Playfair Display', serif" },
+  { id: 'Lora', name: 'Lora (Serif elegante)', family: "'Lora', serif" },
+  { id: 'Cormorant Garamond', name: 'Cormorant (Serif refinada)', family: "'Cormorant Garamond', serif" },
+  { id: 'Bebas Neue', name: 'Bebas Neue (Impacto)', family: "'Bebas Neue', sans-serif" },
 ];
 
 export const CATALOG_LAYOUTS = [
@@ -35,45 +46,64 @@ export const CATALOG_LAYOUTS = [
 
 export const PLAN_LIMITS: Record<PlanType, {
   name: string; priceText: string; badge: string;
-  maxProducts: number; maxBanners: number;
+  maxProducts: number; maxBanners: number; maxCatalogs: number;
   features: string[];
 }> = {
   free: {
     name: 'Starter', priceText: '$0/mes', badge: 'Gratis',
-    maxProducts: 8, maxBanners: 1,
+    maxProducts: 8, maxBanners: 1, maxCatalogs: 1,
     features: [
       'Hasta 8 productos activos', 'Categorías y subcategorías ilimitadas',
       '1 banner destacado', 'Pedidos directos por WhatsApp',
       'Código QR exclusivo para clientes', 'Múltiples métodos de pago',
-      'Ofertas y descuentos', '6 modelos de catálogo',
-      'Hasta 2 colaboradores'
+      'Ofertas y descuentos', '6 modelos de catálogo', '1 catálogo'
     ]
   },
   monthly: {
-    name: 'Pro Comerciante', priceText: '$29/mes', badge: 'Popular',
-    maxProducts: Infinity, maxBanners: 5,
+    name: 'Pro Comerciante', priceText: 'US$29/mes', badge: 'Popular',
+    maxProducts: Infinity, maxBanners: 5, maxCatalogs: 3,
     features: [
       'Productos ILIMITADOS', 'Hasta 5 banners promocionales',
-      'Tipografía avanzada con Google Fonts', 'Billeteras digitales, tarjetas y enlaces de pago',
+      'Hasta 3 catálogos', 'Tipografía avanzada con Google Fonts',
+      'Billeteras digitales, tarjetas y enlaces de pago',
       'Panel de historial de pedidos', 'Soporte prioritario por WhatsApp',
-      'Colores personalizados de la tienda', 'Colaboradores ilimitados'
+      'Colores personalizados de la tienda'
     ]
   },
   yearly: {
-    name: 'Enterprise', priceText: '$249/año', badge: 'Ahorra 35%',
-    maxProducts: Infinity, maxBanners: Infinity,
+    name: 'Enterprise', priceText: 'US$249/año', badge: 'Ahorra 35%',
+    maxProducts: Infinity, maxBanners: Infinity, maxCatalogs: Infinity,
     features: [
       'Todo lo de Pro Comerciante', 'Banners y colecciones ilimitadas',
-      'Modo tienda exclusivo solo para clientes', 'Dominio propio y enlace corto',
-      'Cero comisión por venta', 'Consultoría de catálogo y pasarelas'
+      'Catálogos ILIMITADOS', 'Modo tienda exclusivo solo para clientes',
+      'Dominio propio y enlace corto', 'Cero comisión por venta',
+      'Consultoría de catálogo y pasarelas'
     ]
   }
 };
 
-const RUBROS = [
-  'Moda y Ropa', 'Comida y Bebidas', 'Hogar y Decoración', 'Tecnología',
-  'Belleza y Cuidado Personal', 'Salud y Farmacia', 'Juguetes', 'Deportes',
-  'Joyería y Accesorios', 'Papelería', 'Artesanías', 'Otros'
+// Rubros removed — now a free-text input field
+
+const COUNTRIES = [
+  { code: 'PE', name: 'Perú', currency: 'S/' },
+  { code: 'PE_USD', name: 'Perú (USD)', currency: 'US$' },
+  { code: 'MX', name: 'México', currency: '$' },
+  { code: 'MX_USD', name: 'México (USD)', currency: 'US$' },
+  { code: 'CO', name: 'Colombia', currency: '$' },
+  { code: 'CO_USD', name: 'Colombia (USD)', currency: 'US$' },
+  { code: 'AR', name: 'Argentina', currency: '$' },
+  { code: 'AR_USD', name: 'Argentina (USD)', currency: 'US$' },
+  { code: 'CL', name: 'Chile', currency: '$' },
+  { code: 'CL_USD', name: 'Chile (USD)', currency: 'US$' },
+  { code: 'EC', name: 'Ecuador', currency: '$' },
+  { code: 'BO', name: 'Bolivia', currency: 'Bs' },
+  { code: 'VE', name: 'Venezuela', currency: 'Bs' },
+  { code: 'UY', name: 'Uruguay', currency: '$U' },
+  { code: 'PY', name: 'Paraguay', currency: '₲' },
+  { code: 'DO', name: 'Rep. Dominicana', currency: 'RD$' },
+  { code: 'US', name: 'Estados Unidos', currency: 'US$' },
+  { code: 'ES', name: 'España', currency: '€' },
+  { code: 'GLOBAL_USD', name: 'Otros (USD)', currency: 'US$' },
 ];
 
 const PRESET_IMAGES = [
@@ -714,6 +744,12 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
               <div className={`flex justify-between items-center border-t ${theme.borderSubtle} pt-2 text-xs font-bold`}>
                 <span className="opacity-70">Total:</span><span className={`${theme.accent} text-sm`}>{store.currency_symbol}{Number(order.total).toFixed(2)}</span>
               </div>
+              {order.payment_proof && (
+                <div className={`border-t ${theme.borderSubtle} pt-2.5`}>
+                  <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider mb-1.5 flex items-center gap-1.5`}><Receipt size={11} /> Comprobante de pago</p>
+                  <img src={order.payment_proof} alt="Comprobante" className={`w-full max-h-44 object-contain ${theme.cardRadius} border ${theme.borderSubtle}`} />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -729,17 +765,26 @@ interface AdminSettingsProps { store: Store; theme: ThemeDef; categories: Catego
 const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories, onUpdate, onUpgrade, onOpenQR, onRefresh, customTextColor }) => {
   const [showCatModal, setShowCatModal] = useState(false);
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [members, setMembers] = useState<StoreMember[]>([]);
-  const [inviteCode, setInviteCode] = useState<string | null>(null);
-  const [generatingCode, setGeneratingCode] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
   const planLimits = PLAN_LIMITS[store.plan] || PLAN_LIMITS.free;
   const payments = store.payments || {};
   const update = (partial: Partial<Store>) => onUpdate(partial);
 
   useEffect(() => {
     api.fetchBanners(store.id).then(setBanners).catch(() => {});
-    api.fetchMembers(store.id).then(setMembers).catch(() => {});
   }, [store.id]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('La imagen no puede pesar más de 2MB.'); return; }
+    setLogoUploading(true);
+    try {
+      const base64 = await readFileAsBase64(file);
+      await update({ logo: base64 });
+    } catch { alert('Error al subir el logo.'); }
+    setLogoUploading(false);
+  };
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -752,20 +797,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
     } catch { alert('Error al subir el banner'); }
   };
   const handleDeleteBanner = async (id: string) => { try { await api.deleteBanner(id); const b = await api.fetchBanners(store.id); setBanners(b); onRefresh(); } catch { alert('Error'); } };
-
-  const handleGenerateInvite = async () => {
-    setGeneratingCode(true);
-    try {
-      const code = await api.generateInviteCode(store.id);
-      setInviteCode(code);
-      const m = await api.fetchMembers(store.id); setMembers(m);
-    } catch { alert('Error al generar código de invitación'); }
-    setGeneratingCode(false);
-  };
-  const handleDeleteMember = async (memberId: string) => {
-    if (!confirm('¿Eliminar este colaborador?')) return;
-    try { await api.deleteMember(memberId); const m = await api.fetchMembers(store.id); setMembers(m); } catch { alert('Error'); }
-  };
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
@@ -793,21 +824,46 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
         </div>
         <div>
           <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Rubro / Giro</label>
-          <select value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })}
+          <input type="text" value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })} placeholder="Ej: Ropa, Comida, Tecnología..." className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+        </div>
+        <div>
+          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>País</label>
+          <select value={store.country || 'US'} onChange={e => {
+            const country = COUNTRIES.find(c => c.code === e.target.value);
+            update({ country: e.target.value, currency_symbol: country?.currency || '$' });
+          }}
             style={selectStyle(theme, customTextColor)}
             className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500 font-medium`}>
-            <option value="">Selecciona un rubro</option>
-            {RUBROS.map(r => <option key={r} value={r}>{r}</option>)}
+            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Número de WhatsApp</label>
-            <input type="text" value={store.whatsapp} onChange={e => update({ whatsapp: e.target.value })} placeholder="+1 555 0123" className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+        <div>
+          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Número de WhatsApp</label>
+          <input type="tel" inputMode="tel" value={store.whatsapp} onChange={e => update({ whatsapp: e.target.value })} placeholder="+51 999 888 777" className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+        </div>
+        <div>
+          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Moneda</label>
+          <input type="text" value={store.currency_symbol} onChange={e => update({ currency_symbol: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+        </div>
+      </div>
+
+      {/* Logo de la tienda */}
+      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
+        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><ImageIcon size={14} /> Logo de la tienda</p>
+        <p className={`text-[11px] ${theme.subtext}`}>Sube el logo de tu tienda. Se mostrará en el encabezado de tu catálogo.</p>
+        <div className="flex items-center gap-3">
+          <div className={`w-20 h-20 ${theme.cardRadius} border-2 ${theme.borderSubtle} overflow-hidden flex items-center justify-center shrink-0 bg-black/10`}>
+            {store.logo ? <img src={store.logo} alt="Logo" className="w-full h-full object-cover" /> : <ImageIcon size={28} className={theme.subtext} />}
           </div>
-          <div>
-            <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Símbolo de moneda</label>
-            <input type="text" value={store.currency_symbol} onChange={e => update({ currency_symbol: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+          <div className="flex-1 space-y-2">
+            <label className={`${theme.primary} px-4 py-2.5 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 transition-opacity`}>
+              {logoUploading ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={15} />}
+              {logoUploading ? 'Subiendo...' : 'Subir logo'}
+              <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+            </label>
+            {store.logo && (
+              <button onClick={() => update({ logo: '' })} className={`w-full text-[10px] text-red-400 hover:underline font-bold`}>Quitar logo</button>
+            )}
           </div>
         </div>
       </div>
@@ -855,37 +911,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
               <div key={b.id} className={`relative ${theme.cardRadius} overflow-hidden border ${theme.borderSubtle} group`}>
                 <img src={b.image_url} alt="Banner" className="w-full h-20 object-cover" />
                 <button onClick={() => handleDeleteBanner(b.id)} className="absolute top-1.5 right-1.5 bg-red-500/80 text-white p-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12} /></button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Colaboradores / Sub-usuarios */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Users size={14} /> Colaboradores ({members.filter(m => m.role === 'staff').length})</p>
-        <p className={`text-[11px] ${theme.subtext}`}>Invita a otras personas para que gestionen tu tienda. Ellos crean su cuenta y usan el código de invitación.</p>
-        {inviteCode && (
-          <div className={`${theme.accentBg} p-3 ${theme.cardRadius} flex items-center justify-between`}>
-            <div>
-              <p className="text-[10px] font-bold uppercase opacity-70">Código de invitación:</p>
-              <p className="font-black text-base tracking-wider">{inviteCode}</p>
-            </div>
-            <button onClick={() => { navigator.clipboard?.writeText(inviteCode); alert('¡Código copiado!'); }} className={`p-2 ${theme.primary} ${theme.cardRadius}`}><Copy size={16} /></button>
-          </div>
-        )}
-        <button onClick={handleGenerateInvite} disabled={generatingCode} className={`w-full ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50`}>
-          {generatingCode ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={15} />} {inviteCode ? 'Generar nuevo código' : 'Generar código de invitación'}
-        </button>
-        {members.filter(m => m.role === 'staff').length > 0 && (
-          <div className="space-y-1.5">
-            {members.filter(m => m.role === 'staff').map(m => (
-              <div key={m.id} className={`flex items-center justify-between p-2.5 ${theme.cardRadius} ${theme.sectionBg} border ${theme.borderSubtle}`}>
-                <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 ${theme.cardRadius} ${theme.badge} flex items-center justify-center text-[10px] font-bold`}>?</div>
-                  <div><p className="text-xs font-bold">Colaborador</p><p className={`text-[10px] ${theme.subtext}`}>Código: {m.invite_code || 'N/A'}</p></div>
-                </div>
-                <button onClick={() => handleDeleteMember(m.id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 size={14} /></button>
               </div>
             ))}
           </div>
@@ -976,36 +1001,128 @@ interface CartViewProps {
 }
 
 const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, onRemove, onClear, onBack, onOrder }) => {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
   const [address, setAddress] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'yape' | 'card' | 'cash' | 'bank'>('yape');
+  const [paymentProof, setPaymentProof] = useState<string | null>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
+  const [orderSent, setOrderSent] = useState(false);
 
+  const payments = store.payments || {};
   const subtotal = cart.reduce((sum, item) => {
     const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
     return sum + price * item.quantity;
   }, 0);
+  const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
 
-  const handleSend = () => {
-    if (cart.length === 0) return;
-    const newOrder: Omit<Order, 'id' | 'store_id' | 'created_at'> = {
-      customer_name: customerName || 'Cliente WhatsApp', phone: null, delivery_method: deliveryMethod,
-      address, payment_method: paymentMethod,
-      items: cart.map(i => ({ id: i.id, name: i.name, price: (i.is_offer && i.offer_price) ? i.offer_price : i.price, quantity: i.quantity, image: i.image })),
-      total: subtotal, status: 'pending'
-    };
-    onOrder(newOrder);
-    let payText = 'Billetera digital'; if (paymentMethod === 'card') payText = 'Tarjeta'; if (paymentMethod === 'cash') payText = 'Efectivo'; if (paymentMethod === 'bank') payText = 'Transferencia';
+  const availableMethods: { id: 'yape' | 'card' | 'cash' | 'bank'; label: string; icon: any }[] = [];
+  if (payments.acceptsYape !== false) availableMethods.push({ id: 'yape', label: 'Billetera', icon: Wallet });
+  if (payments.acceptsCard) availableMethods.push({ id: 'card', label: 'Tarjeta', icon: CreditCard });
+  if (payments.acceptsBankTransfer !== false) availableMethods.push({ id: 'bank', label: 'Banco', icon: Building2 });
+  if (payments.acceptsCash !== false) availableMethods.push({ id: 'cash', label: 'Efectivo', icon: Banknote });
+
+  const handleProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('La imagen es muy grande (máx 5MB)'); return; }
+    setProofFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setPaymentProof(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const canProceedStep1 = customerName.trim().length >= 2 && (deliveryMethod === 'pickup' || address.trim().length >= 5);
+  const canProceedStep2 = availableMethods.length > 0;
+  const canSend = canProceedStep1 && canProceedStep2 && (paymentMethod !== 'cash' || true);
+
+  const payLabel = paymentMethod === 'yape' ? 'Billetera digital' : paymentMethod === 'card' ? 'Tarjeta' : paymentMethod === 'cash' ? 'Efectivo' : 'Transferencia bancaria';
+
+  const buildWhatsAppText = (paymentProofUrl?: string | null) => {
     let text = `*NUEVO PEDIDO - ${store.name.toUpperCase()}*\n\n`;
-    if (customerName) text += `*Cliente:* ${customerName}\n`;
+    text += `*Cliente:* ${customerName}\n`;
+    if (customerPhone) text += `*Teléfono:* ${customerPhone}\n`;
     text += `*Entrega:* ${deliveryMethod === 'delivery' ? 'Delivery' : 'Recojo en tienda'}\n`;
     if (deliveryMethod === 'delivery' && address) text += `*Dirección:* ${address}\n`;
-    text += `*Pago:* ${payText}\n\n*Detalle:*\n`;
-    cart.forEach(item => { const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price; text += `${item.quantity}x ${item.name} (${store.currency_symbol}${(price * item.quantity).toFixed(2)})\n`; });
-    text += `\n*TOTAL:* ${store.currency_symbol}${subtotal.toFixed(2)}`;
-    const cleanPhone = store.whatsapp.replace(/[^0-9]/g, '');
-    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+    text += `*Pago:* ${payLabel}\n`;
+    if (paymentProofUrl) text += `*Comprobante de pago:* ${paymentProofUrl}\n`;
+    text += `\n*DETALLE DEL PEDIDO:*\n`;
+    text += `${'─'.repeat(24)}\n`;
+    cart.forEach(item => {
+      const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
+      const lineTotal = price * item.quantity;
+      text += `${item.quantity}x ${item.name}\n   ${store.currency_symbol}${lineTotal.toFixed(2)}\n`;
+    });
+    text += `${'─'.repeat(24)}\n`;
+    text += `*TOTAL: ${store.currency_symbol}${subtotal.toFixed(2)}*\n\n`;
+    text += `*DATOS DE PAGO:*\n`;
+    if (paymentMethod === 'yape' && payments.yapePlinNumber) {
+      text += `Billetera: ${payments.yapePlinNumber}\n`;
+      if (payments.yapePlinHolder) text += `Titular: ${payments.yapePlinHolder}\n`;
+    }
+    if (paymentMethod === 'bank' && payments.bankAccountDetails) {
+      text += `Cuenta: ${payments.bankAccountDetails}\n`;
+    }
+    if (paymentMethod === 'card' && payments.cardPaymentLink) {
+      text += `Pagar con tarjeta: ${payments.cardPaymentLink}\n`;
+    }
+    if (paymentMethod === 'cash') {
+      text += `Pago en efectivo al momento de la entrega/recojo.\n`;
+    }
+    text += `\n_Pedido generado desde ${store.name}_`;
+    return text;
   };
+
+  const handleSend = async () => {
+    if (!canSend) return;
+    setSending(true);
+    let proofUrl: string | null = null;
+    if (proofFile) {
+      try {
+        proofUrl = await uploadPaymentProof(proofFile);
+      } catch {
+        setSending(false);
+        alert('No se pudo subir el comprobante. Intenta de nuevo.');
+        return;
+      }
+    }
+    const newOrder: Omit<Order, 'id' | 'store_id' | 'created_at'> = {
+      customer_name: customerName || 'Cliente WhatsApp',
+      phone: customerPhone || null,
+      delivery_method: deliveryMethod,
+      address: deliveryMethod === 'delivery' ? address : null,
+      payment_method: paymentMethod,
+      items: cart.map(i => ({ id: i.id, name: i.name, price: (i.is_offer && i.offer_price) ? i.offer_price : i.price, quantity: i.quantity, image: i.image })),
+      total: subtotal, payment_proof: proofUrl, status: 'pending'
+    };
+    try {
+      await onOrder(newOrder);
+      const text = buildWhatsAppText(proofUrl);
+      const cleanPhone = store.whatsapp.replace(/[^0-9]/g, '');
+      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
+      setOrderSent(true);
+      setSending(false);
+    } catch {
+      setSending(false);
+      alert('Error al enviar el pedido. Intenta de nuevo.');
+    }
+  };
+
+  if (orderSent) {
+    return (
+      <div className="text-center py-16 space-y-4 animate-in fade-in zoom-in-95 duration-300">
+        <div className={`w-24 h-24 mx-auto ${theme.accentBg} rounded-full flex items-center justify-center animate-in zoom-in-50 duration-500`}>
+          <Check size={48} className={theme.accent} strokeWidth={3} />
+        </div>
+        <h3 className="font-black text-xl">¡Pedido enviado!</h3>
+        <p className={`text-xs max-w-xs mx-auto ${theme.subtext}`}>Te redirigimos a WhatsApp para confirmar tu pedido con el vendedor. Revisa que se haya abierto el chat.</p>
+        <button onClick={() => { onClear(); onBack(); }} className={`${theme.primary} px-6 py-3 ${theme.cardRadius} text-xs font-bold inline-flex items-center gap-2 active:scale-95`}><ArrowLeft size={16} /> Volver al catálogo</button>
+      </div>
+    );
+  }
 
   if (cart.length === 0) {
     return (
@@ -1019,11 +1136,28 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
   }
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-4 animate-in fade-in duration-200 pb-24">
       <div className={`flex items-center justify-between border-b ${theme.borderSubtle} pb-3`}>
-        <h2 className="text-lg font-bold flex items-center gap-2"><ShoppingBag size={20} className={theme.accent} /> Mi carrito ({cart.reduce((s, i) => s + i.quantity, 0)})</h2>
+        <h2 className="text-lg font-bold flex items-center gap-2"><ShoppingBag size={20} className={theme.accent} /> Mi carrito ({totalItems})</h2>
         <button onClick={onClear} className="text-xs text-red-400 hover:underline">Vaciar</button>
       </div>
+
+      {/* Stepper */}
+      <div className="flex items-center gap-1">
+        {[1, 2, 3].map((s) => (
+          <div key={s} className="flex items-center flex-1">
+            <div className={`flex items-center gap-1.5 ${step >= s ? theme.accent : theme.subtext}`}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black ${step >= s ? theme.accentBg : `${theme.sectionBg} border ${theme.borderSubtle}`}`}>
+                {step > s ? <Check size={14} /> : s}
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wide hidden sm:block">{s === 1 ? 'Datos' : s === 2 ? 'Pago' : 'Confirmar'}</span>
+            </div>
+            {s < 3 && <div className={`flex-1 h-0.5 mx-1.5 rounded ${step > s ? theme.accent.replace('text-', 'bg-') : theme.borderSubtle}`} />}
+          </div>
+        ))}
+      </div>
+
+      {/* Cart items - always visible */}
       <div className="space-y-2">
         {cart.map(item => {
           const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
@@ -1041,33 +1175,147 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
           );
         })}
       </div>
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>1. Datos de entrega</p>
-        <div>
-          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Nombre</label>
-          <input type="text" placeholder="Tu nombre" value={customerName} onChange={e => setCustomerName(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+
+      {/* STEP 1: Datos de entrega */}
+      {step === 1 && (
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200`}>
+          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><User size={12} /> Datos de entrega</p>
+          <div>
+            <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Nombre completo *</label>
+            <input type="text" placeholder="Ej: María García" value={customerName} onChange={e => setCustomerName(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+          </div>
+          <div>
+            <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Teléfono (opcional)</label>
+            <input type="tel" inputMode="tel" placeholder="Ej: +51 999 888 777" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+          </div>
+          <div>
+            <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Tipo de entrega</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => setDeliveryMethod('delivery')} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center justify-center gap-2 transition-all ${deliveryMethod === 'delivery' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><Truck size={16} /> Delivery</button>
+              <button onClick={() => setDeliveryMethod('pickup')} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center justify-center gap-2 transition-all ${deliveryMethod === 'pickup' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><StoreIcon size={16} /> Recojo</button>
+            </div>
+          </div>
+          {deliveryMethod === 'delivery' && (
+            <div>
+              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Dirección de entrega *</label>
+              <input type="text" placeholder="Ej: Av. Principal 123, Ref. Frente al parque" value={address} onChange={e => setAddress(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+            </div>
+          )}
+          <button onClick={() => canProceedStep1 && setStep(2)} disabled={!canProceedStep1} className={`w-full ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 transition-all`}>Continuar <ChevronRight size={16} /></button>
         </div>
-        <div>
-          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Tipo de entrega</label>
+      )}
+
+      {/* STEP 2: Método de pago + comprobante */}
+      {step === 2 && (
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200`}>
+          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Wallet size={12} /> Método de pago</p>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setDeliveryMethod('delivery')} className={`p-2.5 ${theme.cardRadius} border text-xs font-bold flex items-center justify-center gap-2 transition-all ${deliveryMethod === 'delivery' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><Truck size={15} /> Delivery</button>
-            <button onClick={() => setDeliveryMethod('pickup')} className={`p-2.5 ${theme.cardRadius} border text-xs font-bold flex items-center justify-center gap-2 transition-all ${deliveryMethod === 'pickup' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><StoreIcon size={15} /> Recojo</button>
+            {availableMethods.map(m => {
+              const Icon = m.icon;
+              return (
+                <button key={m.id} onClick={() => setPaymentMethod(m.id)} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center gap-2 transition-all ${paymentMethod === m.id ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}>
+                  <Icon size={16} /> {m.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Payment details box */}
+          <div className={`${theme.sectionBg} ${theme.cardRadius} border ${theme.borderSubtle} p-3.5 space-y-2`}>
+            {paymentMethod === 'yape' && (
+              <>
+                <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Datos de billetera</p>
+                {payments.yapePlinNumber ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-mono font-bold">{payments.yapePlinNumber}</span>
+                      <button onClick={() => navigator.clipboard?.writeText(payments.yapePlinNumber || '')} className={`p-1.5 ${theme.badge} rounded-lg`}><Copy size={12} /></button>
+                    </div>
+                    {payments.yapePlinHolder && <p className="text-[11px] opacity-70">Titular: {payments.yapePlinHolder}</p>}
+                  </div>
+                ) : <p className="text-[11px] opacity-60">El vendedor no configuró el número. Contáctalo por WhatsApp.</p>}
+              </>
+            )}
+            {paymentMethod === 'bank' && (
+              <>
+                <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Cuenta bancaria</p>
+                {payments.bankAccountDetails ? <p className="text-[11px] whitespace-pre-line">{payments.bankAccountDetails}</p> : <p className="text-[11px] opacity-60">El vendedor no configuró la cuenta. Contáctalo por WhatsApp.</p>}
+              </>
+            )}
+            {paymentMethod === 'card' && (
+              <>
+                <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Pago con tarjeta</p>
+                {payments.cardPaymentLink ? <a href={payments.cardPaymentLink} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 ${theme.primary} px-3 py-2 ${theme.cardRadius} text-xs font-bold`}><ExternalLink size={13} /> Ir a pagar</a> : <p className="text-[11px] opacity-60">El vendedor no configuró el enlace. Contáctalo por WhatsApp.</p>}
+              </>
+            )}
+            {paymentMethod === 'cash' && <p className="text-[11px] opacity-70">Pagarás en efectivo al momento de la entrega o recojo.</p>}
+          </div>
+
+          {/* Payment proof upload */}
+          {paymentMethod !== 'cash' && (
+            <div>
+              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1.5`}>Comprobante de pago (opcional)</label>
+              {paymentProof ? (
+                <div className="relative">
+                  <img src={paymentProof} alt="Comprobante" className={`w-full max-h-48 object-contain ${theme.cardRadius} border ${theme.borderSubtle}`} />
+                  <button onClick={() => { setPaymentProof(null); setProofFile(null); }} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg shadow-lg"><X size={14} /></button>
+                </div>
+              ) : (
+                <label className={`flex flex-col items-center justify-center gap-2 p-6 ${theme.sectionBg} ${theme.cardRadius} border-2 border-dashed ${theme.borderSubtle} cursor-pointer hover:border-emerald-500 transition-colors`}>
+                  <Upload size={22} className={theme.subtext} />
+                  <span className="text-[11px] font-semibold opacity-70">Toca para subir captura del comprobante</span>
+                  <span className="text-[9px] opacity-50">JPG, PNG · máx 2MB</span>
+                  <input type="file" accept="image/*" onChange={handleProofUpload} className="hidden" />
+                </label>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <button onClick={() => setStep(1)} className={`flex-1 ${theme.badge} py-3 ${theme.cardRadius} text-xs font-bold`}>Atrás</button>
+            <button onClick={() => setStep(3)} className={`flex-1 ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 active:scale-95`}>Continuar <ChevronRight size={16} /></button>
           </div>
         </div>
-        {deliveryMethod === 'delivery' && <div><label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Dirección</label><input type="text" placeholder="Dirección de entrega" value={address} onChange={e => setAddress(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} /></div>}
-      </div>
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>2. Método de pago</p>
-        <div className="grid grid-cols-2 gap-2">
-          {store.payments?.acceptsYape !== false && <button onClick={() => setPaymentMethod('yape')} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center gap-2 transition-all ${paymentMethod === 'yape' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><Wallet size={15} /> Billetera</button>}
-          {store.payments?.acceptsCard && <button onClick={() => setPaymentMethod('card')} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center gap-2 transition-all ${paymentMethod === 'card' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><CreditCard size={15} /> Tarjeta</button>}
-          {store.payments?.acceptsBankTransfer !== false && <button onClick={() => setPaymentMethod('bank')} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center gap-2 transition-all ${paymentMethod === 'bank' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><Building2 size={15} /> Banco</button>}
-          {store.payments?.acceptsCash !== false && <button onClick={() => setPaymentMethod('cash')} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center gap-2 transition-all ${paymentMethod === 'cash' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><Banknote size={15} /> Efectivo</button>}
+      )}
+
+      {/* STEP 3: Confirmación */}
+      {step === 3 && (
+        <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-200">
+          <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
+            <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Receipt size={12} /> Resumen del pedido</p>
+            <div className="space-y-1.5 text-xs">
+              <div className="flex justify-between"><span className={theme.subtext}>Cliente</span><span className="font-bold">{customerName}</span></div>
+              {customerPhone && <div className="flex justify-between"><span className={theme.subtext}>Teléfono</span><span className="font-bold">{customerPhone}</span></div>}
+              <div className="flex justify-between"><span className={theme.subtext}>Entrega</span><span className="font-bold">{deliveryMethod === 'delivery' ? 'Delivery' : 'Recojo'}</span></div>
+              {deliveryMethod === 'delivery' && address && <div className="flex justify-between gap-2"><span className={theme.subtext}>Dirección</span><span className="font-bold text-right">{address}</span></div>}
+              <div className="flex justify-between"><span className={theme.subtext}>Pago</span><span className="font-bold">{payLabel}</span></div>
+              {paymentProof && <div className="flex justify-between"><span className={theme.subtext}>Comprobante</span><span className="font-bold flex items-center gap-1"><Check size={12} className={theme.accent} /> Adjunto</span></div>}
+            </div>
+            <div className={`border-t ${theme.borderSubtle} pt-3 space-y-1`}>
+              {cart.map(item => {
+                const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
+                return <div key={item.id} className="flex justify-between text-[11px]"><span className={theme.subtext}>{item.quantity}x {item.name}</span><span className="font-bold">{store.currency_symbol}{(price * item.quantity).toFixed(2)}</span></div>;
+              })}
+            </div>
+            <div className={`flex justify-between items-center border-t ${theme.borderSubtle} pt-3`}>
+              <span className="text-sm font-bold">Total</span>
+              <span className={`text-xl font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</span>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setStep(2)} className={`flex-1 ${theme.badge} py-3.5 ${theme.cardRadius} text-xs font-bold`}>Atrás</button>
+            <button onClick={handleSend} disabled={sending} className={`flex-[2] ${theme.primary} py-3.5 ${theme.cardRadius} text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50`}>
+              {sending ? <Loader2 size={18} className="animate-spin" /> : <><MessageCircle size={18} /> ENVIAR PEDIDO</>}
+            </button>
+          </div>
+          <p className={`text-center text-[10px] ${theme.subtext} flex items-center justify-center gap-1`}><ShieldCheck size={11} /> Tu pedido se envía seguro por WhatsApp</p>
         </div>
-      </div>
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-xl`}>
-        <div className="flex justify-between items-center text-sm font-bold"><span>Total:</span><span className={`text-lg font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</span></div>
-        <button onClick={handleSend} className={`w-full ${theme.primary} py-3.5 ${theme.cardRadius} text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-95`}><MessageCircle size={18} /> ENVIAR PEDIDO POR WHATSAPP</button>
+      )}
+
+      {/* Floating total bar on mobile */}
+      <div className={`fixed bottom-0 left-0 right-0 ${theme.card} border-t ${theme.borderSubtle} p-3 flex items-center justify-between shadow-2xl z-30 sm:hidden`}>
+        <div><span className={`text-[10px] ${theme.subtext}`}>Total</span><p className={`text-lg font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</p></div>
+        <button onClick={() => step === 3 ? handleSend() : setStep(step + 1 as 1 | 2 | 3)} disabled={step === 1 && !canProceedStep1} className={`${theme.primary} px-5 py-2.5 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 disabled:opacity-50`}>{step === 3 ? <><MessageCircle size={15} /> Enviar</> : <>Continuar <ChevronRight size={15} /></>}</button>
       </div>
     </div>
   );
@@ -1263,12 +1511,14 @@ interface StoreContainerProps {
   onUpgrade?: () => void;
   onSignOut?: () => void;
   onOpenQR?: () => void;
+  onOpenStoreSwitcher?: () => void;
+  storeCount?: number;
   isAdmin: boolean;
 }
 
 const StoreContainer: React.FC<StoreContainerProps> = ({
   store, products, categories, banners, orders, cart, setCart, activeTab, setActiveTab,
-  onRefresh, onOrder, onUpdateStore, onUpgrade, onSignOut, onOpenQR, isAdmin
+  onRefresh, onOrder, onUpdateStore, onUpgrade, onSignOut, onOpenQR, onOpenStoreSwitcher, storeCount, isAdmin
 }) => {
   const theme = THEMES[store.theme] || THEMES.proDark;
   const fontObj = AVAILABLE_FONTS.find(f => f.id === store.font) || AVAILABLE_FONTS[0];
@@ -1302,13 +1552,19 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
       <div className="w-full max-w-md min-h-screen flex flex-col relative shadow-2xl">
         <header className={`sticky top-0 z-40 ${theme.nav} p-3.5 shadow-md flex items-center justify-between border-b`}>
           <div className="flex items-center gap-2.5">
-            <div className={`w-10 h-10 ${theme.cardRadius} ${theme.primary} flex items-center justify-center font-black text-lg shadow-md shrink-0`}>{store.name.charAt(0)}</div>
+            <div className={`w-10 h-10 ${theme.cardRadius} overflow-hidden flex items-center justify-center shadow-md shrink-0 ${store.logo ? '' : theme.primary}`}>{store.logo ? <img src={store.logo} alt={store.name} className="w-full h-full object-cover" /> : <span className="font-black text-lg">{store.name.charAt(0)}</span>}</div>
             <div>
               <h1 className="font-black text-sm leading-tight" style={customTextColor ? { color: customTextColor } : undefined}>{store.name}</h1>
               <p className={`text-[10px] ${theme.subtext} truncate max-w-[150px]`}>{store.slogan}</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            {isAdmin && onOpenStoreSwitcher && (
+              <button onClick={onOpenStoreSwitcher} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors flex items-center gap-1`} title="Mis catálogos">
+                <Layers size={16} />
+                {storeCount && storeCount > 1 && <span className="text-[9px] font-bold">{storeCount}</span>}
+              </button>
+            )}
             {isAdmin && onOpenQR && <button onClick={onOpenQR} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`} title="Código QR"><QrCode size={16} /></button>}
             <button onClick={() => setActiveTab('cart')} className={`relative p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`}>
               <ShoppingBag size={18} style={customTextColor ? { color: customTextColor } : undefined} />
@@ -1379,7 +1635,7 @@ const ClientStoreView: React.FC<ClientStoreViewProps> = ({ storeId }) => {
 // ============ APP ADMIN (comerciante autenticado) ============
 
 const AdminApp: React.FC = () => {
-  const { store, signOut, refreshStore } = useAuth();
+  const { store, stores, signOut, refreshStore, setStoreLocal, switchStore, createStore, deleteStore } = useAuth();
   const [activeTab, setActiveTab] = useState<'catalog' | 'cart' | 'products' | 'orders' | 'plans' | 'settings'>('catalog');
   const [showQR, setShowQR] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -1388,6 +1644,9 @@ const AdminApp: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [showStoreSwitcher, setShowStoreSwitcher] = useState(false);
+  const [newStoreName, setNewStoreName] = useState('');
+  const [creatingStore, setCreatingStore] = useState(false);
 
   const refreshAll = useCallback(async () => {
     if (!store) return;
@@ -1402,29 +1661,106 @@ const AdminApp: React.FC = () => {
   if (!store) return null;
 
   const handleUpdateStore = async (updates: Partial<Store>) => {
-    try { await api.updateStore(store.id, updates); await refreshStore(); } catch { alert('Error al guardar'); }
+    setStoreLocal(updates);
+    try { await api.updateStore(store.id, updates); } catch { alert('Error al guardar'); await refreshStore(); }
   };
   const handleOrder = async (order: Omit<Order, 'id' | 'store_id' | 'created_at'>) => {
     try { await api.createOrder(store.id, order); setCart([]); setActiveTab('catalog'); refreshAll(); } catch { alert('Error al realizar el pedido'); }
+  };
+
+  const planLimits = PLAN_LIMITS[store.plan] || PLAN_LIMITS.free;
+  const canCreateMore = stores.length < planLimits.maxCatalogs;
+
+  const handleCreateStore = async () => {
+    if (!newStoreName.trim()) return;
+    setCreatingStore(true);
+    const { error } = await createStore(newStoreName.trim());
+    setCreatingStore(false);
+    if (error) { alert(error); return; }
+    setNewStoreName('');
+    setShowStoreSwitcher(false);
+    setActiveTab('catalog');
+  };
+
+  const handleDeleteStore = async (storeId: string) => {
+    if (stores.length <= 1) { alert('Debes tener al menos un catálogo'); return; }
+    if (!confirm('¿Eliminar este catálogo y todos sus productos? Esta acción no se puede deshacer.')) return;
+    const { error } = await deleteStore(storeId);
+    if (error) { alert(error); return; }
+    setShowStoreSwitcher(false);
   };
 
   if (loadingData) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
 
   return (
     <>
-      <StoreContainer store={store} products={products} categories={categories} banners={banners} orders={orders} cart={cart} setCart={setCart} activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={refreshAll} onOrder={handleOrder} onUpdateStore={handleUpdateStore} onUpgrade={() => setActiveTab('plans')} onSignOut={signOut} onOpenQR={() => setShowQR(true)} isAdmin={true} />
+      <StoreContainer store={store} products={products} categories={categories} banners={banners} orders={orders} cart={cart} setCart={setCart} activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={refreshAll} onOrder={handleOrder} onUpdateStore={handleUpdateStore} onUpgrade={() => setActiveTab('plans')} onSignOut={signOut} onOpenQR={() => setShowQR(true)} isAdmin={true} onOpenStoreSwitcher={() => setShowStoreSwitcher(true)} storeCount={stores.length} />
       <QRModal isOpen={showQR} onClose={() => setShowQR(false)} storeId={store.id} storeName={store.name} theme={THEMES[store.theme] || THEMES.proDark} />
+      {showStoreSwitcher && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowStoreSwitcher(false)}>
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-[90%] max-w-md space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2"><Layers size={18} className="text-emerald-500" /> Mis catálogos ({stores.length}/{planLimits.maxCatalogs === Infinity ? '∞' : planLimits.maxCatalogs})</h3>
+              <button onClick={() => setShowStoreSwitcher(false)} className="text-slate-400 hover:text-white"><X size={18} /></button>
+            </div>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {stores.map(s => (
+                <div key={s.id} className={`flex items-center justify-between p-3 rounded-xl border ${s.id === store.id ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-700 bg-slate-800/50'}`}>
+                  <button onClick={() => { switchStore(s.id); setShowStoreSwitcher(false); setActiveTab('catalog'); }} className="flex items-center gap-2 flex-1 text-left">
+                    <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-emerald-600 shrink-0">
+                      {s.logo ? <img src={s.logo} alt={s.name} className="w-full h-full object-cover" /> : <span className="text-white font-bold text-xs">{s.name.charAt(0)}</span>}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">{s.name}</p>
+                      <p className="text-[10px] text-slate-400">{s.rubro || 'Sin rubro'}</p>
+                    </div>
+                  </button>
+                  {s.id === store.id && <span className="text-[10px] text-emerald-400 font-bold">Activo</span>}
+                  {stores.length > 1 && s.id !== store.id && (
+                    <button onClick={() => handleDeleteStore(s.id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 size={14} /></button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {canCreateMore ? (
+              <div className="space-y-2 pt-3 border-t border-slate-700">
+                <div className="flex gap-2">
+                  <input type="text" value={newStoreName} onChange={e => setNewStoreName(e.target.value)} placeholder="Nombre del nuevo catálogo..." className="flex-1 bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-xs text-white outline-none focus:border-emerald-500" />
+                  <button onClick={handleCreateStore} disabled={creatingStore || !newStoreName.trim()} className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-xl text-xs font-bold text-white flex items-center gap-1.5">
+                    {creatingStore ? <Loader2 size={14} className="animate-spin" /> : <Plus size={15} />} Crear
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="pt-3 border-t border-slate-700">
+                <p className="text-[11px] text-amber-400 text-center">Has alcanzado el límite de catálogos de tu plan. Mejora tu plan para crear más.</p>
+                <button onClick={() => { setShowStoreSwitcher(false); setActiveTab('plans'); }} className="w-full mt-2 py-2.5 bg-amber-500/20 text-amber-400 rounded-xl text-xs font-bold">Ver planes</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 };
 
-// ============ APP RAÍZ ============
+// ============ EXPORT PRINCIPAL ============
 
-export default function App() {
+const VendelyProVendeDirectoPorWhatsApp: React.FC = () => {
   const { user, store, loading } = useAuth();
-  const storeParam = new URLSearchParams(window.location.search).get('store');
-  if (storeParam) return <ClientStoreView storeId={storeParam} />;
+
+  const [publicStoreId, setPublicStoreId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const storeId = params.get('store');
+    if (storeId) setPublicStoreId(storeId);
+  }, []);
+
+  if (publicStoreId) return <ClientStoreView storeId={publicStoreId} />;
   if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
   if (!user || !store) return <AuthScreen />;
   return <AdminApp />;
-}
+};
+
+export default VendelyProVendeDirectoPorWhatsApp;
