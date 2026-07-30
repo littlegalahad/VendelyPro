@@ -8,12 +8,12 @@ import {
   ShieldCheck, LogOut, Loader2, AlertCircle, Wallet, Eye, EyeOff,
   LayoutGrid, Rows3, Columns3, Image as ImageIconBanner, Droplet, AlignLeft,
   KeyRound, Grid2x2, Grid3x3, List, GalleryVerticalEnd, Square, BookOpen,
-  Phone, Upload, MapPin, User, Receipt, Sparkles
+  Phone, Upload, MapPin, User, Receipt, Sparkles, ZoomIn, FileText, TrendingUp, Calendar, DollarSign, ShoppingCart
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import type { Store, Product, Category, Banner, Order, OrderItem, CartItem, PlanType } from '@/lib/types';
 import * as api from '@/lib/store-api';
-import { uploadPaymentProof } from '@/lib/store-api';
+import { uploadPaymentProof, updateOrderPayment } from '@/lib/store-api';
 import AuthScreen from '@/components/AuthScreen';
 
 // ============ CONSTANTES ============
@@ -266,6 +266,17 @@ function readFileAsBase64(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+
+// ============ LIGHTBOX (visor de imagen) ============
+
+interface LightboxProps { src: string; alt: string; onClose: () => void; }
+
+const Lightbox: React.FC<LightboxProps> = ({ src, alt, onClose }) => (
+  <div className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
+    <button className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors" onClick={onClose}><X size={24} /></button>
+    <img src={src} alt={alt} className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()} />
+  </div>
+);
 
 // ============ MODAL CATEGORÍAS ============
 
@@ -703,53 +714,226 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
 
 interface OrdersViewProps { orders: Order[]; store: Store; theme: ThemeDef; onRefresh: () => void; customTextColor?: string; }
 
+const STATUS_LABELS: Record<Order['status'], string> = {
+  pending: 'Pendiente', preparing: 'Preparando', shipped: 'Enviado', delivered: 'Entregado',
+};
+const STATUS_COLORS: Record<Order['status'], string> = {
+  pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  preparing: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  shipped: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  delivered: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+};
+
+const generateOrderPDF = (order: Order, store: Store) => {
+  const win = window.open('', '_blank');
+  if (!win) return;
+  const itemsHtml = order.items.map((item: OrderItem) => `
+    <tr>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.quantity}x ${item.name}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">${store.currency_symbol}${(item.price * item.quantity).toFixed(2)}</td>
+    </tr>`).join('');
+  win.document.write(`<!DOCTYPE html><html><head><title>Pedido #${order.id.slice(-5)}</title>
+    <style>body{font-family:Inter,sans-serif;max-width:500px;margin:40px auto;padding:20px;color:#1a1a1a}
+    h1{font-size:20px;margin:0}.sub{color:#666;font-size:12px;margin:4px 0 20px}
+    .info{background:#f8f9fa;border-radius:12px;padding:16px;margin:16px 0;font-size:13px}
+    .info p{margin:4px 0}table{width:100%;border-collapse:collapse;font-size:13px}
+    .total{font-size:18px;font-weight:bold;margin-top:16px;padding-top:12px;border-top:2px solid #10B981;display:flex;justify-content:space-between}
+    .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:bold;text-transform:uppercase}
+    .logo{font-size:24px;font-weight:900;color:#10B981}</style></head>
+    <body>
+    <div class="logo">${store.name}</div>
+    <h1>Pedido #${order.id.slice(-5)}</h1>
+    <div class="sub">${new Date(order.created_at).toLocaleString('es-ES')}</div>
+    <div class="info">
+      <p><strong>Cliente:</strong> ${order.customer_name}</p>
+      ${order.phone ? `<p><strong>Teléfono:</strong> ${order.phone}</p>` : ''}
+      <p><strong>Entrega:</strong> ${order.delivery_method === 'delivery' ? 'Delivery' : 'Recojo'}</p>
+      ${order.address ? `<p><strong>Dirección:</strong> ${order.address}</p>` : ''}
+      <p><strong>Pago:</strong> ${order.payment_method.toUpperCase()}</p>
+      <p><strong>Estado:</strong> <span class="badge" style="background:#f0fdf4;color:#10B981">${STATUS_LABELS[order.status]}</span></p>
+    </div>
+    <table><thead><tr><th style="text-align:left;padding:8px 12px;border-bottom:2px solid #10B981">Producto</th><th style="text-align:right;padding:8px 12px;border-bottom:2px solid #10B981">Subtotal</th></tr></thead>
+    <tbody>${itemsHtml}</tbody></table>
+    <div class="total"><span>Total:</span><span>${store.currency_symbol}${Number(order.total).toFixed(2)}</span></div>
+    ${order.payment_proof ? `<div style="margin-top:20px"><h3 style="font-size:14px">Comprobante de pago:</h3><img src="${order.payment_proof}" style="max-width:100%;border-radius:12px;margin-top:8px" /></div>` : ''}
+    <script>window.onload=function(){window.print()}</script>
+    </body></html>`);
+  win.document.close();
+};
+
 const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh, customTextColor }) => {
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [editingPayment, setEditingPayment] = useState(false);
+  const [newPayment, setNewPayment] = useState<Order['payment_method']>('yape');
+  const [statusFilter, setStatusFilter] = useState<'all' | Order['status']>('all');
+
   const handleStatus = async (orderId: string, status: Order['status']) => {
-    try { await api.updateOrderStatus(orderId, status); onRefresh(); } catch { alert('Error al actualizar'); }
+    try {
+      await api.updateOrderStatus(orderId, status);
+      onRefresh();
+      if (selectedOrder?.id === orderId) setSelectedOrder({ ...selectedOrder, status });
+    } catch { alert('Error al actualizar el estado.'); }
   };
+
+  const handlePaymentUpdate = async (orderId: string) => {
+    try {
+      await updateOrderPayment(orderId, newPayment);
+      onRefresh();
+      if (selectedOrder?.id === orderId) setSelectedOrder({ ...selectedOrder, payment_method: newPayment });
+      setEditingPayment(false);
+    } catch { alert('Error al actualizar el método de pago.'); }
+  };
+
+  const filteredOrders = statusFilter === 'all' ? orders : orders.filter(o => o.status === statusFilter);
+
+  if (selectedOrder) {
+    return (
+      <div className="space-y-4 animate-in fade-in duration-200">
+        <button onClick={() => setSelectedOrder(null)} className={`flex items-center gap-2 text-xs font-bold ${theme.subtext} hover:opacity-80 transition-opacity`}>
+          <ArrowLeft size={16} /> Volver a pedidos
+        </button>
+        <div className={`${theme.card} p-5 ${theme.cardRadius} border space-y-4 shadow-lg`}>
+          <div className={`flex justify-between items-start border-b ${theme.borderSubtle} pb-3`}>
+            <div>
+              <span className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Pedido #{selectedOrder.id.slice(-5)}</span>
+              <h3 className="font-black text-base mt-0.5">{selectedOrder.customer_name}</h3>
+              <p className="text-[10px] opacity-60">{new Date(selectedOrder.created_at).toLocaleString('es-ES')}</p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${STATUS_COLORS[selectedOrder.status]}`}>{STATUS_LABELS[selectedOrder.status]}</span>
+          </div>
+
+          {/* Customer info */}
+          <div className={`space-y-1.5 text-xs ${theme.sectionBg} p-3 rounded-2xl`}>
+            {selectedOrder.phone && <p className="flex items-center gap-2"><Phone size={12} className={theme.subtext} /> {selectedOrder.phone}</p>}
+            <p className="flex items-center gap-2"><Truck size={12} className={theme.subtext} /> {selectedOrder.delivery_method === 'delivery' ? 'Delivery' : 'Recojo en tienda'}</p>
+            {selectedOrder.address && <p className="flex items-center gap-2"><MapPin size={12} className={theme.subtext} /> {selectedOrder.address}</p>}
+          </div>
+
+          {/* Payment method — editable if no proof */}
+          <div className={`flex items-center justify-between p-3 rounded-2xl ${theme.sectionBg}`}>
+            <div className="flex items-center gap-2">
+              <CreditCard size={14} className={theme.accent} />
+              <span className="text-xs font-bold">Pago: </span>
+              {editingPayment ? (
+                <select value={newPayment} onChange={e => setNewPayment(e.target.value as Order['payment_method'])}
+                  style={selectStyle(theme, customTextColor)}
+                  className={`${theme.selectBg} border rounded-xl px-2 py-1 text-[10px] font-bold outline-none`}>
+                  <option value="yape">Yape/Plin</option>
+                  <option value="cash">Efectivo</option>
+                  <option value="bank">Transferencia</option>
+                  <option value="card">Tarjeta</option>
+                </select>
+              ) : (
+                <span className="text-xs font-bold uppercase">{selectedOrder.payment_method}</span>
+              )}
+            </div>
+            {editingPayment ? (
+              <div className="flex gap-2">
+                <button onClick={() => handlePaymentUpdate(selectedOrder.id)} className={`${theme.primary} px-3 py-1.5 rounded-xl text-[10px] font-bold`}>Guardar</button>
+                <button onClick={() => setEditingPayment(false)} className={`border ${theme.borderSubtle} px-3 py-1.5 rounded-xl text-[10px] font-bold`}>Cancelar</button>
+              </div>
+            ) : (
+              !selectedOrder.payment_proof && (
+                <button onClick={() => { setNewPayment(selectedOrder.payment_method); setEditingPayment(true); }} className={`text-[10px] font-bold ${theme.accent} hover:underline flex items-center gap-1`}>
+                  <Pencil size={11} /> Editar
+                </button>
+              )
+            )}
+          </div>
+
+          {/* Products ordered */}
+          <div className="space-y-2">
+            <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Productos del pedido</p>
+            {selectedOrder.items.map((item: OrderItem, idx: number) => (
+              <div key={idx} className={`flex items-center gap-3 p-2.5 rounded-2xl ${theme.sectionBg}`}>
+                {item.image && <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded-xl shrink-0" />}
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-xs line-clamp-1">{item.name}</p>
+                  <p className={`text-[10px] ${theme.subtext}`}>{item.quantity}x {store.currency_symbol}{Number(item.price).toFixed(2)}</p>
+                </div>
+                <span className="font-bold text-xs">{store.currency_symbol}{(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className={`flex justify-between items-center border-t ${theme.borderSubtle} pt-3`}>
+            <span className="text-xs font-bold opacity-70">Total:</span>
+            <span className={`${theme.accent} text-lg font-black`}>{store.currency_symbol}{Number(selectedOrder.total).toFixed(2)}</span>
+          </div>
+
+          {/* Payment proof */}
+          {selectedOrder.payment_proof && (
+            <div className={`border-t ${theme.borderSubtle} pt-3`}>
+              <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider mb-2 flex items-center gap-1.5`}><Receipt size={11} /> Comprobante de pago</p>
+              <img src={selectedOrder.payment_proof} alt="Comprobante" className={`w-full max-h-64 object-contain ${theme.cardRadius} border ${theme.borderSubtle}`} />
+            </div>
+          )}
+
+          {/* Status + PDF */}
+          <div className="flex gap-2">
+            <select value={selectedOrder.status} onChange={e => handleStatus(selectedOrder.id, e.target.value as Order['status'])}
+              style={selectStyle(theme, customTextColor)}
+              className={`flex-1 ${theme.selectBg} font-bold border rounded-xl px-3 py-2.5 text-xs outline-none`}>
+              <option value="pending">Pendiente</option>
+              <option value="preparing">Preparando</option>
+              <option value="shipped">Enviado</option>
+              <option value="delivered">Entregado</option>
+            </select>
+            <button onClick={() => generateOrderPDF(selectedOrder, store)} className={`${theme.accentBg} px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 whitespace-nowrap`}>
+              <FileText size={14} /> PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       <div className={`flex items-center justify-between border-b ${theme.borderSubtle} pb-3`}>
         <div><h2 className="text-lg font-bold">Historial de pedidos</h2><p className={`text-xs ${theme.subtext}`}>Pedidos recibidos por WhatsApp</p></div>
         <span className={`${theme.accentBg} font-bold px-3 py-1 rounded-full text-xs`}>{orders.length} pedidos</span>
       </div>
-      {orders.length === 0 ? (
-        <div className={`text-center py-16 space-y-3 opacity-50 ${theme.subtext}`}><Clock size={40} className="mx-auto" /><p className="text-xs font-medium">Aún no hay pedidos.</p></div>
+
+      {/* Status filter */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {(['all', 'pending', 'preparing', 'shipped', 'delivered'] as const).map(s => (
+          <button key={s} onClick={() => setStatusFilter(s)}
+            className={`px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap border transition-all ${statusFilter === s ? theme.primary : `${theme.card} ${theme.borderSubtle} opacity-60`}`}>
+            {s === 'all' ? 'Todos' : STATUS_LABELS[s]}
+          </button>
+        ))}
+      </div>
+
+      {filteredOrders.length === 0 ? (
+        <div className={`text-center py-16 space-y-3 opacity-50 ${theme.subtext}`}><Clock size={40} className="mx-auto" /><p className="text-xs font-medium">No hay pedidos {statusFilter !== 'all' ? 'con este estado' : 'todavía'}.</p></div>
       ) : (
         <div className="space-y-3">
-          {orders.map(order => (
-            <div key={order.id} className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
+          {filteredOrders.map(order => (
+            <div key={order.id} onClick={() => setSelectedOrder(order)}
+              className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md cursor-pointer hover:shadow-lg hover:border-emerald-500/30 transition-all`}>
               <div className={`flex justify-between items-start border-b ${theme.borderSubtle} pb-2.5`}>
                 <div>
                   <span className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Pedido #{order.id.slice(-5)}</span>
                   <h4 className="font-bold text-xs mt-0.5">{order.customer_name}</h4>
                   <p className="text-[10px] opacity-60">{new Date(order.created_at).toLocaleString('es-ES')} &bull; Pago: <strong className="uppercase">{order.payment_method}</strong></p>
                 </div>
-                <select value={order.status} onChange={e => handleStatus(order.id, e.target.value as Order['status'])}
-                  style={selectStyle(theme, customTextColor)}
-                  className={`${theme.selectBg} font-bold border text-[10px] rounded-xl px-2.5 py-1 outline-none`}>
-                  <option value="pending">Pendiente</option>
-                  <option value="preparing">Preparando</option>
-                  <option value="shipped">Enviado</option>
-                  <option value="delivered">Entregado</option>
-                </select>
+                <div className="flex flex-col items-end gap-1.5">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${STATUS_COLORS[order.status]}`}>{STATUS_LABELS[order.status]}</span>
+                  <span className="text-[10px] opacity-50">{order.items.length} productos</span>
+                </div>
               </div>
               <div className="space-y-1 text-xs">
-                {order.items.map((item: OrderItem, idx: number) => (
+                {order.items.slice(0, 3).map((item: OrderItem, idx: number) => (
                   <div key={idx} className="flex justify-between text-[11px] opacity-80">
                     <span>{item.quantity}x {item.name}</span><span>{store.currency_symbol}{(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
+                {order.items.length > 3 && <p className="text-[10px] opacity-50 italic">+ {order.items.length - 3} producto(s) más...</p>}
               </div>
               <div className={`flex justify-between items-center border-t ${theme.borderSubtle} pt-2 text-xs font-bold`}>
                 <span className="opacity-70">Total:</span><span className={`${theme.accent} text-sm`}>{store.currency_symbol}{Number(order.total).toFixed(2)}</span>
               </div>
-              {order.payment_proof && (
-                <div className={`border-t ${theme.borderSubtle} pt-2.5`}>
-                  <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider mb-1.5 flex items-center gap-1.5`}><Receipt size={11} /> Comprobante de pago</p>
-                  <img src={order.payment_proof} alt="Comprobante" className={`w-full max-h-44 object-contain ${theme.cardRadius} border ${theme.borderSubtle}`} />
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -1150,7 +1334,7 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black ${step >= s ? theme.accentBg : `${theme.sectionBg} border ${theme.borderSubtle}`}`}>
                 {step > s ? <Check size={14} /> : s}
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wide hidden sm:block">{s === 1 ? 'Datos' : s === 2 ? 'Pago' : 'Confirmar'}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide hidden sm:block">{s === 1 ? 'Datos' : s === 2 ? 'Confirmar' : 'Pago'}</span>
             </div>
             {s < 3 && <div className={`flex-1 h-0.5 mx-1.5 rounded ${step > s ? theme.accent.replace('text-', 'bg-') : theme.borderSubtle}`} />}
           </div>
@@ -1205,8 +1389,35 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
         </div>
       )}
 
-      {/* STEP 2: Método de pago + comprobante */}
+      {/* STEP 2: Confirmación del pedido antes de pago */}
       {step === 2 && (
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200`}>
+          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Receipt size={12} /> Confirmar tu pedido</p>
+          <div className="space-y-1.5 text-xs">
+            <div className="flex justify-between"><span className={theme.subtext}>Cliente</span><span className="font-bold">{customerName}</span></div>
+            {customerPhone && <div className="flex justify-between"><span className={theme.subtext}>Teléfono</span><span className="font-bold">{customerPhone}</span></div>}
+            <div className="flex justify-between"><span className={theme.subtext}>Entrega</span><span className="font-bold">{deliveryMethod === 'delivery' ? 'Delivery' : 'Recojo'}</span></div>
+            {deliveryMethod === 'delivery' && address && <div className="flex justify-between gap-2"><span className={theme.subtext}>Dirección</span><span className="font-bold text-right">{address}</span></div>}
+          </div>
+          <div className={`border-t ${theme.borderSubtle} pt-3 space-y-1`}>
+            {cart.map(item => {
+              const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
+              return <div key={item.id} className="flex justify-between text-[11px]"><span className={theme.subtext}>{item.quantity}x {item.name}</span><span className="font-bold">{store.currency_symbol}{(price * item.quantity).toFixed(2)}</span></div>;
+            })}
+          </div>
+          <div className={`flex justify-between items-center border-t ${theme.borderSubtle} pt-3`}>
+            <span className="text-sm font-bold">Total</span>
+            <span className={`text-xl font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</span>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setStep(1)} className={`flex-1 ${theme.badge} py-3 ${theme.cardRadius} text-xs font-bold`}>Editar pedido</button>
+            <button onClick={() => setStep(3)} className={`flex-1 ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 active:scale-95`}>Ir a pagar <ChevronRight size={16} /></button>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 3: Método de pago + comprobante */}
+      {step === 3 && (
         <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200`}>
           <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Wallet size={12} /> Método de pago</p>
           <div className="grid grid-cols-2 gap-2">
@@ -1272,40 +1483,9 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
           )}
 
           <div className="flex gap-2">
-            <button onClick={() => setStep(1)} className={`flex-1 ${theme.badge} py-3 ${theme.cardRadius} text-xs font-bold`}>Atrás</button>
-            <button onClick={() => setStep(3)} className={`flex-1 ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 active:scale-95`}>Continuar <ChevronRight size={16} /></button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3: Confirmación */}
-      {step === 3 && (
-        <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-200">
-          <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
-            <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Receipt size={12} /> Resumen del pedido</p>
-            <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between"><span className={theme.subtext}>Cliente</span><span className="font-bold">{customerName}</span></div>
-              {customerPhone && <div className="flex justify-between"><span className={theme.subtext}>Teléfono</span><span className="font-bold">{customerPhone}</span></div>}
-              <div className="flex justify-between"><span className={theme.subtext}>Entrega</span><span className="font-bold">{deliveryMethod === 'delivery' ? 'Delivery' : 'Recojo'}</span></div>
-              {deliveryMethod === 'delivery' && address && <div className="flex justify-between gap-2"><span className={theme.subtext}>Dirección</span><span className="font-bold text-right">{address}</span></div>}
-              <div className="flex justify-between"><span className={theme.subtext}>Pago</span><span className="font-bold">{payLabel}</span></div>
-              {paymentProof && <div className="flex justify-between"><span className={theme.subtext}>Comprobante</span><span className="font-bold flex items-center gap-1"><Check size={12} className={theme.accent} /> Adjunto</span></div>}
-            </div>
-            <div className={`border-t ${theme.borderSubtle} pt-3 space-y-1`}>
-              {cart.map(item => {
-                const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
-                return <div key={item.id} className="flex justify-between text-[11px]"><span className={theme.subtext}>{item.quantity}x {item.name}</span><span className="font-bold">{store.currency_symbol}{(price * item.quantity).toFixed(2)}</span></div>;
-              })}
-            </div>
-            <div className={`flex justify-between items-center border-t ${theme.borderSubtle} pt-3`}>
-              <span className="text-sm font-bold">Total</span>
-              <span className={`text-xl font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</span>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => setStep(2)} className={`flex-1 ${theme.badge} py-3.5 ${theme.cardRadius} text-xs font-bold`}>Atrás</button>
+            <button onClick={() => setStep(2)} className={`flex-1 ${theme.badge} py-3 ${theme.cardRadius} text-xs font-bold`}>Atrás</button>
             <button onClick={handleSend} disabled={sending} className={`flex-[2] ${theme.primary} py-3.5 ${theme.cardRadius} text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50`}>
-              {sending ? <Loader2 size={18} className="animate-spin" /> : <><MessageCircle size={18} /> ENVIAR PEDIDO</>}
+              {sending ? <Loader2 size={18} className="animate-spin" /> : <><MessageCircle size={18} /> ENVIAR A WHATSAPP</>}
             </button>
           </div>
           <p className={`text-center text-[10px] ${theme.subtext} flex items-center justify-center gap-1`}><ShieldCheck size={11} /> Tu pedido se envía seguro por WhatsApp</p>
@@ -1315,7 +1495,11 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
       {/* Floating total bar on mobile */}
       <div className={`fixed bottom-0 left-0 right-0 ${theme.card} border-t ${theme.borderSubtle} p-3 flex items-center justify-between shadow-2xl z-30 sm:hidden`}>
         <div><span className={`text-[10px] ${theme.subtext}`}>Total</span><p className={`text-lg font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</p></div>
-        <button onClick={() => step === 3 ? handleSend() : setStep(step + 1 as 1 | 2 | 3)} disabled={step === 1 && !canProceedStep1} className={`${theme.primary} px-5 py-2.5 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 disabled:opacity-50`}>{step === 3 ? <><MessageCircle size={15} /> Enviar</> : <>Continuar <ChevronRight size={15} /></>}</button>
+        <button onClick={() => {
+          if (step === 1 && canProceedStep1) setStep(2);
+          else if (step === 2) setStep(3);
+          else if (step === 3) handleSend();
+        }} disabled={(step === 1 && !canProceedStep1) || sending} className={`${theme.primary} px-5 py-2.5 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 disabled:opacity-50`}>{step === 3 ? <><MessageCircle size={15} /> Enviar</> : <>Continuar <ChevronRight size={15} /></>}</button>
       </div>
     </div>
   );
@@ -1331,6 +1515,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
   const [onlyOffers, setOnlyOffers] = useState(false);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'default' | 'low' | 'high'>('default');
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
 
   const catNames = ['Todos', ...new Set(products.map(p => p.category))];
   const activeCatProducts = products.filter(p => p.category === selectedCat);
@@ -1349,24 +1534,62 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
   const layout = store.catalog_layout || 'grid2';
   const accentColor = store.custom_accent_color || undefined;
 
+  // Shared "Add" button — consistent across all layouts
+  const AddButton = ({ product, size = 'md' }: { product: Product; size?: 'sm' | 'md' | 'lg' }) => {
+    const sizes = {
+      sm: 'text-[9px] px-2 py-1 gap-0.5',
+      md: 'text-[10px] px-3 py-1.5 gap-1',
+      lg: 'text-xs px-4 py-2.5 gap-1.5',
+    };
+    const iconSize = size === 'sm' ? 10 : size === 'lg' ? 16 : 13;
+    return (
+      <button
+        onClick={() => addToCart(product)}
+        className={`${theme.primary} ${sizes[size]} font-bold ${theme.cardRadius} flex items-center justify-center active:scale-95 transition-transform shadow-sm whitespace-nowrap shrink-0`}
+      >
+        <Plus size={iconSize} /> Agregar
+      </button>
+    );
+  };
+
+  // Shared price display
+  const PriceTag = ({ p, size = 'md' }: { p: Product; size?: 'sm' | 'md' | 'lg' }) => {
+    const cls = size === 'sm' ? 'text-[11px]' : size === 'lg' ? 'text-lg' : 'text-sm';
+    if (p.is_offer && p.offer_price) {
+      return (
+        <div>
+          <span className={`text-red-400 font-black ${cls} block leading-none`}>{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span>
+          <span className={`text-[10px] opacity-40 line-through`}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>
+        </div>
+      );
+    }
+    return <span className={`font-black ${cls} ${theme.accent}`} style={accentColor ? { color: accentColor } : undefined}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>;
+  };
+
   const renderProductCard = (p: Product, layoutType: string) => {
-    const price = (p.is_offer && p.offer_price) ? p.offer_price : p.price;
+    // Image with zoom-on-click
+    const ProductImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
+      <div className="relative cursor-zoom-in" onClick={() => setLightbox({ src, alt })}>
+        <img src={src} alt={alt} className={className} />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <ZoomIn size={20} className="text-white drop-shadow-lg" />
+        </div>
+      </div>
+    );
 
     if (layoutType === 'lista') {
       return (
         <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-md flex items-center gap-3 p-2.5 ${theme.cardHover} transition-all group`}>
           <div className="relative shrink-0">
-            <img src={p.image} alt={p.name} className={`w-20 h-20 object-cover ${theme.cardRadius} group-hover:scale-105 transition-transform`} />
+            <ProductImage src={p.image} alt={p.name} className={`w-20 h-20 object-cover ${theme.cardRadius} group-hover:scale-105 transition-transform`} />
             {p.is_offer && <span className="absolute top-1 left-1 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">OFERTA</span>}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-xs line-clamp-1">{p.name}</h3>
             <p className={`text-[10px] ${theme.subtext} line-clamp-1`}>{p.description}</p>
             <div className="flex items-center justify-between mt-1.5">
-              <div>
-                {p.is_offer && p.offer_price ? (<div><span className="text-red-400 font-black text-xs">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[10px] opacity-40 line-through ml-1">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></div>) : (<span className={`font-black text-xs ${theme.accent}`} style={accentColor ? { color: accentColor } : undefined}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
-              </div>
-              <button onClick={() => addToCart(p)} className={`${theme.primary} text-[10px] font-bold px-3 py-1.5 ${theme.cardRadius} flex items-center gap-1 active:scale-95`}><Plus size={13} /> Agregar</button>
+              <PriceTag p={p} size="sm" />
+              <AddButton product={p} size="sm" />
             </div>
           </div>
         </div>
@@ -1377,18 +1600,16 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
       return (
         <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-lg flex flex-col ${theme.cardHover} transition-all group`}>
           <div className="relative">
-            <img src={p.image} alt={p.name} className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300" />
+            <ProductImage src={p.image} alt={p.name} className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300" />
             {p.is_offer && <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg"><Tag size={11} /> OFERTA</span>}
-            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-3 pt-8`}>
+            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-3 pt-8 pointer-events-none`}>
               <h3 className="font-black text-sm text-white line-clamp-1">{p.name}</h3>
               <p className="text-[10px] text-white/80 line-clamp-1">{p.description}</p>
             </div>
           </div>
           <div className="p-3 flex items-center justify-between">
-            <div>
-              {p.is_offer && p.offer_price ? (<div><span className="text-red-400 font-black text-base">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[10px] opacity-40 line-through ml-1">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></div>) : (<span className={`font-black text-base ${theme.accent}`} style={accentColor ? { color: accentColor } : undefined}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
-            </div>
-            <button onClick={() => addToCart(p)} className={`${theme.primary} text-xs font-bold px-4 py-2 ${theme.cardRadius} flex items-center gap-1.5 active:scale-95 shadow-md`}><Plus size={15} /> Agregar</button>
+            <PriceTag p={p} size="lg" />
+            <AddButton product={p} size="lg" />
           </div>
         </div>
       );
@@ -1398,13 +1619,13 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
       return (
         <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-sm flex flex-col ${theme.cardHover} transition-all group`}>
           <div className="relative">
-            <img src={p.image} alt={p.name} className="w-full h-24 object-cover group-hover:scale-105 transition-transform" />
+            <ProductImage src={p.image} alt={p.name} className="w-full h-24 object-cover group-hover:scale-105 transition-transform" />
             {p.is_offer && <span className="absolute top-1 left-1 bg-red-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full">OFERTA</span>}
           </div>
           <div className="p-2 flex-1 flex flex-col justify-between gap-1">
             <h3 className="font-bold text-[10px] line-clamp-1">{p.name}</h3>
-            {p.is_offer && p.offer_price ? (<div><span className="text-red-400 font-black text-[11px]">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[8px] opacity-40 line-through ml-0.5">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></div>) : (<span className={`font-black text-[11px] ${theme.accent}`} style={accentColor ? { color: accentColor } : undefined}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
-            <button onClick={() => addToCart(p)} className={`${theme.primary} text-[9px] font-bold py-1.5 ${theme.cardRadius} flex items-center justify-center gap-1 active:scale-95`}><Plus size={11} /> Agregar</button>
+            <PriceTag p={p} size="sm" />
+            <AddButton product={p} size="sm" />
           </div>
         </div>
       );
@@ -1414,18 +1635,16 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
       return (
         <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-lg flex flex-col ${theme.cardHover} transition-all group`}>
           <div className="relative">
-            <img src={p.image} alt={p.name} className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" />
+            <ProductImage src={p.image} alt={p.name} className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" />
             {p.is_offer && <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg"><Tag size={11} /> OFERTA</span>}
-            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-4 pt-12`}>
+            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-4 pt-12 pointer-events-none`}>
               <h3 className="font-black text-base text-white line-clamp-1">{p.name}</h3>
               <p className="text-[11px] text-white/80 line-clamp-2">{p.description}</p>
             </div>
           </div>
           <div className="p-3 flex items-center justify-between">
-            <div>
-              {p.is_offer && p.offer_price ? (<div><span className="text-red-400 font-black text-lg">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[10px] opacity-40 line-through ml-1">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></div>) : (<span className={`font-black text-lg ${theme.accent}`} style={accentColor ? { color: accentColor } : undefined}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
-            </div>
-            <button onClick={() => addToCart(p)} className={`${theme.primary} text-xs font-bold px-4 py-2.5 ${theme.cardRadius} flex items-center gap-1.5 active:scale-95 shadow-md`}><Plus size={16} /> Agregar</button>
+            <PriceTag p={p} size="lg" />
+            <AddButton product={p} size="lg" />
           </div>
         </div>
       );
@@ -1435,17 +1654,15 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
     return (
       <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-md flex flex-col justify-between ${theme.cardHover} transition-all group`}>
         <div className="relative">
-          <img src={p.image} alt={p.name} className={`w-full ${layoutType === 'grid3' ? 'h-28' : 'h-36'} sm:h-40 object-cover group-hover:scale-105 transition-transform duration-300`} />
+          <ProductImage src={p.image} alt={p.name} className={`w-full ${layoutType === 'grid3' ? 'h-28' : 'h-36'} sm:h-40 object-cover group-hover:scale-105 transition-transform duration-300`} />
           {p.is_offer && <span className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-md"><Tag size={10} /> OFERTA</span>}
           <span className={`absolute top-2 right-2 ${theme.sectionBg} text-[9px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md border ${theme.borderSubtle}`}>{p.category}</span>
         </div>
         <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
           <div><h3 className="font-bold text-xs line-clamp-1">{p.name}</h3><p className={`text-[10px] ${theme.subtext} line-clamp-2 mt-0.5`}>{p.description}</p></div>
           <div className="flex items-center justify-between pt-1">
-            <div>
-              {p.is_offer && p.offer_price ? (<div><span className="text-red-400 font-black text-sm block leading-none">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[10px] opacity-40 line-through">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></div>) : (<span className={`font-black text-sm ${theme.accent}`} style={accentColor ? { color: accentColor } : undefined}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
-            </div>
-            <button onClick={() => addToCart(p)} className={`${theme.primary} text-[10px] font-bold px-3 py-1.5 ${theme.cardRadius} flex items-center gap-1 active:scale-95 transition-transform shadow-md`}><Plus size={13} /> Agregar</button>
+            <PriceTag p={p} size="md" />
+            <AddButton product={p} size="md" />
           </div>
         </div>
       </div>
@@ -1489,6 +1706,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
           {filtered.map(p => renderProductCard(p, layout))}
         </div>
       )}
+      {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     </div>
   );
 };
@@ -1514,11 +1732,12 @@ interface StoreContainerProps {
   onOpenStoreSwitcher?: () => void;
   storeCount?: number;
   isAdmin: boolean;
+  onBackToAdmin?: () => void;
 }
 
 const StoreContainer: React.FC<StoreContainerProps> = ({
   store, products, categories, banners, orders, cart, setCart, activeTab, setActiveTab,
-  onRefresh, onOrder, onUpdateStore, onUpgrade, onSignOut, onOpenQR, onOpenStoreSwitcher, storeCount, isAdmin
+  onRefresh, onOrder, onUpdateStore, onUpgrade, onSignOut, onOpenQR, onOpenStoreSwitcher, storeCount, isAdmin, onBackToAdmin
 }) => {
   const theme = THEMES[store.theme] || THEMES.proDark;
   const fontObj = AVAILABLE_FONTS.find(f => f.id === store.font) || AVAILABLE_FONTS[0];
@@ -1559,6 +1778,7 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            {onBackToAdmin && <button onClick={onBackToAdmin} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`} title="Volver al panel"><ArrowLeft size={16} /></button>}
             {isAdmin && onOpenStoreSwitcher && (
               <button onClick={onOpenStoreSwitcher} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors flex items-center gap-1`} title="Mis catálogos">
                 <Layers size={16} />
@@ -1578,6 +1798,7 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
           {activeTab === 'cart' && <CartView cart={cart} store={store} theme={theme} onUpdateQty={(id, delta) => setCart(prev => prev.map(i => i.id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i))} onRemove={id => setCart(prev => prev.filter(c => c.id !== id))} onClear={() => setCart([])} onBack={() => setActiveTab('catalog')} onOrder={onOrder} />}
           {isAdmin && activeTab === 'products' && <AdminProducts products={products} store={store} theme={theme} categories={categories} onRefresh={onRefresh} onUpgrade={onUpgrade || (() => {})} customTextColor={customTextColor} />}
           {isAdmin && activeTab === 'orders' && <OrdersView orders={orders} store={store} theme={theme} onRefresh={onRefresh} customTextColor={customTextColor} />}
+          {isAdmin && activeTab === 'reports' && <ReportsView orders={orders} store={store} theme={theme} />}
           {isAdmin && activeTab === 'plans' && <PlansView currentPlan={store.plan} productCount={products.length} bannerCount={banners.length} theme={theme} onSelectPlan={async (plan) => { if (onUpdateStore) { try { await api.updatePlan(store.id, plan); await onUpdateStore({}); } catch { alert('Error al cambiar de plan'); } } }} />}
           {isAdmin && activeTab === 'settings' && onUpdateStore && <AdminSettings store={store} theme={theme} categories={categories} onUpdate={onUpdateStore} onUpgrade={onUpgrade || (() => {})} onOpenQR={onOpenQR || (() => {})} onRefresh={onRefresh} customTextColor={customTextColor} />}
         </main>
@@ -1587,10 +1808,147 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
             <button onClick={() => setActiveTab('cart')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all relative ${activeTab === 'cart' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'cart')}><ShoppingBag size={18} /><span className="text-[9px]">Carrito</span>{cart.length > 0 && <span className="absolute top-1 right-3 bg-red-500 text-white text-[8px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}</button>
             {isAdmin && <button onClick={() => setActiveTab('products')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'products' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'products')}><Package size={18} /><span className="text-[9px]">Productos</span></button>}
             {isAdmin && <button onClick={() => setActiveTab('orders')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all relative ${activeTab === 'orders' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'orders')}><Clock size={18} /><span className="text-[9px]">Pedidos</span>{orders.filter(o => o.status === 'pending').length > 0 && <span className={`absolute top-1 right-3 ${theme.primary} text-slate-950 text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center`}>{orders.filter(o => o.status === 'pending').length}</span>}</button>}
+            {isAdmin && <button onClick={() => setActiveTab('reports')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'reports' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'reports')}><TrendingUp size={18} /><span className="text-[9px]">Reportes</span></button>}
             {isAdmin && <button onClick={() => setActiveTab('settings')} className={`py-2 ${theme.cardRadius} flex flex-col items-center gap-1 transition-all ${activeTab === 'settings' ? `${theme.activeText} font-bold scale-105` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'settings')}><Settings size={18} /><span className="text-[9px]">Ajustes</span></button>}
           </div>
         </nav>
       </div>
+    </div>
+  );
+};
+
+// ============ VISTA REPORTES ============
+
+interface ReportsViewProps { orders: Order[]; store: Store; theme: ThemeDef; }
+
+const ReportsView: React.FC<ReportsViewProps> = ({ orders, store, theme }) => {
+  const [period, setPeriod] = useState<'today' | 'week' | 'month' | 'all'>('all');
+
+  const now = new Date();
+  const filterByPeriod = (o: Order) => {
+    const d = new Date(o.created_at);
+    if (period === 'today') return d.toDateString() === now.toDateString();
+    if (period === 'week') { const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7); return d >= weekAgo; }
+    if (period === 'month') { const monthAgo = new Date(now); monthAgo.setMonth(monthAgo.getMonth() - 1); return d >= monthAgo; }
+    return true;
+  };
+
+  const filtered = orders.filter(filterByPeriod);
+  const totalRevenue = filtered.filter(o => o.status === 'delivered').reduce((s, o) => s + Number(o.total), 0);
+  const pendingRevenue = filtered.filter(o => o.status === 'pending').reduce((s, o) => s + Number(o.total), 0);
+  const deliveredCount = filtered.filter(o => o.status === 'delivered').length;
+  const pendingCount = filtered.filter(o => o.status === 'pending').length;
+  const avgTicket = deliveredCount > 0 ? totalRevenue / deliveredCount : 0;
+
+  // Payment method breakdown
+  const paymentBreakdown: Record<string, { count: number; total: number }> = {};
+  filtered.forEach(o => {
+    const m = o.payment_method;
+    if (!paymentBreakdown[m]) paymentBreakdown[m] = { count: 0, total: 0 };
+    paymentBreakdown[m].count++;
+    paymentBreakdown[m].total += Number(o.total);
+  });
+
+  // Top products
+  const productSales: Record<string, { name: string; qty: number; revenue: number }> = {};
+  filtered.forEach(o => {
+    o.items.forEach(item => {
+      if (!productSales[item.id]) productSales[item.id] = { name: item.name, qty: 0, revenue: 0 };
+      productSales[item.id].qty += item.quantity;
+      productSales[item.id].revenue += item.price * item.quantity;
+    });
+  });
+  const topProducts = Object.values(productSales).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+  const exportReportPDF = () => {
+    const win = window.open('', '_blank');
+    if (!win) return;
+    const periodLabel = period === 'today' ? 'Hoy' : period === 'week' ? 'Última semana' : period === 'month' ? 'Último mes' : 'Todos';
+    win.document.write(`<!DOCTYPE html><html><head><title>Reporte - ${store.name}</title>
+      <style>body{font-family:Inter,sans-serif;max-width:600px;margin:40px auto;padding:20px;color:#1a1a1a}
+      h1{font-size:22px;margin:0}.sub{color:#666;font-size:12px;margin:4px 0 24px}
+      .cards{display:flex;gap:12px;margin:16px 0}.card{flex:1;background:#f8f9fa;border-radius:12px;padding:16px;text-align:center}
+      .card .v{font-size:22px;font-weight:900;color:#10B981}.card .l{font-size:10px;color:#666;text-transform:uppercase}
+      table{width:100%;border-collapse:collapse;font-size:12px;margin-top:16px}
+      th{text-align:left;padding:8px;border-bottom:2px solid #10B981}td{padding:8px;border-bottom:1px solid #eee}
+      .logo{font-size:24px;font-weight:900;color:#10B981}</style></head>
+      <body><div class="logo">${store.name}</div><h1>Reporte de ventas</h1>
+      <div class="sub">Periodo: ${periodLabel} &bull; Generado: ${now.toLocaleString('es-ES')}</div>
+      <div class="cards">
+        <div class="card"><div class="v">${store.currency_symbol}${totalRevenue.toFixed(2)}</div><div class="l">Ingresos</div></div>
+        <div class="card"><div class="v">${deliveredCount}</div><div class="l">Entregados</div></div>
+        <div class="card"><div class="v">${pendingCount}</div><div class="l">Pendientes</div></div>
+        <div class="card"><div class="v">${store.currency_symbol}${avgTicket.toFixed(2)}</div><div class="l">Ticket prom.</div></div>
+      </div>
+      <h3>Productos más vendidos</h3><table><thead><tr><th>Producto</th><th>Cant.</th><th style="text-align:right">Ingresos</th></tr></thead>
+      <tbody>${topProducts.map(p => `<tr><td>${p.name}</td><td>${p.qty}</td><td style="text-align:right">${store.currency_symbol}${p.revenue.toFixed(2)}</td></tr>`).join('')}</tbody></table>
+      <h3>Por método de pago</h3><table><thead><tr><th>Método</th><th>Pedidos</th><th style="text-align:right">Total</th></tr></thead>
+      <tbody>${Object.entries(paymentBreakdown).map(([m, v]) => `<tr><td>${m.toUpperCase()}</td><td>${v.count}</td><td style="text-align:right">${store.currency_symbol}${v.total.toFixed(2)}</td></tr>`).join('')}</tbody></table>
+      <script>window.onload=function(){window.print()}</script></body></html>`);
+    win.document.close();
+  };
+
+  return (
+    <div className="space-y-4 animate-in fade-in duration-200">
+      <div className={`flex items-center justify-between border-b ${theme.borderSubtle} pb-3`}>
+        <div><h2 className="text-lg font-bold">Reportes</h2><p className={`text-xs ${theme.subtext}`}>Análisis de tus ventas</p></div>
+        <button onClick={exportReportPDF} className={`${theme.accentBg} px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5`}><FileText size={14} /> PDF</button>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {(['today', 'week', 'month', 'all'] as const).map(p => (
+          <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap border transition-all ${period === p ? theme.primary : `${theme.card} ${theme.borderSubtle} opacity-60`}`}>
+            {p === 'today' ? 'Hoy' : p === 'week' ? 'Semana' : p === 'month' ? 'Mes' : 'Todo'}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
+          <div className="flex items-center gap-2 mb-1"><DollarSign size={14} className={theme.accent} /><span className={`text-[10px] font-bold ${theme.subtext} uppercase`}>Ingresos</span></div>
+          <p className={`text-2xl font-black ${theme.accent}`}>{store.currency_symbol}{totalRevenue.toFixed(2)}</p>
+          <p className="text-[10px] opacity-50">Solo pedidos entregados</p>
+        </div>
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
+          <div className="flex items-center gap-2 mb-1"><TrendingUp size={14} className={theme.accent} /><span className={`text-[10px] font-bold ${theme.subtext} uppercase`}>Ticket prom.</span></div>
+          <p className="text-2xl font-black">{store.currency_symbol}{avgTicket.toFixed(2)}</p>
+          <p className="text-[10px] opacity-50">Por pedido entregado</p>
+        </div>
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
+          <div className="flex items-center gap-2 mb-1"><ShoppingCart size={14} className={theme.accent} /><span className={`text-[10px] font-bold ${theme.subtext} uppercase`}>Entregados</span></div>
+          <p className="text-2xl font-black">{deliveredCount}</p>
+          <p className="text-[10px] opacity-50">{filtered.length} pedidos total</p>
+        </div>
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
+          <div className="flex items-center gap-2 mb-1"><Clock size={14} className={theme.accent} /><span className={`text-[10px] font-bold ${theme.subtext} uppercase`}>Pendientes</span></div>
+          <p className="text-2xl font-black">{pendingCount}</p>
+          <p className="text-[10px] opacity-50">{store.currency_symbol}{pendingRevenue.toFixed(2)} en espera</p>
+        </div>
+      </div>
+
+      {topProducts.length > 0 && (
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md space-y-3`}>
+          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Top productos</p>
+          {topProducts.map((p, i) => (
+            <div key={i} className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2"><span className={`w-5 h-5 rounded-full ${theme.accentBg} flex items-center justify-center text-[9px] font-black`}>{i + 1}</span><span className="font-bold line-clamp-1">{p.name}</span></div>
+              <div className="text-right shrink-0 ml-2"><span className="font-bold">{p.qty} vend.</span><span className={`text-[10px] ${theme.subtext} block`}>{store.currency_symbol}{p.revenue.toFixed(2)}</span></div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {Object.keys(paymentBreakdown).length > 0 && (
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md space-y-3`}>
+          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Por método de pago</p>
+          {Object.entries(paymentBreakdown).map(([m, v]) => (
+            <div key={m} className="flex items-center justify-between text-xs">
+              <span className="font-bold uppercase">{m}</span>
+              <span>{v.count} pedidos &bull; <strong>{store.currency_symbol}{v.total.toFixed(2)}</strong></span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -1600,6 +1958,7 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
 interface ClientStoreViewProps { storeId: string; }
 
 const ClientStoreView: React.FC<ClientStoreViewProps> = ({ storeId }) => {
+  const { user } = useAuth();
   const [store, setStore] = useState<Store | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -1626,17 +1985,23 @@ const ClientStoreView: React.FC<ClientStoreViewProps> = ({ storeId }) => {
     try { await api.createOrder(storeId, order); setCart([]); setActiveTab('catalog'); } catch { alert('Error al realizar el pedido'); }
   };
 
-  if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
-  if (error || !store) return <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-3 text-slate-400"><AlertCircle size={40} /><p className="text-sm">{error || 'Tienda no disponible'}</p></div>;
+  const backToAdmin = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('store');
+    window.location.href = url.toString();
+  };
 
-  return <StoreContainer store={store} products={products} categories={categories} banners={banners} orders={[]} cart={cart} setCart={setCart} activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={loadData} onOrder={handleOrder} isAdmin={false} />;
+  if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
+  if (error || !store) return <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-3 text-slate-400"><AlertCircle size={40} /><p className="text-sm">{error || 'Tienda no disponible'}</p>{user && <button onClick={backToAdmin} className="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Volver al panel</button>}</div>;
+
+  return <StoreContainer store={store} products={products} categories={categories} banners={banners} orders={[]} cart={cart} setCart={setCart} activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={loadData} onOrder={handleOrder} isAdmin={false} onBackToAdmin={user ? backToAdmin : undefined} />;
 };
 
 // ============ APP ADMIN (comerciante autenticado) ============
 
 const AdminApp: React.FC = () => {
   const { store, stores, signOut, refreshStore, setStoreLocal, switchStore, createStore, deleteStore } = useAuth();
-  const [activeTab, setActiveTab] = useState<'catalog' | 'cart' | 'products' | 'orders' | 'plans' | 'settings'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'cart' | 'products' | 'orders' | 'reports' | 'plans' | 'settings'>('catalog');
   const [showQR, setShowQR] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);

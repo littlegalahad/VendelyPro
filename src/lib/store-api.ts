@@ -140,6 +140,11 @@ export async function updateOrderStatus(orderId: string, status: Order['status']
   if (error) throw error;
 }
 
+export async function updateOrderPayment(orderId: string, paymentMethod: Order['payment_method']): Promise<void> {
+  const { error } = await supabase.from('orders').update({ payment_method: paymentMethod }).eq('id', orderId);
+  if (error) throw error;
+}
+
 // ============ PLAN ============
 export async function updatePlan(storeId: string, plan: PlanType): Promise<void> {
   const { error } = await supabase.from('stores').update({ plan }).eq('id', storeId);

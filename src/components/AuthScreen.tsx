@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Store as StoreIcon, Mail, Lock, ArrowRight, Sparkles, CheckCircle2, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Store as StoreIcon, Mail, Lock, ArrowRight, Sparkles, CheckCircle2, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft, ShoppingBag, MessageCircle, QrCode, Palette } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 export default function AuthScreen() {
   const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
-  const [email, setEmail] = useState('demo@vendely.com');
-  const [password, setPassword] = useState('Vendely2025!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [storeName, setStoreName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,9 +34,14 @@ export default function AuthScreen() {
         if (msg.includes('User already registered')) msg = 'Ya existe una cuenta con este correo.';
         else if (msg.includes('Password should be at least')) msg = 'La contraseña debe tener al menos 6 caracteres.';
         else if (msg.includes('Invalid email')) msg = 'El correo no es válido.';
+        else if (msg.includes('Failed to fetch') || msg.includes('fetch')) msg = 'Error de conexión. Verifica tu internet e intenta de nuevo.';
         setError(msg);
       } else {
-        setInfo('¡Cuenta creada! Te enviamos un correo de confirmación. Revisa tu bandeja de entrada (y spam) para activar tu cuenta.');
+        setInfo('¡Cuenta creada! Ya puedes iniciar sesión.');
+        setMode('login');
+        setPassword('');
+        setConfirmPassword('');
+        setStoreName('');
       }
     } else if (mode === 'login') {
       const { error } = await signIn(email, password);
@@ -44,6 +49,7 @@ export default function AuthScreen() {
         let msg = error;
         if (msg.includes('Invalid login credentials')) msg = 'Correo o contraseña incorrectos.';
         else if (msg.includes('Email not confirmed')) msg = 'Tu correo aún no ha sido confirmado. Revisa tu bandeja de entrada.';
+        else if (msg.includes('Failed to fetch') || msg.includes('fetch')) msg = 'Error de conexión. Verifica tu internet e intenta de nuevo.';
         setError(msg);
       }
     } else if (mode === 'forgot') {
@@ -64,15 +70,27 @@ export default function AuthScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/40 flex items-center justify-center p-4 font-sans">
-      <div className="w-full max-w-sm space-y-5">
-        <div className="text-center space-y-3">
-          <div className="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-xl shadow-emerald-950/50">
-            <StoreIcon size={32} className="text-slate-950" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/40 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+      {/* Decorative background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-sm space-y-5 relative z-10">
+        {/* Hero / Portada */}
+        <div className="text-center space-y-4 pt-4">
+          <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-2xl shadow-emerald-950/50 ring-4 ring-emerald-500/20">
+            <ShoppingBag size={38} className="text-slate-950" strokeWidth={2.5} />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">Vendely Pro</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Tu tienda, directa por WhatsApp</p>
+            <h1 className="text-3xl font-black text-white tracking-tight">Vendely Pro</h1>
+            <p className="text-sm text-slate-400 mt-1">Tu tienda, directa por WhatsApp</p>
+          </div>
+          <div className="flex items-center justify-center gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+            <span className="flex items-center gap-1"><MessageCircle size={11} className="text-emerald-400" /> Pedidos</span>
+            <span className="flex items-center gap-1"><QrCode size={11} className="text-emerald-400" /> QR</span>
+            <span className="flex items-center gap-1"><Palette size={11} className="text-emerald-400" /> Diseño</span>
           </div>
         </div>
 
@@ -181,13 +199,6 @@ export default function AuthScreen() {
             </button>
           </form>
 
-          {mode === 'login' && (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3 text-[11px] text-emerald-300 space-y-1">
-              <p className="font-bold flex items-center gap-1.5"><CheckCircle2 size={13} /> Cuenta de prueba:</p>
-              <p>Correo: <strong>demo@vendely.com</strong></p>
-              <p>Contraseña: <strong>Vendely2025!</strong></p>
-            </div>
-          )}
           {mode === 'signup' && (
             <div className="space-y-2 pt-2 border-t border-slate-800">
               <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><Sparkles size={12} className="text-emerald-400" /> Todo incluido:</p>
