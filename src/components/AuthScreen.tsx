@@ -81,7 +81,7 @@ export default function AuthScreen() {
         {/* Hero / Portada */}
         <div className="text-center space-y-4 pt-4">
           <div className="w-20 h-20 mx-auto rounded-3xl overflow-hidden flex items-center justify-center shadow-2xl ring-4 ring-[#1E6FFF]/20 bg-white/5">
-            <img src="/image copy.png" alt="Vendely Pro" className="w-full h-full object-contain p-1" />
+            <img src="/ChatGPT_Image_30_jul_2026,_12_24_41_p.m. copy copy.png" alt="Vendely Pro" className="w-full h-full object-contain p-1" />
           </div>
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight">Vendely Pro</h1>
