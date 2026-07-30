@@ -145,7 +145,7 @@ export default function AuthScreen() {
                 <div className="relative">
                   <StoreIcon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input type="text" required value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Mi tienda"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-3 py-3 text-xs text-white outline-none focus:border-emerald-500 transition-colors" />
+                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-3 py-3 text-xs text-white outline-none focus:border-[#1E6FFF] transition-colors" />
                 </div>
               </div>
             )}
@@ -154,7 +154,7 @@ export default function AuthScreen() {
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="tucorreo@email.com"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-3 py-3 text-xs text-white outline-none focus:border-emerald-500 transition-colors" />
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-3 py-3 text-xs text-white outline-none focus:border-[#1E6FFF] transition-colors" />
               </div>
             </div>
             {mode !== 'forgot' && (
@@ -163,7 +163,7 @@ export default function AuthScreen() {
                 <div className="relative">
                   <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input type={showPassword ? 'text' : 'password'} required minLength={6} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-10 py-3 text-xs text-white outline-none focus:border-emerald-500 transition-colors" />
+                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-10 py-3 text-xs text-white outline-none focus:border-[#1E6FFF] transition-colors" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -176,7 +176,7 @@ export default function AuthScreen() {
                 <div className="relative">
                   <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input type={showConfirm ? 'text' : 'password'} required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repite tu contraseña"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-10 py-3 text-xs text-white outline-none focus:border-emerald-500 transition-colors" />
+                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-10 py-3 text-xs text-white outline-none focus:border-[#1E6FFF] transition-colors" />
                   <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
                     {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -186,7 +186,7 @@ export default function AuthScreen() {
             {mode === 'login' && (
               <div className="text-right">
                 <button type="button" onClick={() => { setMode('forgot'); setError(null); setInfo(null); }}
-                  className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
+                  className="text-[10px] text-[#3B82F6] hover:text-[#5B9BFF] font-bold transition-colors">
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>

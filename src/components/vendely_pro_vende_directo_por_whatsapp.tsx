@@ -215,7 +215,7 @@ const THEMES: Record<string, ThemeDef> = {
   },
   cyberNeon: {
     bg: 'bg-[#050B14]', card: 'bg-[#0A1628]/90 border-[#142C4E] text-cyan-50 backdrop-blur-md',
-    primary: 'bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 text-slate-950 font-black shadow-lg shadow-cyan-950/60 hover:opacity-90',
+    primary: 'bg-gradient-to-r from-[#1E6FFF] via-[#0052CC] to-[#1E6FFF] text-white font-black shadow-lg shadow-[#1E6FFF]/40 hover:opacity-90',
     accent: 'text-cyan-400', accentBg: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40',
     accentSolid: 'bg-cyan-400 text-slate-950',
     badge: 'bg-[#0E203A] text-cyan-200 border border-[#183660]', text: 'text-cyan-50',
@@ -228,14 +228,14 @@ const THEMES: Record<string, ThemeDef> = {
   },
   nordicMint: {
     bg: 'bg-[#F2F8F6]', card: 'bg-white/95 border-[#D2E7E2] text-[#1E3832] shadow-sm',
-    primary: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200',
-    accent: 'text-emerald-600', accentBg: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
-    accentSolid: 'bg-emerald-600 text-white',
+    primary: 'bg-[#1E6FFF] hover:bg-[#1060DD] text-white shadow-md shadow-[#1E6FFF]/30',
+    accent: 'text-[#1E6FFF]', accentBg: 'bg-[#1E6FFF]/10 text-[#0052CC] border border-[#1E6FFF]/20',
+    accentSolid: 'bg-[#1E6FFF] text-white',
     badge: 'bg-[#E4F2EE] text-[#345B51] border border-[#D2E7E2]', text: 'text-[#1E3832]', subtext: 'text-[#577A72]',
     nav: 'bg-white/95 border-[#D2E7E2]', selectBg: 'bg-white text-[#1E3832] border-[#D2E7E2]',
     gradientBg: 'from-[#F2F8F6] via-[#E7F3F0] to-[#DCECE7]',
-    cardRadius: 'rounded-3xl', cardHover: 'hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-100',
-    borderSubtle: 'border-[#D2E7E2]', sectionBg: 'bg-[#F2F8F6]/60', activeText: 'text-emerald-600',
+    cardRadius: 'rounded-3xl', cardHover: 'hover:border-[#1E6FFF]/40 hover:shadow-lg hover:shadow-[#1E6FFF]/10',
+    borderSubtle: 'border-[#D2E7E2]', sectionBg: 'bg-[#F2F8F6]/60', activeText: 'text-[#1E6FFF]',
     overlayBg: 'from-[#F2F8F6]/80', modalBg: 'bg-white border-[#D2E7E2] text-[#1E3832]',
     modalInputBg: 'bg-[#F2F8F6] border-[#D2E7E2]', isDark: false
   }
@@ -352,7 +352,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
             <input type="text" placeholder="Nueva categoría..." value={newCatName}
               onChange={e => setNewCatName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddCat())}
-              className={`flex-1 ${theme.modalInputBg} ${theme.cardRadius} px-3.5 py-2.5 text-xs outline-none focus:border-emerald-500`} />
+              className={`flex-1 ${theme.modalInputBg} ${theme.cardRadius} px-3.5 py-2.5 text-xs outline-none focus:border-[#1E6FFF]`} />
             <button onClick={handleAddCat} className={`${theme.primary} px-4 py-2.5 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95`}>
               <Plus size={15} /> Agregar
             </button>
@@ -393,7 +393,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
               <input type="text" placeholder={`Subcategoría para ${activeCat.name}...`} value={newSubName}
                 onChange={e => setNewSubName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddSub())}
-                className={`flex-1 ${theme.modalInputBg} ${theme.cardRadius} px-3 py-2 text-xs outline-none focus:border-emerald-500`} />
+                className={`flex-1 ${theme.modalInputBg} ${theme.cardRadius} px-3 py-2 text-xs outline-none focus:border-[#1E6FFF]`} />
               <button onClick={handleAddSub} className={`${theme.badge} px-3 py-2 ${theme.cardRadius} text-xs font-bold flex items-center gap-1`}>
                 <Plus size={14} /> Agregar
               </button>
@@ -437,15 +437,15 @@ const QRModal: React.FC<QRModalProps> = ({ isOpen, onClose, storeId, storeName, 
           <h3 className="font-bold text-sm flex items-center gap-2"><QrCode size={18} className={theme.accent} /> Código QR para clientes</h3>
           <button onClick={onClose} className={`p-1 ${theme.subtext}`}><X size={18} /></button>
         </div>
-        <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-slate-900 p-6 rounded-3xl text-white space-y-3 shadow-xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#1E6FFF] via-[#0052CC] to-[#0A1628] p-6 rounded-3xl text-white space-y-3 shadow-xl relative overflow-hidden">
           <div className="relative z-10">
-            <span className="bg-white/20 backdrop-blur-md text-emerald-100 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 border border-white/20 mb-2"><ShieldCheck size={12} /> Solo catálogo y carrito</span>
+            <span className="bg-white/20 backdrop-blur-md text-blue-100 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 border border-white/20 mb-2"><ShieldCheck size={12} /> Solo catálogo y carrito</span>
             <p className="font-black text-lg text-white drop-shadow-sm">{storeName}</p>
           </div>
-          <div className="bg-white p-4 rounded-2xl inline-block shadow-2xl relative z-10 border border-emerald-100">
+          <div className="bg-white p-4 rounded-2xl inline-block shadow-2xl relative z-10 border border-[#1E6FFF]/20">
             <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(clientUrl)}`} alt="QR" className="w-44 h-44 mx-auto rounded-lg" />
           </div>
-          <p className="text-[10px] text-emerald-100 font-medium relative z-10">Tus clientes escanean esto para ver tus productos y hacer pedidos.</p>
+          <p className="text-[10px] text-blue-100 font-medium relative z-10">Tus clientes escanean esto para ver tus productos y hacer pedidos.</p>
         </div>
         <div className="space-y-2">
           <button onClick={() => { navigator.clipboard?.writeText(clientUrl); alert('¡Enlace copiado!'); }}
@@ -642,13 +642,13 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
               <div>
                 <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Nombre *</label>
                 <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Nombre del producto"
-                  className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+                  className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Precio *</label>
                   <input type="number" step="0.01" required value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="29.90"
-                    className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+                    className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
                 </div>
                 <div>
                   <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Precio de oferta</label>
@@ -657,14 +657,14 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
                 </div>
               </div>
               <label className="flex items-center gap-2 cursor-pointer pt-1">
-                <input type="checkbox" checked={form.isOffer} onChange={e => setForm({...form, isOffer: e.target.checked})} className="rounded text-emerald-500 focus:ring-0" />
+                <input type="checkbox" checked={form.isOffer} onChange={e => setForm({...form, isOffer: e.target.checked})} className="rounded text-[#1E6FFF] focus:ring-0" />
                 <span className="text-xs font-semibold">Marcar como OFERTA</span>
               </label>
               <div>
                 <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Categoría</label>
                 <select value={form.category} onChange={e => { const nc = e.target.value; const fs = categories.find(c => c.name === nc)?.subcategories[0] || ''; setForm({...form, category: nc, subcategory: fs}); }}
                   style={selectStyle(theme, customTextColor)}
-                  className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500 font-medium`}>
+                  className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF] font-medium`}>
                   {catNames.map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
@@ -672,7 +672,7 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
                 <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Subcategoría</label>
                 <select value={form.subcategory} onChange={e => setForm({...form, subcategory: e.target.value})}
                   style={selectStyle(theme, customTextColor)}
-                  className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`}>
+                  className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`}>
                   <option value="">Sin subcategoría</option>
                   {availableSubs.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -680,7 +680,7 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
               <div>
                 <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Descripción</label>
                 <textarea rows={2} value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Detalles..."
-                  className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs resize-none outline-none focus:border-emerald-500`} />
+                  className={`w-full ${theme.modalInputBg} ${theme.cardRadius} p-3 text-xs resize-none outline-none focus:border-[#1E6FFF]`} />
               </div>
               <div>
                 <label className={`block text-[10px] font-semibold ${theme.subtext} uppercase mb-1`}>Imagen</label>
@@ -721,7 +721,7 @@ const STATUS_COLORS: Record<Order['status'], string> = {
   pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
   preparing: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   shipped: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  delivered: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  delivered: 'bg-[#1E6FFF]/20 text-[#5B9BFF] border-[#1E6FFF]/30',
 };
 
 const generateOrderPDF = (order: Order, store: Store) => {
@@ -737,9 +737,9 @@ const generateOrderPDF = (order: Order, store: Store) => {
     h1{font-size:20px;margin:0}.sub{color:#666;font-size:12px;margin:4px 0 20px}
     .info{background:#f8f9fa;border-radius:12px;padding:16px;margin:16px 0;font-size:13px}
     .info p{margin:4px 0}table{width:100%;border-collapse:collapse;font-size:13px}
-    .total{font-size:18px;font-weight:bold;margin-top:16px;padding-top:12px;border-top:2px solid #10B981;display:flex;justify-content:space-between}
+    .total{font-size:18px;font-weight:bold;margin-top:16px;padding-top:12px;border-top:2px solid #1E6FFF;display:flex;justify-content:space-between}
     .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:bold;text-transform:uppercase}
-    .logo{font-size:24px;font-weight:900;color:#10B981}</style></head>
+    .logo{font-size:24px;font-weight:900;color:#1E6FFF}</style></head>
     <body>
     <div class="logo">${store.name}</div>
     <h1>Pedido #${order.id.slice(-5)}</h1>
@@ -750,9 +750,9 @@ const generateOrderPDF = (order: Order, store: Store) => {
       <p><strong>Entrega:</strong> ${order.delivery_method === 'delivery' ? 'Delivery' : 'Recojo'}</p>
       ${order.address ? `<p><strong>Dirección:</strong> ${order.address}</p>` : ''}
       <p><strong>Pago:</strong> ${order.payment_method.toUpperCase()}</p>
-      <p><strong>Estado:</strong> <span class="badge" style="background:#f0fdf4;color:#10B981">${STATUS_LABELS[order.status]}</span></p>
+      <p><strong>Estado:</strong> <span class="badge" style="background:#f0fdf4;color:#1E6FFF">${STATUS_LABELS[order.status]}</span></p>
     </div>
-    <table><thead><tr><th style="text-align:left;padding:8px 12px;border-bottom:2px solid #10B981">Producto</th><th style="text-align:right;padding:8px 12px;border-bottom:2px solid #10B981">Subtotal</th></tr></thead>
+    <table><thead><tr><th style="text-align:left;padding:8px 12px;border-bottom:2px solid #1E6FFF">Producto</th><th style="text-align:right;padding:8px 12px;border-bottom:2px solid #1E6FFF">Subtotal</th></tr></thead>
     <tbody>${itemsHtml}</tbody></table>
     <div class="total"><span>Total:</span><span>${store.currency_symbol}${Number(order.total).toFixed(2)}</span></div>
     ${order.payment_proof ? `<div style="margin-top:20px"><h3 style="font-size:14px">Comprobante de pago:</h3><img src="${order.payment_proof}" style="max-width:100%;border-radius:12px;margin-top:8px" /></div>` : ''}
@@ -911,7 +911,7 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
         <div className="space-y-3">
           {filteredOrders.map(order => (
             <div key={order.id} onClick={() => setSelectedOrder(order)}
-              className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md cursor-pointer hover:shadow-lg hover:border-emerald-500/30 transition-all`}>
+              className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md cursor-pointer hover:shadow-lg hover:border-[#1E6FFF]/30 transition-all`}>
               <div className={`flex justify-between items-start border-b ${theme.borderSubtle} pb-2.5`}>
                 <div>
                   <span className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Pedido #{order.id.slice(-5)}</span>
@@ -990,7 +990,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
       </div>
 
       {/* Plan */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-slate-900 text-white p-4 rounded-3xl shadow-xl flex items-center justify-between">
+      <div className="bg-gradient-to-r from-[#1E6FFF] via-[#0052CC] to-[#0A1628] text-white p-4 rounded-3xl shadow-xl flex items-center justify-between">
         <div><span className="text-[10px] uppercase font-bold opacity-80 tracking-wider">Plan activo</span><h3 className="text-base font-black flex items-center gap-1.5 mt-0.5"><Crown size={16} className="text-amber-300" /> {PLAN_LIMITS[store.plan].name}</h3></div>
         <button onClick={onUpgrade} className="bg-white text-slate-900 px-3.5 py-2 rounded-2xl text-xs font-bold shadow-lg hover:bg-slate-100 transition-colors">Cambiar plan</button>
       </div>
@@ -1000,15 +1000,15 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
         <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>1. Información de la tienda</p>
         <div>
           <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Nombre de la tienda</label>
-          <input type="text" value={store.name} onChange={e => update({ name: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+          <input type="text" value={store.name} onChange={e => update({ name: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
         </div>
         <div>
           <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Eslogan</label>
-          <input type="text" value={store.slogan} onChange={e => update({ slogan: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+          <input type="text" value={store.slogan} onChange={e => update({ slogan: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
         </div>
         <div>
           <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Rubro / Giro</label>
-          <input type="text" value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })} placeholder="Ej: Ropa, Comida, Tecnología..." className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+          <input type="text" value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })} placeholder="Ej: Ropa, Comida, Tecnología..." className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
         </div>
         <div>
           <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>País</label>
@@ -1017,17 +1017,17 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
             update({ country: e.target.value, currency_symbol: country?.currency || '$' });
           }}
             style={selectStyle(theme, customTextColor)}
-            className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500 font-medium`}>
+            className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF] font-medium`}>
             {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
           </select>
         </div>
         <div>
           <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Número de WhatsApp</label>
-          <input type="tel" inputMode="tel" value={store.whatsapp} onChange={e => update({ whatsapp: e.target.value })} placeholder="+51 999 888 777" className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+          <input type="tel" inputMode="tel" value={store.whatsapp} onChange={e => update({ whatsapp: e.target.value })} placeholder="+51 999 888 777" className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
         </div>
         <div>
           <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Moneda</label>
-          <input type="text" value={store.currency_symbol} onChange={e => update({ currency_symbol: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+          <input type="text" value={store.currency_symbol} onChange={e => update({ currency_symbol: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
         </div>
       </div>
 
@@ -1117,7 +1117,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
         <div className="grid grid-cols-2 gap-2.5">
           {ALL_THEMES.map(t => (
             <button key={t.id} onClick={() => update({ theme: t.id, custom_bg_color: null, custom_text_color: null, custom_accent_color: null })}
-              className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center justify-between transition-all ${store.theme === t.id && !store.custom_bg_color ? `${theme.accentBg} ring-2 ring-emerald-500/30` : `${theme.borderSubtle} hover:opacity-80`}`}>
+              className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center justify-between transition-all ${store.theme === t.id && !store.custom_bg_color ? `${theme.accentBg} ring-2 ring-[#1E6FFF]/30` : `${theme.borderSubtle} hover:opacity-80`}`}>
               <span className="truncate pr-1">{t.name}</span><span className="w-4 h-4 rounded-full border shadow-sm shrink-0" style={{ backgroundColor: t.color }} />
             </button>
           ))}
@@ -1132,7 +1132,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
           <div className="flex items-center justify-between gap-2">
             <label className="text-xs font-bold">Color de fondo</label>
             <div className="flex items-center gap-2">
-              <input type="color" value={store.custom_bg_color || '#090D16'} onChange={e => update({ custom_bg_color: e.target.value })} className="w-9 h-9 rounded-lg border-0 cursor-pointer bg-transparent" />
+              <input type="color" value={store.custom_bg_color || '#0A1628'} onChange={e => update({ custom_bg_color: e.target.value })} className="w-9 h-9 rounded-lg border-0 cursor-pointer bg-transparent" />
               <button onClick={() => update({ custom_bg_color: null })} className={`text-[10px] ${theme.subtext} underline`}>Restablecer</button>
             </div>
           </div>
@@ -1146,7 +1146,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
           <div className="flex items-center justify-between gap-2">
             <label className="text-xs font-bold">Color de acento</label>
             <div className="flex items-center gap-2">
-              <input type="color" value={store.custom_accent_color || '#10B981'} onChange={e => update({ custom_accent_color: e.target.value })} className="w-9 h-9 rounded-lg border-0 cursor-pointer bg-transparent" />
+              <input type="color" value={store.custom_accent_color || '#1E6FFF'} onChange={e => update({ custom_accent_color: e.target.value })} className="w-9 h-9 rounded-lg border-0 cursor-pointer bg-transparent" />
               <button onClick={() => update({ custom_accent_color: null })} className={`text-[10px] ${theme.subtext} underline`}>Restablecer</button>
             </div>
           </div>
@@ -1161,7 +1161,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
             const Icon = layout.icon;
             return (
               <button key={layout.id} onClick={() => update({ catalog_layout: layout.id })}
-                className={`p-3 ${theme.cardRadius} border text-left transition-all ${store.catalog_layout === layout.id ? `${theme.accentBg} ring-2 ring-emerald-500/30` : `${theme.borderSubtle} hover:opacity-80`}`}>
+                className={`p-3 ${theme.cardRadius} border text-left transition-all ${store.catalog_layout === layout.id ? `${theme.accentBg} ring-2 ring-[#1E6FFF]/30` : `${theme.borderSubtle} hover:opacity-80`}`}>
                 <Icon size={18} className={theme.accent} />
                 <p className="font-bold text-xs mt-1.5">{layout.name}</p>
                 <p className={`text-[10px] ${theme.subtext}`}>{layout.desc}</p>
@@ -1366,11 +1366,11 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
           <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><User size={12} /> Datos de entrega</p>
           <div>
             <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Nombre completo *</label>
-            <input type="text" placeholder="Ej: María García" value={customerName} onChange={e => setCustomerName(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+            <input type="text" placeholder="Ej: María García" value={customerName} onChange={e => setCustomerName(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
           </div>
           <div>
             <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Teléfono (opcional)</label>
-            <input type="tel" inputMode="tel" placeholder="Ej: +51 999 888 777" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+            <input type="tel" inputMode="tel" placeholder="Ej: +51 999 888 777" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
           </div>
           <div>
             <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Tipo de entrega</label>
@@ -1382,7 +1382,7 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
           {deliveryMethod === 'delivery' && (
             <div>
               <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Dirección de entrega *</label>
-              <input type="text" placeholder="Ej: Av. Principal 123, Ref. Frente al parque" value={address} onChange={e => setAddress(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-emerald-500`} />
+              <input type="text" placeholder="Ej: Av. Principal 123, Ref. Frente al parque" value={address} onChange={e => setAddress(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
             </div>
           )}
           <button onClick={() => canProceedStep1 && setStep(2)} disabled={!canProceedStep1} className={`w-full ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 transition-all`}>Continuar <ChevronRight size={16} /></button>
@@ -1472,7 +1472,7 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
                   <button onClick={() => { setPaymentProof(null); setProofFile(null); }} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg shadow-lg"><X size={14} /></button>
                 </div>
               ) : (
-                <label className={`flex flex-col items-center justify-center gap-2 p-6 ${theme.sectionBg} ${theme.cardRadius} border-2 border-dashed ${theme.borderSubtle} cursor-pointer hover:border-emerald-500 transition-colors`}>
+                <label className={`flex flex-col items-center justify-center gap-2 p-6 ${theme.sectionBg} ${theme.cardRadius} border-2 border-dashed ${theme.borderSubtle} cursor-pointer hover:border-[#1E6FFF] transition-colors`}>
                   <Upload size={22} className={theme.subtext} />
                   <span className="text-[11px] font-semibold opacity-70">Toca para subir captura del comprobante</span>
                   <span className="text-[9px] opacity-50">JPG, PNG · máx 2MB</span>
@@ -1687,7 +1687,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search size={15} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${theme.subtext}`} />
-          <input type="text" placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className={`w-full pl-10 pr-9 py-2.5 ${theme.selectBg} border ${theme.cardRadius} text-xs outline-none focus:border-emerald-500`} />
+          <input type="text" placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className={`w-full pl-10 pr-9 py-2.5 ${theme.selectBg} border ${theme.cardRadius} text-xs outline-none focus:border-[#1E6FFF]`} />
           {search && <button onClick={() => setSearch('')} className={`absolute right-3.5 top-1/2 -translate-y-1/2 ${theme.subtext}`}><X size={14} /></button>}
         </div>
         <button onClick={() => setOnlyOffers(!onlyOffers)} className={`px-3 py-2.5 ${theme.cardRadius} border text-xs font-bold flex items-center gap-1.5 transition-all ${onlyOffers ? 'bg-red-500 text-white border-red-600 shadow-lg' : `${theme.card} ${theme.borderSubtle}`}`}><Tag size={14} /> Ofertas</button>
@@ -1873,10 +1873,10 @@ const ReportsView: React.FC<ReportsViewProps> = ({ orders, store, theme }) => {
       <style>body{font-family:Inter,sans-serif;max-width:600px;margin:40px auto;padding:20px;color:#1a1a1a}
       h1{font-size:22px;margin:0}.sub{color:#666;font-size:12px;margin:4px 0 24px}
       .cards{display:flex;gap:12px;margin:16px 0}.card{flex:1;background:#f8f9fa;border-radius:12px;padding:16px;text-align:center}
-      .card .v{font-size:22px;font-weight:900;color:#10B981}.card .l{font-size:10px;color:#666;text-transform:uppercase}
+      .card .v{font-size:22px;font-weight:900;color:#1E6FFF}.card .l{font-size:10px;color:#666;text-transform:uppercase}
       table{width:100%;border-collapse:collapse;font-size:12px;margin-top:16px}
-      th{text-align:left;padding:8px;border-bottom:2px solid #10B981}td{padding:8px;border-bottom:1px solid #eee}
-      .logo{font-size:24px;font-weight:900;color:#10B981}</style></head>
+      th{text-align:left;padding:8px;border-bottom:2px solid #1E6FFF}td{padding:8px;border-bottom:1px solid #eee}
+      .logo{font-size:24px;font-weight:900;color:#1E6FFF}</style></head>
       <body><div class="logo">${store.name}</div><h1>Reporte de ventas</h1>
       <div class="sub">Periodo: ${periodLabel} &bull; Generado: ${now.toLocaleString('es-ES')}</div>
       <div class="cards">
@@ -1996,8 +1996,8 @@ const ClientStoreView: React.FC<ClientStoreViewProps> = ({ storeId }) => {
     window.location.href = url.toString();
   };
 
-  if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
-  if (error || !store) return <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-3 text-slate-400"><AlertCircle size={40} /><p className="text-sm">{error || 'Tienda no disponible'}</p>{user && <button onClick={backToAdmin} className="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Volver al panel</button>}</div>;
+  if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-[#1E6FFF]" /></div>;
+  if (error || !store) return <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-3 text-slate-400"><AlertCircle size={40} /><p className="text-sm">{error || 'Tienda no disponible'}</p>{user && <button onClick={backToAdmin} className="mt-2 px-4 py-2 bg-[#1E6FFF] text-white rounded-xl text-xs font-bold">Volver al panel</button>}</div>;
 
   return <StoreContainer store={store} products={products} categories={categories} banners={banners} orders={[]} cart={cart} setCart={setCart} activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={loadData} onOrder={handleOrder} isAdmin={false} onBackToAdmin={user ? backToAdmin : undefined} />;
 };
@@ -2060,7 +2060,7 @@ const AdminApp: React.FC = () => {
     setShowStoreSwitcher(false);
   };
 
-  if (loadingData) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
+  if (loadingData) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-[#1E6FFF]" /></div>;
 
   return (
     <>
@@ -2070,14 +2070,14 @@ const AdminApp: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowStoreSwitcher(false)}>
           <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-[90%] max-w-md space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2"><Layers size={18} className="text-emerald-500" /> Mis catálogos ({stores.length}/{planLimits.maxCatalogs === Infinity ? '∞' : planLimits.maxCatalogs})</h3>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2"><Layers size={18} className="text-[#3B82F6]" /> Mis catálogos ({stores.length}/{planLimits.maxCatalogs === Infinity ? '∞' : planLimits.maxCatalogs})</h3>
               <button onClick={() => setShowStoreSwitcher(false)} className="text-slate-400 hover:text-white"><X size={18} /></button>
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {stores.map(s => (
-                <div key={s.id} className={`flex items-center justify-between p-3 rounded-xl border ${s.id === store.id ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-700 bg-slate-800/50'}`}>
+                <div key={s.id} className={`flex items-center justify-between p-3 rounded-xl border ${s.id === store.id ? 'border-[#1E6FFF] bg-[#1E6FFF]/10' : 'border-slate-700 bg-slate-800/50'}`}>
                   <button onClick={() => { switchStore(s.id); setShowStoreSwitcher(false); setActiveTab('catalog'); }} className="flex items-center gap-2 flex-1 text-left">
-                    <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-emerald-600 shrink-0">
+                    <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-[#1E6FFF] shrink-0">
                       {s.logo ? <img src={s.logo} alt={s.name} className="w-full h-full object-cover" /> : <span className="text-white font-bold text-xs">{s.name.charAt(0)}</span>}
                     </div>
                     <div>
@@ -2085,7 +2085,7 @@ const AdminApp: React.FC = () => {
                       <p className="text-[10px] text-slate-400">{s.rubro || 'Sin rubro'}</p>
                     </div>
                   </button>
-                  {s.id === store.id && <span className="text-[10px] text-emerald-400 font-bold">Activo</span>}
+                  {s.id === store.id && <span className="text-[10px] text-[#5B9BFF] font-bold">Activo</span>}
                   {stores.length > 1 && s.id !== store.id && (
                     <button onClick={() => handleDeleteStore(s.id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg"><Trash2 size={14} /></button>
                   )}
@@ -2095,8 +2095,8 @@ const AdminApp: React.FC = () => {
             {canCreateMore ? (
               <div className="space-y-2 pt-3 border-t border-slate-700">
                 <div className="flex gap-2">
-                  <input type="text" value={newStoreName} onChange={e => setNewStoreName(e.target.value)} placeholder="Nombre del nuevo catálogo..." className="flex-1 bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-xs text-white outline-none focus:border-emerald-500" />
-                  <button onClick={handleCreateStore} disabled={creatingStore || !newStoreName.trim()} className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 rounded-xl text-xs font-bold text-white flex items-center gap-1.5">
+                  <input type="text" value={newStoreName} onChange={e => setNewStoreName(e.target.value)} placeholder="Nombre del nuevo catálogo..." className="flex-1 bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#1E6FFF]" />
+                  <button onClick={handleCreateStore} disabled={creatingStore || !newStoreName.trim()} className="px-4 py-2.5 bg-[#1E6FFF] hover:bg-[#1060DD] disabled:opacity-50 rounded-xl text-xs font-bold text-white flex items-center gap-1.5">
                     {creatingStore ? <Loader2 size={14} className="animate-spin" /> : <Plus size={15} />} Crear
                   </button>
                 </div>
@@ -2128,7 +2128,7 @@ const VendelyProVendeDirectoPorWhatsApp: React.FC = () => {
   }, []);
 
   if (publicStoreId) return <ClientStoreView storeId={publicStoreId} />;
-  if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-emerald-500" /></div>;
+  if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-[#1E6FFF]" /></div>;
   if (!user || !store) return <AuthScreen />;
   return <AdminApp />;
 };
