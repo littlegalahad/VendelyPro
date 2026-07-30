@@ -70,27 +70,27 @@ export default function AuthScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/40 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#0A1628] via-[#0F1D33] to-[#0A1628]/60 flex flex-col items-center justify-center p-4 font-sans relative overflow-hidden">
       {/* Decorative background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#1E6FFF]/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#0052CC]/10 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-sm space-y-5 relative z-10">
         {/* Hero / Portada */}
         <div className="text-center space-y-4 pt-4">
-          <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-2xl shadow-emerald-950/50 ring-4 ring-emerald-500/20">
-            <ShoppingBag size={38} className="text-slate-950" strokeWidth={2.5} />
+          <div className="w-20 h-20 mx-auto rounded-3xl overflow-hidden flex items-center justify-center shadow-2xl ring-4 ring-[#1E6FFF]/20 bg-white/5">
+            <img src="/image copy.png" alt="Vendely Pro" className="w-full h-full object-contain p-1" />
           </div>
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight">Vendely Pro</h1>
             <p className="text-sm text-slate-400 mt-1">Tu tienda, directa por WhatsApp</p>
           </div>
           <div className="flex items-center justify-center gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-            <span className="flex items-center gap-1"><MessageCircle size={11} className="text-emerald-400" /> Pedidos</span>
-            <span className="flex items-center gap-1"><QrCode size={11} className="text-emerald-400" /> QR</span>
-            <span className="flex items-center gap-1"><Palette size={11} className="text-emerald-400" /> Diseño</span>
+            <span className="flex items-center gap-1"><MessageCircle size={11} className="text-[#3B82F6]" /> Pedidos</span>
+            <span className="flex items-center gap-1"><QrCode size={11} className="text-[#3B82F6]" /> QR</span>
+            <span className="flex items-center gap-1"><Palette size={11} className="text-[#3B82F6]" /> Diseño</span>
           </div>
         </div>
 
@@ -98,11 +98,11 @@ export default function AuthScreen() {
           {mode !== 'forgot' && (
             <div className="flex bg-slate-950/60 rounded-2xl p-1 border border-slate-800">
               <button onClick={() => { setMode('signup'); setError(null); setInfo(null); }}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${mode === 'signup' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}>
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${mode === 'signup' ? 'bg-gradient-to-r from-[#1E6FFF] to-[#0052CC] text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}>
                 Crear cuenta
               </button>
               <button onClick={() => { setMode('login'); setError(null); setInfo(null); }}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${mode === 'login' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}>
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${mode === 'login' ? 'bg-gradient-to-r from-[#1E6FFF] to-[#0052CC] text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}>
                 Iniciar sesión
               </button>
             </div>
@@ -192,16 +192,16 @@ export default function AuthScreen() {
               </div>
             )}
             {error && <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-3 text-xs text-red-300 flex items-start gap-2"><AlertCircle size={15} className="shrink-0 mt-0.5" /><span>{error}</span></div>}
-            {info && <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3 text-xs text-emerald-300 flex items-start gap-2"><CheckCircle2 size={15} className="shrink-0 mt-0.5" /><span>{info}</span></div>}
+            {info && <div className="bg-[#1E6FFF]/10 border border-[#1E6FFF]/30 rounded-2xl p-3 text-xs text-[#5B9BFF] flex items-start gap-2"><CheckCircle2 size={15} className="shrink-0 mt-0.5" /><span>{info}</span></div>}
             <button type="submit" disabled={submitting}
-              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white py-3.5 rounded-2xl text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 transition-all active:scale-95 disabled:opacity-50">
+              className="w-full bg-gradient-to-r from-[#1E6FFF] to-[#0052CC] hover:from-[#2E7FFF] hover:to-[#1060DD] text-white py-3.5 rounded-2xl text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-[#1E6FFF]/30 transition-all active:scale-95 disabled:opacity-50">
               {submitting ? <Loader2 size={16} className="animate-spin" /> : (<>{mode === 'signup' ? 'Crear mi tienda' : mode === 'forgot' ? 'Enviar enlace' : 'Iniciar sesión'}<ArrowRight size={16} /></>)}
             </button>
           </form>
 
           {mode === 'signup' && (
             <div className="space-y-2 pt-2 border-t border-slate-800">
-              <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><Sparkles size={12} className="text-emerald-400" /> Todo incluido:</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><Sparkles size={12} className="text-[#3B82F6]" /> Todo incluido:</p>
               {[
                 'Tienda online con catálogo y carrito',
                 'Pedidos directos a tu WhatsApp',
@@ -209,7 +209,7 @@ export default function AuthScreen() {
                 'Múltiples métodos de pago',
               ].map((feat, i) => (
                 <div key={i} className="flex items-center gap-2 text-[11px] text-slate-300">
-                  <CheckCircle2 size={13} className="text-emerald-400 shrink-0" /><span>{feat}</span>
+                  <CheckCircle2 size={13} className="text-[#3B82F6] shrink-0" /><span>{feat}</span>
                 </div>
               ))}
             </div>
