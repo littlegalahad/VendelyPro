@@ -9,7 +9,7 @@ import {
   LayoutGrid, Rows3, Columns3, Image as ImageIconBanner, Droplet, AlignLeft,
   KeyRound, Grid2x2, Grid3x3, List, GalleryVerticalEnd, Square, BookOpen,
   Phone, Upload, MapPin, User, Receipt, Sparkles, ZoomIn, FileText, TrendingUp, Calendar, DollarSign, ShoppingCart,
-  CloudCog, Plus
+  CloudCog
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import type { Store, Product, Category, Banner, Order, OrderItem, CartItem, PlanType } from '@/lib/types';
