@@ -1,0 +1,369 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>VendelyPro - Catálogo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "outline": "#717782",
+                        "primary-container": "#3377bc",
+                        "tertiary": "#585d61",
+                        "secondary-fixed": "#dfe0ff",
+                        "primary-fixed-dim": "#a1c9ff",
+                        "on-tertiary-fixed-variant": "#42474b",
+                        "tertiary-fixed": "#dfe3e8",
+                        "surface-variant": "#d3e4fe",
+                        "on-surface-variant": "#414750",
+                        "on-tertiary-container": "#fcfcff",
+                        "surface-container": "#e5eeff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed-variant": "#00487f",
+                        "outline-variant": "#c1c7d2",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#d8dafe",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#c3c7cc",
+                        "primary": "#075ea1",
+                        "on-tertiary-fixed": "#171c20",
+                        "primary-fixed": "#d2e4ff",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#001c37",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#414562",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-fixed": "#151934",
+                        "surface": "#f8f9ff",
+                        "on-primary-container": "#fdfcff",
+                        "surface-tint": "#0e61a4",
+                        "on-background": "#0b1c30",
+                        "surface-dim": "#cbdbf5",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-primary": "#a1c9ff",
+                        "tertiary-container": "#707579",
+                        "secondary-fixed-dim": "#c1c4e7",
+                        "inverse-surface": "#213145",
+                        "secondary": "#595c7b",
+                        "on-secondary-container": "#5b5f7d",
+                        "surface-container-low": "#eff4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "section-gap": "64px",
+                        "margin-desktop": "48px",
+                        "base": "8px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-effect {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab-indicator {
+            position: absolute;
+            bottom: -2px;
+            height: 3px;
+            width: 24px;
+            border-radius: 99px;
+            background-color: #075ea1;
+        }
+        .premium-shadow {
+            box-shadow: 0 4px 20px -2px rgba(7, 94, 161, 0.08);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 bg-surface/80 glass-effect shadow-sm shadow-primary/10">
+<div class="flex items-center gap-4">
+<img alt="VendelyPro Logo" class="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxVXPrNKqR1RIXPTrpzGrsWo_-W-RWjmHnbVw_5yrJfdJVNtxvpXcQRQNEITArHHybsDaWVuyWGq0cAL-NLJQnPOco3IQ7jrkTFp2r0qcO8U-4bEHBDScA6zkAYVRq--Ud46fZFzKMJDXWYAla35azYdhcQIlJ4m5lbW0mTozBUsL1C9gTrEkdlxOW2zSbW0Z0jd0Mk9-yt_keMENd48gzUaMDETayf51eLdD9RDDNWcHNF_MycsXuhxA7YexgNVcgVg">
+<div class="hidden md:block h-8 w-px bg-outline-variant/30 mx-4"></div>
+<h1 class="hidden md:block font-headline-md text-headline-md font-bold text-primary">VendelyPro</h1>
+</div>
+<!-- Search Bar (Desktop) -->
+<div class="hidden md:flex flex-1 max-w-xl mx-8">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 text-body-md" placeholder="Buscar en el catálogo..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-primary-container/10 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold border-2 border-white shadow-sm overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a smiling business owner in a clean office setting, soft natural lighting, modern corporate aesthetic, blue and white professional tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdPIlutWSyko_2bAgCV_-HtQCg8lcDKgyA43kcRhamhVMF0dljk_JkAXXfUJUMMkmvRS7PBxZy41dWJtCdsTuEpwqXfpgaWMGYbin0WwduO9Trk01Id9fXeh33jqWWEAFMVvgrszj6yO6j3qSH7Yn46txjVq3SATC_RgvqJ7wXfUNKQwtdXXcnrGvj4utoCf6Z7GLV-dTQfVhqhFjV34iw8GaiGfu4g1v0HSFtqE842_74k2gmgK1n">
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-margin-mobile md:px-margin-desktop min-h-screen">
+<!-- Header Section & Filters -->
+<div class="max-w-7xl mx-auto mb-10">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Catálogo de Productos</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Gestiona y visualiza tu inventario en tiempo real.</p>
+</div>
+<!-- Category Tabs -->
+<div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-6 py-2.5 rounded-full bg-primary text-white font-label-md text-label-md premium-shadow hover:opacity-90 transition-all active:scale-95">Todo</button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-highest transition-all active:scale-95">Nuevo</button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-highest transition-all active:scale-95">Ofertas</button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-highest transition-all active:scale-95">Electrónica</button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-highest transition-all active:scale-95">Hogar</button>
+</div>
+</div>
+<!-- Search Bar (Mobile) -->
+<div class="md:hidden mt-6">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container border-none rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-primary/20 text-body-md" placeholder="Buscar productos..." type="text">
+</div>
+</div>
+</div>
+<!-- Bento-Style Product Grid -->
+<div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
+<!-- Product Card 1 -->
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden premium-shadow border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="High-end professional photography of a modern ergonomic office chair in a minimalist white studio, soft professional blue lighting accents, clean lines, corporate premium aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYyCSyE8ZTP5x0L69bHVg6qAhLgo-qyDGOJ8kNnIORsZAt4n_hVbU81pGfNGR2QK-5AG-hPhJ1XeVy5l3GxxrwZS_2MjZXJ7lqiwSeKvrdsJcVrnd-8Zm1hktk3T2LHAGp0z3V4Bg9RH5C5SEMDCgWAiYgrbx1ow6YQicKgbTs0JfOsqwAzuV-tFYTegGa6SrErrQM0SqRhEIYsIymMf8dbi_1Np5MuWK2xC8TXo3MDf4YnEyFlWp3">
+<div class="absolute top-4 right-4 bg-error-container text-on-error-container px-3 py-1 rounded-lg font-label-md text-label-md">-15%</div>
+<button class="absolute bottom-4 right-4 h-10 w-10 rounded-full bg-white/90 glass-effect text-primary flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 active:scale-90">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<span class="font-label-md text-label-md text-on-surface-variant mb-1">Oficina &amp; Hogar</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 line-clamp-1">Silla Pro Elite-X</h3>
+<div class="flex items-center gap-2 mb-6">
+<span class="font-headline-md text-headline-md text-primary">$1,250.00</span>
+<span class="font-body-md text-body-md text-outline line-through">$1,470.00</span>
+</div>
+<button class="mt-auto w-full py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-[0.98] duration-150">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+                        Añadir al carrito
+                    </button>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden premium-shadow border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Elegant metallic laptop on a white desk with a blue glowing keyboard, cinematic product shot, clean workplace environment, sophisticated corporate technology style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpowBe-qEXQGbvyBSJmjdN5WdStFiC8KZIhYRxUZ2DXSreq_7W3WDeRqJMexRkrUgTsVIN3Rri8dVbCMzJwUrdAEc_8439hK56JTwU_XeHAb24wfSRNdlOUwSaU9Mqys6IOurrd7qm_R0fF9PnZFa3_uEnSo7Y3e-yDt-DBjXFH_Z4_912BPErJt-ZsB3VD-fITTJZD4QQ0sD790ImxFnsfHOol005KXvg8JPvqUGx_8Nq6yM5FxT5">
+<div class="absolute top-4 left-4 bg-primary-container text-white px-3 py-1 rounded-lg font-label-md text-label-md">Nuevo</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<span class="font-label-md text-label-md text-on-surface-variant mb-1">Tecnología</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 line-clamp-1">Laptop UltraPro 16"</h3>
+<div class="flex items-center gap-2 mb-6">
+<span class="font-headline-md text-headline-md text-primary">$18,499.00</span>
+</div>
+<button class="mt-auto w-full py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-[0.98] duration-150">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+                        Añadir al carrito
+                    </button>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden premium-shadow border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Professional studio shot of high-quality noise canceling headphones in a deep navy color, resting on a white marble surface, soft ambient blue lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDim6BWM4hQagK9fXjDd8T6c4kncfyTTbHkT9afpwuitJZNBXiaEoS2CgtCSYUvUf0HHqHs9Q9FoX0oI-rLBBPvnwoIGO0370Rsv05YgaPoxu1IgVKGPyq7-cSinvLZwdMxP-x7yZXwaHQ9QDLlXZR0gF9QbdrP1Byp-GebuPXhCCT16RCSOSSfPyiLhZcUTsIN5J264s2iFn7GJezvJ6--QjSHVCQteWNn__W_n-ptDhrPztntNGR_">
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<span class="font-label-md text-label-md text-on-surface-variant mb-1">Audio</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 line-clamp-1">Headset NoiseCancel Gen-3</h3>
+<div class="flex items-center gap-2 mb-6">
+<span class="font-headline-md text-headline-md text-primary">$3,200.00</span>
+</div>
+<button class="mt-auto w-full py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-[0.98] duration-150">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+                        Añadir al carrito
+                    </button>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden premium-shadow border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Sleek modern smartwatch with a bright high-resolution screen displaying business analytics, premium brushed metal finish, corporate lifestyle photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmB1ElcEGBYhpK66A9PJBfvwpdUw4AvTW7jlBUD6g4SEu68zwMirgw7qURobGt90akM5jz7ag7FR2JitOjgSBHqb4b48GkaC05N4dlvJuwiimNJao2i6pF3S02XftEhOCzgy4gQMx0Fo49qYkj6Pl5h-n-EfS1oCvr3rlNbvGYhtLzRbG9i92NiY7OtqoJxIXckiD7m9TTRStGCps6-2BMvS4RhEUNsg7VPjeVlR1SMd4WaGi9hzyn">
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<span class="font-label-md text-label-md text-on-surface-variant mb-1">Wearables</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 line-clamp-1">Vendely Watch Pro</h3>
+<div class="flex items-center gap-2 mb-6">
+<span class="font-headline-md text-headline-md text-primary">$5,800.00</span>
+</div>
+<button class="mt-auto w-full py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-[0.98] duration-150">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+                        Añadir al carrito
+                    </button>
+</div>
+</div>
+<!-- Additional Row to show grid -->
+<!-- Product Card 5 -->
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden premium-shadow border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Modern minimalist table lamp with adjustable arm, warm light against a soft navy background, clean product design photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVlnCP6iEEfkcW203J_tidKZPYZFwgXIxWPeXaAeunCdaYC1I6mgY7teh0ERiC0nQeG53xvO-rA7kxVGb7zvhJ-NIT6VNTbmLh0w8PxuWORvoG01EG3zXHCywQW4IYrQEOV3MKBOBIcSaogQxsu4QnEJCRPnm4Fz_KlXZVD1Pc3-6x-SeDEVlnzqLN8MztkSvhWt8WEgXC8BpkuzZBO3PiEQQq_xUe4qfYMqxmkvQ-efEB8aIqnb1O">
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<span class="font-label-md text-label-md text-on-surface-variant mb-1">Iluminación</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 line-clamp-1">Lámpara LED Focus</h3>
+<div class="flex items-center gap-2 mb-6">
+<span class="font-headline-md text-headline-md text-primary">$890.00</span>
+</div>
+<button class="mt-auto w-full py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-[0.98] duration-150">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+                        Añadir al carrito
+                    </button>
+</div>
+</div>
+<!-- Product Card 6 -->
+<div class="group bg-surface-container-lowest rounded-3xl overflow-hidden premium-shadow border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl duration-300">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Professional wireless mouse and keyboard set, sleek matte finish, corporate hardware product photography on a clean white desk, high-tech vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0rnvNHaOHJ4UL_0wCMxZPAc2tx9hYs0xmY0bM0q2Hvy5fy25TCwpgVBEH0tIasUj6kkYC8bB6Bf5gbFGZ9j8UIGAk62FBIgNHRFlbH08k7nF6eDZPv2N8Fi2O0jgPtt_r--tXI6mwuFm2oUIHqfkDn1dRF6_GjKeqNSNlhTaUzd0awRvV1pL8y3YRsPvpUk8ou9QUf0xIww-Eo0udaOYUQHIPg87XYDzWa0kNfCnfMXMmtqPZwVbi">
+<div class="absolute top-4 left-4 bg-primary-container text-white px-3 py-1 rounded-lg font-label-md text-label-md">Nuevo</div>
+</div>
+<div class="p-6 flex flex-col flex-grow">
+<span class="font-label-md text-label-md text-on-surface-variant mb-1">Periféricos</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2 line-clamp-1">Combo Wireless Pro-S</h3>
+<div class="flex items-center gap-2 mb-6">
+<span class="font-headline-md text-headline-md text-primary">$1,850.00</span>
+</div>
+<button class="mt-auto w-full py-3 bg-primary text-on-primary rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-[0.98] duration-150">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+                        Añadir al carrito
+                    </button>
+</div>
+</div>
+<!-- Empty State / Promotion Card -->
+<div class="hidden lg:flex col-span-2 bg-gradient-to-br from-primary to-primary-container rounded-3xl p-10 text-white relative overflow-hidden items-center group">
+<div class="relative z-10 max-w-sm">
+<h3 class="font-display-lg text-display-lg leading-tight mb-4">Potencia tu Negocio</h3>
+<p class="font-body-lg text-body-lg opacity-90 mb-8">Obtén descuentos exclusivos en compras por volumen para tu corporación.</p>
+<button class="px-8 py-4 bg-white text-primary rounded-xl font-label-md text-label-md shadow-lg hover:shadow-white/20 transition-all active:scale-95">Más Información</button>
+</div>
+<div class="absolute right-[-10%] bottom-[-10%] opacity-10 group-hover:scale-110 transition-transform duration-700">
+<span class="material-symbols-outlined text-[320px]" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<!-- Glass accent shapes -->
+<div class="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute bottom-10 left-1/2 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed bottom-24 right-6 md:bottom-10 md:right-10 h-16 w-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-all z-40 group">
+<span class="material-symbols-outlined text-[28px] group-hover:rotate-90 transition-transform duration-300">add</span>
+</button>
+<!-- Bottom Navigation Bar (Mobile-first, shared logic) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface/90 glass-effect flex justify-around items-center px-2 py-3 rounded-t-xl shadow-[0_-4px_12px_rgba(7,94,161,0.08)]">
+<!-- Catálogo (Active) -->
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/10 rounded-xl px-3 py-1 active:scale-90 duration-200 transition-all group" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label-md text-label-md mt-1">Catálogo</span>
+<div class="active-tab-indicator"></div>
+</a>
+<!-- Carrito -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-3 py-1 active:scale-90 duration-200 transition-all group relative" href="#">
+<span class="material-symbols-outlined text-[24px]">shopping_cart</span>
+<span class="font-label-md text-label-md mt-1">Carrito</span>
+<div class="absolute top-1 right-3 h-4 w-4 bg-error text-[10px] text-white flex items-center justify-center rounded-full font-bold">2</div>
+</a>
+<!-- Pedidos -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-3 py-1 active:scale-90 duration-200 transition-all group" href="#">
+<span class="material-symbols-outlined text-[24px]">receipt_long</span>
+<span class="font-label-md text-label-md mt-1">Pedidos</span>
+</a>
+<!-- Productos (Custom Addition based on prompt) -->
+<a class="hidden sm:flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-3 py-1 active:scale-90 duration-200 transition-all group" href="#">
+<span class="material-symbols-outlined text-[24px]">inventory_2</span>
+<span class="font-label-md text-label-md mt-1">Productos</span>
+</a>
+<!-- Reportes -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-3 py-1 active:scale-90 duration-200 transition-all group" href="#">
+<span class="material-symbols-outlined text-[24px]">analytics</span>
+<span class="font-label-md text-label-md mt-1">Reportes</span>
+</a>
+<!-- Ajustes -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-3 py-1 active:scale-90 duration-200 transition-all group" href="#">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="font-label-md text-label-md mt-1">Ajustes</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions and UI enhancements
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.innerText.includes('carrito')) {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-bounce">check</span> Agregado';
+                    this.classList.replace('bg-primary', 'bg-primary-container');
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.classList.replace('bg-primary-container', 'bg-primary');
+                    }, 2000);
+                }
+            });
+        });
+
+        // Simple scroll parallax for header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('py-2', 'h-16');
+                header.classList.remove('h-20');
+            } else {
+                header.classList.remove('py-2', 'h-16');
+                header.classList.add('h-20');
+            }
+        });
+    </script>
+</body></html>

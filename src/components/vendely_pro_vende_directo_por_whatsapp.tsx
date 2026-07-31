@@ -8,7 +8,8 @@ import {
   ShieldCheck, LogOut, Loader2, AlertCircle, Wallet, Eye, EyeOff,
   LayoutGrid, Rows3, Columns3, Image as ImageIconBanner, Droplet, AlignLeft,
   KeyRound, Grid2x2, Grid3x3, List, GalleryVerticalEnd, Square, BookOpen,
-  Phone, Upload, MapPin, User, Receipt, Sparkles, ZoomIn, FileText, TrendingUp, Calendar, DollarSign, ShoppingCart
+  Phone, Upload, MapPin, User, Receipt, Sparkles, ZoomIn, FileText, TrendingUp, Calendar, DollarSign, ShoppingCart,
+  CloudCog, Plus
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import type { Store, Product, Category, Banner, Order, OrderItem, CartItem, PlanType } from '@/lib/types';
@@ -469,54 +470,87 @@ interface PlansViewProps {
   onSelectPlan: (plan: PlanType) => void;
 }
 
-const PlansView: React.FC<PlansViewProps> = ({ currentPlan, productCount, bannerCount, theme, onSelectPlan }) => (
-  <div className="space-y-5 animate-in fade-in duration-200">
-    <div className="text-center space-y-1.5">
-      <div className={`inline-flex items-center gap-1.5 ${theme.accentBg} px-3.5 py-1 rounded-full text-xs font-bold`}>
-        <Crown size={14} /> Suscripción y Planes
+const PlansView: React.FC<PlansViewProps> = ({ currentPlan, productCount, bannerCount, theme, onSelectPlan }) => {
+  const planOrder: PlanType[] = ['free', 'monthly', 'yearly'];
+  const planBadges: Record<PlanType, string> = { free: 'Básico', monthly: 'Popular', yearly: 'Corporativo' };
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-bold tracking-tight">Elige tu Plan Pro</h2>
+        <p className={`text-sm ${theme.subtext} max-w-md mx-auto`}>Escala tu negocio con herramientas diseñadas para la eficiencia corporativa y el control total de tus ventas.</p>
       </div>
-      <h2 className="text-2xl font-black tracking-tight">Potencia tu negocio digital</h2>
-      <p className={`text-xs ${theme.subtext}`}>Desbloquea ventas ilimitadas, pasarelas de pago y diseño premium</p>
-    </div>
-    <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
-      <div className="flex justify-between items-center text-xs">
-        <span className="font-bold flex items-center gap-1.5"><Zap size={15} className={theme.accent} /> Plan actual</span>
-        <span className={`font-black uppercase px-2.5 py-1 rounded-xl ${theme.accentBg} text-[10px]`}>{PLAN_LIMITS[currentPlan].name}</span>
-      </div>
-      <div>
-        <div className={`flex justify-between text-[11px] mb-1 font-semibold ${theme.subtext}`}>
-          <span>Productos agregados:</span>
-          <span>{productCount} / {PLAN_LIMITS[currentPlan].maxProducts === Infinity ? '\u221e' : PLAN_LIMITS[currentPlan].maxProducts}</span>
+
+      {/* Current plan usage bar */}
+      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-2 shadow-md`}>
+        <div className="flex justify-between items-center text-xs">
+          <span className="font-bold flex items-center gap-1.5"><Zap size={15} className={theme.accent} /> Plan actual: <strong className={theme.accent}>{PLAN_LIMITS[currentPlan].name}</strong></span>
+          <span className={`font-black uppercase px-2.5 py-1 rounded-full ${theme.accentBg} text-[10px]`}>{PLAN_LIMITS[currentPlan].name}</span>
         </div>
-        <div className={`w-full ${theme.sectionBg} h-2 rounded-full overflow-hidden`}>
-          <div className={`h-full transition-all ${productCount >= PLAN_LIMITS[currentPlan].maxProducts ? 'bg-amber-500' : theme.accentSolid}`}
-            style={{ width: PLAN_LIMITS[currentPlan].maxProducts === Infinity ? '100%' : `${Math.min(100, (productCount / PLAN_LIMITS[currentPlan].maxProducts) * 100)}%` }} />
-        </div>
-      </div>
-    </div>
-    <div className="space-y-4">
-      {(Object.keys(PLAN_LIMITS) as PlanType[]).map(planKey => {
-        const plan = PLAN_LIMITS[planKey]; const isCurrent = currentPlan === planKey;
-        return (
-          <div key={planKey} className={`p-5 ${theme.cardRadius} border-2 transition-all relative ${isCurrent ? `${theme.accentBg} shadow-xl` : `${theme.card} hover:opacity-90`}`}>
-            {planKey === 'monthly' && <span className="absolute -top-3 right-5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">{plan.badge}</span>}
-            <div className="flex justify-between items-start mb-3">
-              <div><h3 className="font-bold text-base">{plan.name}</h3><p className={`text-xl font-black ${theme.accent} mt-0.5`}>{plan.priceText}</p></div>
-              {isCurrent && <span className={`flex items-center gap-1 text-[10px] font-bold ${theme.accentBg} px-2.5 py-1 rounded-full`}><CheckCircle2 size={12} /> Activo</span>}
-            </div>
-            <ul className="space-y-2 text-xs opacity-90 mb-5">
-              {plan.features.map((feat, idx) => <li key={idx} className="flex items-center gap-2"><Check size={14} className={`${theme.accent} shrink-0`} /><span>{feat}</span></li>)}
-            </ul>
-            <button onClick={() => onSelectPlan(planKey)} disabled={isCurrent}
-              className={`w-full py-3 ${theme.cardRadius} text-xs font-bold transition-all ${isCurrent ? `${theme.badge} cursor-default` : `${theme.primary}`}`}>
-              {isCurrent ? 'Plan actual' : `Activar ${plan.name}`}
-            </button>
+        <div>
+          <div className={`flex justify-between text-[11px] mb-1 font-semibold ${theme.subtext}`}>
+            <span>Productos: {productCount} / {PLAN_LIMITS[currentPlan].maxProducts === Infinity ? '\u221e' : PLAN_LIMITS[currentPlan].maxProducts}</span>
+            <span>Banners: {bannerCount} / {PLAN_LIMITS[currentPlan].maxBanners === Infinity ? '\u221e' : PLAN_LIMITS[currentPlan].maxBanners}</span>
           </div>
-        );
-      })}
+          <div className={`w-full ${theme.sectionBg} h-2 rounded-full overflow-hidden`}>
+            <div className={`h-full transition-all ${productCount >= PLAN_LIMITS[currentPlan].maxProducts ? 'bg-amber-500' : theme.accentSolid}`}
+              style={{ width: PLAN_LIMITS[currentPlan].maxProducts === Infinity ? '100%' : `${Math.min(100, (productCount / PLAN_LIMITS[currentPlan].maxProducts) * 100)}%` }} />
+          </div>
+        </div>
+      </div>
+
+      {/* 3-column pricing grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+        {planOrder.map((planKey, idx) => {
+          const plan = PLAN_LIMITS[planKey];
+          const isCurrent = currentPlan === planKey;
+          const isFeatured = planKey === 'monthly';
+          return (
+            <div key={planKey} className={`relative ${theme.card} ${theme.cardRadius} p-6 flex flex-col h-full border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isFeatured ? 'border-[#075ea1]/40 ring-4 ring-[#075ea1]/5 md:scale-105 z-10' : ''}`}
+              style={{ animationDelay: `${idx * 100}ms` }}>
+              {isFeatured && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#075ea1] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">RECOMENDADO</span>
+              )}
+              <div className="mb-6">
+                <span className={`text-xs font-bold px-3 py-1 rounded-full inline-block mb-3 ${isFeatured ? 'bg-[#3377bc] text-white' : theme.accentBg}`}>{planBadges[planKey]}</span>
+                <h3 className="text-xl font-bold">{plan.name}</h3>
+                <div className="flex items-baseline gap-1 mt-3">
+                  <span className="text-3xl font-bold">{plan.priceText.split('/')[0]}</span>
+                  {plan.priceText.includes('/') && <span className={`text-sm ${theme.subtext}`}>/{plan.priceText.split('/')[1]}</span>}
+                </div>
+              </div>
+              <ul className="space-y-3 mb-8 flex-grow">
+                {plan.features.map((feat, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm">
+                    <CheckCircle2 size={18} className={`${theme.accent} shrink-0 mt-0.5`} />
+                    <span className={isFeatured ? 'font-medium' : theme.subtext}>{feat}</span>
+                  </li>
+                ))}
+              </ul>
+              {isCurrent ? (
+                <div className={`w-full py-3.5 ${theme.cardRadius} text-sm font-bold text-center ${theme.badge}`}>Plan actual</div>
+              ) : (
+                <button onClick={() => onSelectPlan(planKey)}
+                  className={`w-full py-3.5 ${theme.cardRadius} text-sm font-bold transition-all active:scale-95 ${isFeatured ? `${theme.primary}` : `border-2 border-[#075ea1] text-[#075ea1] hover:bg-[#075ea1]/5`}`}>
+                  Seleccionar Plan
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Trust section */}
+      <div className={`mt-8 py-8 px-6 ${theme.cardRadius} ${theme.sectionBg} border ${theme.borderSubtle} text-center`}>
+        <h3 className="text-lg font-bold mb-6">Con la confianza de miles de negocios</h3>
+        <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+          <div className="flex items-center gap-2"><ShieldCheck size={20} className={theme.accent} /><span className="font-bold text-sm">PCI Compliance</span></div>
+          <div className="flex items-center gap-2"><CloudCog size={20} className={theme.accent} /><span className="font-bold text-sm">Google Cloud Partner</span></div>
+          <div className="flex items-center gap-2"><Lock size={20} className={theme.accent} /><span className="font-bold text-sm">AES-256 Encrypted</span></div>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ============ ADMIN PRODUCTOS ============
 
@@ -889,17 +923,49 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
   }
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
-      <div className={`flex items-center justify-between border-b ${theme.borderSubtle} pb-3`}>
-        <div><h2 className="text-lg font-bold">Historial de pedidos</h2><p className={`text-xs ${theme.subtext}`}>Pedidos recibidos por WhatsApp</p></div>
-        <span className={`${theme.accentBg} font-bold px-3 py-1 rounded-full text-xs`}>{orders.length} pedidos</span>
+    <div className="space-y-6 animate-in fade-in duration-200">
+      <div>
+        <p className={`text-xs font-bold ${theme.accent} mb-1 uppercase tracking-wider`}>Análisis de Negocio</p>
+        <h2 className="text-2xl font-bold tracking-tight">Panel de Pedidos</h2>
+      </div>
+
+      {/* Key metrics grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
+          <div className="flex justify-between items-start mb-3">
+            <span className={`p-2 ${theme.accentBg} ${theme.cardRadius} ${theme.accent}`}><DollarSign size={18} /></span>
+          </div>
+          <p className={`text-xs ${theme.subtext}`}>Ingresos Totales</p>
+          <h3 className={`text-lg font-bold mt-1 ${theme.accent}`}>{store.currency_symbol}{totalRevenue.toFixed(2)}</h3>
+        </div>
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
+          <div className="flex justify-between items-start mb-3">
+            <span className={`p-2 ${theme.accentBg} ${theme.cardRadius} ${theme.accent}`}><ShoppingCart size={18} /></span>
+          </div>
+          <p className={`text-xs ${theme.subtext}`}>Pedidos Totales</p>
+          <h3 className="text-lg font-bold mt-1">{orders.length}</h3>
+        </div>
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
+          <div className="flex justify-between items-start mb-3">
+            <span className={`p-2 ${theme.accentBg} ${theme.cardRadius} ${theme.accent}`}><Receipt size={18} /></span>
+          </div>
+          <p className={`text-xs ${theme.subtext}`}>Ticket Promedio</p>
+          <h3 className={`text-lg font-bold mt-1 ${theme.accent}`}>{store.currency_symbol}{avgTicket.toFixed(2)}</h3>
+        </div>
+        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
+          <div className="flex justify-between items-start mb-3">
+            <span className={`p-2 ${theme.accentBg} ${theme.cardRadius} ${theme.accent}`}><CheckCircle2 size={18} /></span>
+          </div>
+          <p className={`text-xs ${theme.subtext}`}>Entregados</p>
+          <h3 className="text-lg font-bold mt-1">{deliveredCount}</h3>
+        </div>
       </div>
 
       {/* Status filter */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {(['all', 'pending', 'preparing', 'shipped', 'delivered'] as const).map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap border transition-all ${statusFilter === s ? theme.primary : `${theme.card} ${theme.borderSubtle} opacity-60`}`}>
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all active:scale-95 ${statusFilter === s ? theme.primary : `${theme.card} ${theme.borderSubtle} opacity-60`}`}>
             {s === 'all' ? 'Todos' : STATUS_LABELS[s]}
           </button>
         ))}
@@ -983,16 +1049,22 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
   const handleDeleteBanner = async (id: string) => { try { await api.deleteBanner(id); const b = await api.fetchBanners(store.id); setBanners(b); onRefresh(); } catch { alert('Error'); } };
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-in fade-in duration-200">
       <div className={`flex justify-between items-center border-b ${theme.borderSubtle} pb-3`}>
-        <h2 className="text-lg font-bold">Ajustes</h2>
-        <button onClick={onOpenQR} className={`${theme.accentBg} px-3 py-1.5 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5`}><QrCode size={14} /> Enlace QR</button>
+        <h2 className="text-2xl font-bold tracking-tight">Ajustes</h2>
+        <button onClick={onOpenQR} className={`${theme.accentBg} px-3.5 py-2 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform`}><QrCode size={14} /> Enlace QR</button>
       </div>
 
-      {/* Plan */}
-      <div className="bg-gradient-to-r from-[#1E6FFF] via-[#0052CC] to-[#0A1628] text-white p-4 rounded-3xl shadow-xl flex items-center justify-between">
-        <div><span className="text-[10px] uppercase font-bold opacity-80 tracking-wider">Plan activo</span><h3 className="text-base font-black flex items-center gap-1.5 mt-0.5"><Crown size={16} className="text-amber-300" /> {PLAN_LIMITS[store.plan].name}</h3></div>
-        <button onClick={onUpgrade} className="bg-white text-slate-900 px-3.5 py-2 rounded-2xl text-xs font-bold shadow-lg hover:bg-slate-100 transition-colors">Cambiar plan</button>
+      {/* Store profile quick card */}
+      <div className={`${theme.card} ${theme.cardRadius} p-5 flex items-center gap-4 shadow-md hover:scale-[1.01] transition-transform border ${theme.borderSubtle}`}>
+        <div className={`w-16 h-16 rounded-full ${theme.sectionBg} flex items-center justify-center ${theme.accent} shrink-0 overflow-hidden`}>
+          {store.logo ? <img src={store.logo} alt={store.name} className="w-full h-full object-cover" /> : <StoreIcon size={28} />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-bold text-base truncate">{store.name}</h3>
+          <p className={`text-xs ${theme.subtext}`}>Plan {PLAN_LIMITS[store.plan].name}</p>
+        </div>
+        <button onClick={onUpgrade} className={`${theme.primary} px-3.5 py-2 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform shrink-0`}><Crown size={14} className="text-amber-400" /> Cambiar</button>
       </div>
 
       {/* Info tienda */}
@@ -1320,44 +1392,75 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
   }
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200 pb-24">
-      <div className={`flex items-center justify-between border-b ${theme.borderSubtle} pb-3`}>
-        <h2 className="text-lg font-bold flex items-center gap-2"><ShoppingBag size={20} className={theme.accent} /> Mi carrito ({totalItems})</h2>
-        <button onClick={onClear} className="text-xs text-red-400 hover:underline">Vaciar</button>
+    <div className="space-y-6 animate-in fade-in duration-200 pb-24">
+      <div className="mb-2">
+        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2"><ShoppingBag size={22} className={theme.accent} /> Tu Carrito</h2>
+        <p className={`text-sm ${theme.subtext} mt-1`}>Revisa tus productos seleccionados antes de finalizar el pedido.</p>
       </div>
 
       {/* Stepper */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center flex-1">
-            <div className={`flex items-center gap-1.5 ${step >= s ? theme.accent : theme.subtext}`}>
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black ${step >= s ? theme.accentBg : `${theme.sectionBg} border ${theme.borderSubtle}`}`}>
-                {step > s ? <Check size={14} /> : s}
+            <div className={`flex items-center gap-2 ${step >= s ? theme.accent : theme.subtext}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step >= s ? theme.accentBg : `${theme.sectionBg} border ${theme.borderSubtle}`}`}>
+                {step > s ? <Check size={15} /> : s}
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wide hidden sm:block">{s === 1 ? 'Datos' : s === 2 ? 'Confirmar' : 'Pago'}</span>
+              <span className="text-[11px] font-bold uppercase tracking-wide hidden sm:block">{s === 1 ? 'Datos' : s === 2 ? 'Confirmar' : 'Pago'}</span>
             </div>
-            {s < 3 && <div className={`flex-1 h-0.5 mx-1.5 rounded ${step > s ? theme.accent.replace('text-', 'bg-') : theme.borderSubtle}`} />}
+            {s < 3 && <div className={`flex-1 h-0.5 mx-2 rounded-full transition-all ${step > s ? theme.accent.replace('text-', 'bg-') : theme.borderSubtle}`} />}
           </div>
         ))}
       </div>
 
-      {/* Cart items - always visible */}
-      <div className="space-y-2">
-        {cart.map(item => {
-          const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
-          return (
-            <div key={item.id} className={`${theme.card} p-3 ${theme.cardRadius} border flex items-center gap-3 shadow-sm`}>
-              <img src={item.image} alt={item.name} className={`w-12 h-12 ${theme.cardRadius} object-cover shrink-0`} />
-              <div className="flex-1 min-w-0"><h4 className="font-bold text-xs truncate">{item.name}</h4><p className={`text-xs font-bold ${theme.accent}`}>{store.currency_symbol}{(price * item.quantity).toFixed(2)}</p></div>
-              <div className={`flex items-center gap-2 ${theme.sectionBg} p-1.5 rounded-xl border ${theme.borderSubtle}`}>
-                <button onClick={() => onUpdateQty(item.id, -1)} className={`w-6 h-6 rounded-lg ${theme.badge} font-bold text-xs flex items-center justify-center`}>-</button>
-                <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
-                <button onClick={() => onUpdateQty(item.id, 1)} className={`w-6 h-6 rounded-lg ${theme.badge} font-bold text-xs flex items-center justify-center`}>+</button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Cart items column */}
+        <div className="lg:col-span-8 space-y-3">
+          {cart.map(item => {
+            const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
+            return (
+              <div key={item.id} className={`${theme.card} p-4 ${theme.cardRadius} border border-opacity-30 flex gap-4 shadow-md hover:scale-[1.01] transition-transform`}>
+                <div className={`w-24 h-24 ${theme.cardRadius} overflow-hidden shrink-0 ${theme.sectionBg}`}>
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 flex flex-col justify-between min-w-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-sm truncate">{item.name}</h4>
+                      <p className={`text-xs ${theme.subtext} mt-0.5`}>{store.currency_symbol}{price.toFixed(2)} c/u</p>
+                    </div>
+                    <button onClick={() => onRemove(item.id)} className="text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-colors shrink-0"><Trash2 size={16} /></button>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <div className={`flex items-center gap-1 ${theme.sectionBg} rounded-xl p-1 border ${theme.borderSubtle}`}>
+                      <button onClick={() => onUpdateQty(item.id, -1)} className={`w-8 h-8 flex items-center justify-center rounded-lg ${theme.card} ${theme.accent} font-bold text-sm hover:opacity-80 active:scale-90 transition-all`}>-</button>
+                      <span className="px-4 font-bold text-sm">{item.quantity}</span>
+                      <button onClick={() => onUpdateQty(item.id, 1)} className={`w-8 h-8 flex items-center justify-center rounded-lg ${theme.card} ${theme.accent} font-bold text-sm hover:opacity-80 active:scale-90 transition-all`}>+</button>
+                    </div>
+                    <span className={`text-lg font-black ${theme.accent}`}>{store.currency_symbol}{(price * item.quantity).toFixed(2)}</span>
+                  </div>
+                </div>
               </div>
-              <button onClick={() => onRemove(item.id)} className="text-red-400 p-1 hover:bg-red-500/10 rounded-lg"><Trash2 size={16} /></button>
+            );
+          })}
+          <button onClick={onClear} className="text-xs text-red-400 hover:underline font-bold pt-1">Vaciar carrito</button>
+        </div>
+
+        {/* Summary column */}
+        <div className="lg:col-span-4">
+          <div className={`${theme.sectionBg} ${theme.cardRadius} p-5 shadow-md sticky top-24 border ${theme.borderSubtle}`}>
+            <h3 className="font-bold text-base mb-4">Resumen</h3>
+            <div className="space-y-2.5 mb-4">
+              <div className={`flex justify-between text-sm ${theme.subtext}`}><span>Subtotal ({totalItems} items)</span><span className="font-medium">{store.currency_symbol}{subtotal.toFixed(2)}</span></div>
+              <div className={`flex justify-between text-sm ${theme.subtext}`}><span>Envío</span><span className={theme.accent}>Se coordina</span></div>
             </div>
-          );
-        })}
+            <div className={`h-px ${theme.borderSubtle} my-3`} />
+            <div className="flex justify-between items-baseline mb-4">
+              <span className="font-bold">Total</span>
+              <span className={`text-2xl font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* STEP 1: Datos de entrega */}
@@ -1650,23 +1753,23 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
       );
     }
 
-    // grid2 o grid3
+    // grid2 o grid3 — premium card style matching catalog mockup
     return (
-      <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-md flex flex-col ${theme.cardHover} transition-all group`}>
-        <div className="relative">
-          <ProductImage src={p.image} alt={p.name} className={`w-full ${layoutType === 'grid3' ? 'h-28' : 'h-36'} sm:h-40 object-cover group-hover:scale-105 transition-transform duration-300`} />
-          {p.is_offer && <span className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-md"><Tag size={10} /> OFERTA</span>}
-          <span className={`absolute top-2 right-2 ${theme.sectionBg} text-[9px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md border ${theme.borderSubtle}`}>{p.category}</span>
+      <div key={p.id} className={`${theme.card} border border-opacity-20 ${theme.cardRadius} overflow-hidden shadow-md flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl duration-300 group`}>
+        <div className="relative aspect-square overflow-hidden bg-[#eff4ff]">
+          <ProductImage src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          {p.is_offer && <span className="absolute top-3 right-3 bg-red-100 text-red-700 px-2.5 py-1 rounded-lg text-xs font-bold">-{Math.round((1 - (p.offer_price || 0) / p.price) * 100)}%</span>}
+          {p.is_new && <span className="absolute top-3 left-3 bg-[#3377bc] text-white px-2.5 py-1 rounded-lg text-xs font-bold">Nuevo</span>}
         </div>
-        <div className="p-3 flex-1 flex flex-col gap-2">
-          <div>
-            <h3 className="font-bold text-xs line-clamp-1">{p.name}</h3>
-            <p className={`text-[10px] ${theme.subtext} line-clamp-2 mt-0.5`}>{p.description}</p>
-          </div>
-          <div className="mt-auto flex items-center justify-between gap-2">
+        <div className="p-4 flex flex-col flex-grow gap-2">
+          <span className={`text-xs ${theme.subtext}`}>{p.category}</span>
+          <h3 className="font-bold text-sm line-clamp-1">{p.name}</h3>
+          <div className="flex items-center gap-2 mb-1">
             <PriceTag p={p} size="md" />
-            <AddButton product={p} size="md" />
           </div>
+          <button onClick={() => addToCart(p)} className={`mt-auto w-full py-2.5 ${theme.primary} ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all`}>
+            <ShoppingCart size={15} /> Añadir al carrito
+          </button>
         </div>
       </div>
     );
@@ -2114,12 +2217,96 @@ const AdminApp: React.FC = () => {
   );
 };
 
+// ============ ONBOARDING (3 pasos de bienvenida) ============
+
+const ONBOARDING_STEPS = [
+  {
+    icon: MessageCircle,
+    badge: 'VENTAS DIRECTAS',
+    title: 'Vende por WhatsApp en segundos',
+    desc: 'Convierte tus chats en ventas reales. Tus clientes compran y tú recibes el pedido listo en tu WhatsApp.',
+    accent: 'from-[#1E6FFF] to-[#0052CC]',
+  },
+  {
+    icon: BookOpen,
+    badge: 'CONSTRUCCIÓN DE MARCA',
+    title: 'Tu catálogo, con look profesional',
+    desc: 'Crea una vitrina digital elegante para tus productos. Organiza por categorías y destaca tus mejores ofertas con un toque sofisticado.',
+    accent: 'from-[#3B82F6] to-[#1E6FFF]',
+  },
+  {
+    icon: TrendingUp,
+    badge: 'GESTIÓN PRO',
+    title: 'Control total de tu negocio',
+    desc: 'Analiza tus ventas, gestiona tu inventario y haz crecer tu marca con herramientas diseñadas para comerciantes profesionales.',
+    accent: 'from-[#0052CC] to-[#1E6FFF]',
+  },
+];
+
+const OnboardingScreen: React.FC<{ onDone: () => void }> = ({ onDone }) => {
+  const [step, setStep] = useState(0);
+  const current = ONBOARDING_STEPS[step];
+  const Icon = current.icon;
+  const isLast = step === ONBOARDING_STEPS.length - 1;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0A1628] via-[#0F1D33] to-[#0A1628] flex flex-col items-center justify-center p-6 font-sans relative overflow-hidden">
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#1E6FFF]/10 rounded-full blur-3xl" />
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#0052CC]/10 rounded-full blur-3xl" />
+
+      <div className="w-full max-w-md space-y-8 relative z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center bg-white/5 ring-2 ring-[#1E6FFF]/20">
+              <img src="/ChatGPT_Image_30_jul_2026,_12_24_41_p.m. copy copy.png" alt="Vendely Pro" className="w-full h-full object-contain p-0.5" />
+            </div>
+            <span className="text-lg font-black text-white">VendelyPro</span>
+          </div>
+          <button onClick={onDone} className="text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors">Saltar</button>
+        </div>
+
+        <div className="flex flex-col items-center text-center space-y-6">
+          <div className={`relative w-40 h-40 rounded-3xl bg-gradient-to-br ${current.accent} flex items-center justify-center shadow-2xl animate-in zoom-in-95 duration-500`}>
+            <Icon size={64} className="text-white" />
+            <div className="absolute -bottom-3 -right-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-3 py-2 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-[10px] font-bold text-white">Activo</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <span className="inline-block px-3 py-1 rounded-full bg-[#1E6FFF]/15 text-[#5B9BFF] text-[10px] font-bold uppercase tracking-wider">{current.badge}</span>
+            <h1 className="text-2xl font-black text-white tracking-tight">{current.title}</h1>
+            <p className="text-sm text-slate-400 leading-relaxed max-w-xs">{current.desc}</p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          <div className="flex items-center justify-center gap-2">
+            {ONBOARDING_STEPS.map((_, i) => (
+              <div key={i} className={`h-2 rounded-full transition-all duration-300 ${i === step ? 'w-8 bg-[#1E6FFF]' : 'w-2 bg-slate-700'}`} />
+            ))}
+          </div>
+
+          <button onClick={() => isLast ? onDone() : setStep(s => s + 1)}
+            className="w-full bg-gradient-to-r from-[#1E6FFF] to-[#0052CC] hover:from-[#2E7FFF] hover:to-[#1060DD] text-white py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-[#1E6FFF]/30 transition-all active:scale-95">
+            {isLast ? 'Comenzar ahora' : 'Siguiente'}
+            <ChevronRight size={18} className={isLast ? 'hidden' : ''} />
+          </button>
+          <p className="text-center text-[10px] text-slate-500">{step + 1} de {ONBOARDING_STEPS.length}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ============ EXPORT PRINCIPAL ============
 
 const VendelyProVendeDirectoPorWhatsApp: React.FC = () => {
   const { user, store, loading } = useAuth();
 
   const [publicStoreId, setPublicStoreId] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -2127,9 +2314,16 @@ const VendelyProVendeDirectoPorWhatsApp: React.FC = () => {
     if (storeId) setPublicStoreId(storeId);
   }, []);
 
+  useEffect(() => {
+    if (user && store && !localStorage.getItem('vendely_onboarding_done')) {
+      setShowOnboarding(true);
+    }
+  }, [user, store]);
+
   if (publicStoreId) return <ClientStoreView storeId={publicStoreId} />;
   if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 size={32} className="animate-spin text-[#1E6FFF]" /></div>;
   if (!user || !store) return <AuthScreen />;
+  if (showOnboarding) return <OnboardingScreen onDone={() => { localStorage.setItem('vendely_onboarding_done', '1'); setShowOnboarding(false); }} />;
   return <AdminApp />;
 };
 

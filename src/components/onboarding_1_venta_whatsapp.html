@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VendelyPro - Onboarding</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary-container": "#3377bc",
+                "surface-container": "#e5eeff",
+                "on-surface-variant": "#414750",
+                "on-error-container": "#93000a",
+                "tertiary-fixed-dim": "#c3c7cc",
+                "outline-variant": "#c1c7d2",
+                "on-secondary-fixed-variant": "#414562",
+                "error": "#ba1a1a",
+                "on-error": "#ffffff",
+                "tertiary": "#585d61",
+                "surface-container-highest": "#d3e4fe",
+                "inverse-on-surface": "#eaf1ff",
+                "on-primary-container": "#fdfcff",
+                "on-tertiary": "#ffffff",
+                "background": "#f8f9ff",
+                "surface-dim": "#cbdbf5",
+                "on-secondary-fixed": "#151934",
+                "surface-container-low": "#eff4ff",
+                "surface": "#f8f9ff",
+                "on-tertiary-fixed-variant": "#42474b",
+                "surface-variant": "#d3e4fe",
+                "on-primary-fixed-variant": "#00487f",
+                "error-container": "#ffdad6",
+                "on-tertiary-fixed": "#171c20",
+                "on-secondary-container": "#5b5f7d",
+                "on-primary-fixed": "#001c37",
+                "secondary-fixed": "#dfe0ff",
+                "surface-bright": "#f8f9ff",
+                "on-background": "#0b1c30",
+                "surface-tint": "#0e61a4",
+                "on-surface": "#0b1c30",
+                "inverse-primary": "#a1c9ff",
+                "tertiary-container": "#707579",
+                "primary-fixed": "#d2e4ff",
+                "secondary": "#595c7b",
+                "on-tertiary-container": "#fcfcff",
+                "on-primary": "#ffffff",
+                "secondary-fixed-dim": "#c1c4e7",
+                "surface-container-high": "#dce9ff",
+                "primary": "#075ea1",
+                "outline": "#717782",
+                "surface-container-lowest": "#ffffff",
+                "inverse-surface": "#213145",
+                "tertiary-fixed": "#dfe3e8",
+                "primary-fixed-dim": "#a1c9ff",
+                "secondary-container": "#d8dafe",
+                "on-secondary": "#ffffff"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "section-gap": "64px",
+                "margin-mobile": "16px",
+                "margin-desktop": "48px",
+                "gutter": "24px",
+                "base": "8px"
+            },
+            "fontFamily": {
+                "display-lg": ["Inter"],
+                "body-md": ["Inter"],
+                "headline-lg": ["Inter"],
+                "label-md": ["Inter"],
+                "headline-md": ["Inter"],
+                "body-lg": ["Inter"],
+                "headline-lg-mobile": ["Inter"]
+            },
+            "fontSize": {
+                "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(7, 94, 161, 0.08);
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(7, 94, 161, 0.1) 0%, rgba(248, 249, 255, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-background/80 dark:bg-background/80 backdrop-blur-3xl z-50 flex justify-between items-center px-margin-mobile py-4 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="storefront">storefront</span>
+<span class="text-headline-md font-headline-md font-bold text-primary">VendelyPro</span>
+</div>
+<button class="text-on-surface-variant font-label-md hover:opacity-80 transition-opacity active:scale-95 duration-200">
+            Saltar
+        </button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col items-center justify-center px-margin-mobile pt-24 pb-32 max-w-lg mx-auto relative">
+<!-- Ambient Background Glows -->
+<div class="ambient-glow top-20 -left-20"></div>
+<div class="ambient-glow bottom-40 -right-20"></div>
+<!-- Illustration Section -->
+<div class="relative w-full aspect-square flex items-center justify-center mb-8 animate-float">
+<!-- Central Visual Asset -->
+<div class="w-full h-full relative flex items-center justify-center">
+<img alt="VendelyPro Illustration" class="w-full h-full object-contain drop-shadow-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoGpR2UjfjLRSnF2rjUm7AqPmx-z_d4w8vsRXhWTJcr-NHy-G0ShWsjawiv9RTBpj0hksPGZWlgMc1eQvm6JxmdWClOAKnZAUOb6SmO3n61ZUY62-utmsV3XD-30BxSAnJE4sV0Ybq8TbhPG8GUOPZATBqoNZknL56Fvr2bfmPhMNJj0UnORJ4gTuzz4S5W76BZaSmAX2NSXMonByEOQpYftBcRe0BuCcWKnNNfc9YOH5bSxdwtlmy"/>
+</div>
+<!-- Glassmorphism Floating Badge Example -->
+<div class="absolute bottom-4 left-4 glass-card p-4 rounded-xl flex items-center gap-3 animate-pulse">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+</div>
+<div>
+<p class="text-label-md font-bold text-primary">Nuevo Pedido</p>
+<p class="text-[12px] text-on-surface-variant">Vía WhatsApp</p>
+</div>
+</div>
+</div>
+<!-- Text Content Section -->
+<div class="text-center space-y-4">
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile md:text-headline-lg md:font-headline-lg text-on-background">
+                Vende por WhatsApp en segundos
+            </h1>
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed px-4">
+                Convierte tus chats en ventas reales. Tus clientes compran y tú recibes el pedido listo en tu WhatsApp.
+            </p>
+</div>
+</main>
+<!-- Footer Controls (Indicator & Button) -->
+<footer class="fixed bottom-0 left-0 w-full bg-background/80 backdrop-blur-xl px-margin-mobile py-8 flex flex-col items-center gap-6 z-40">
+<!-- Step Indicator -->
+<div class="flex items-center gap-2">
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-1.5 rounded-full bg-outline-variant"></div>
+<div class="h-1.5 w-1.5 rounded-full bg-outline-variant"></div>
+</div>
+<!-- Action Button -->
+<button class="w-full max-w-md bg-primary text-white py-4 px-8 rounded-xl font-headline-md shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95 duration-200 flex items-center justify-center gap-2">
+<span>Siguiente</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<!-- Hidden/Subtle Indicator Text -->
+<span class="text-label-md text-outline">1 de 3</span>
+</footer>
+<!-- Interactive micro-interactions script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nextBtn = document.querySelector('button.bg-primary');
+            const skipBtn = document.querySelector('button.text-on-surface-variant');
+
+            nextBtn.addEventListener('mouseenter', () => {
+                nextBtn.querySelector('span.material-symbols-outlined').style.transform = 'translateX(4px)';
+                nextBtn.querySelector('span.material-symbols-outlined').style.transition = 'transform 0.3s ease';
+            });
+
+            nextBtn.addEventListener('mouseleave', () => {
+                nextBtn.querySelector('span.material-symbols-outlined').style.transform = 'translateX(0px)';
+            });
+
+            // Page transition simulation
+            nextBtn.addEventListener('click', () => {
+                document.body.style.opacity = '0.5';
+                document.body.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => {
+                    document.body.style.opacity = '1';
+                }, 500);
+            });
+        });
+    </script>
+</body></html>

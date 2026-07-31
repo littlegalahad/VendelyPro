@@ -1,0 +1,366 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>VendelyPro - Reportes de Negocio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#d3e4fe",
+                    "outline": "#717782",
+                    "primary-container": "#3377bc",
+                    "tertiary": "#585d61",
+                    "secondary-fixed": "#dfe0ff",
+                    "primary-fixed-dim": "#a1c9ff",
+                    "on-tertiary-fixed-variant": "#42474b",
+                    "tertiary-fixed": "#dfe3e8",
+                    "surface-variant": "#d3e4fe",
+                    "on-surface-variant": "#414750",
+                    "on-tertiary-container": "#fcfcff",
+                    "surface-container": "#e5eeff",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary-fixed-variant": "#00487f",
+                    "outline-variant": "#c1c7d2",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#d8dafe",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#c3c7cc",
+                    "primary": "#075ea1",
+                    "on-tertiary-fixed": "#171c20",
+                    "primary-fixed": "#d2e4ff",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#001c37",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed-variant": "#414562",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#0b1c30",
+                    "on-secondary-fixed": "#151934",
+                    "surface": "#f8f9ff",
+                    "on-primary-container": "#fdfcff",
+                    "surface-tint": "#0e61a4",
+                    "on-background": "#0b1c30",
+                    "surface-dim": "#cbdbf5",
+                    "background": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#dce9ff",
+                    "inverse-primary": "#a1c9ff",
+                    "tertiary-container": "#707579",
+                    "secondary-fixed-dim": "#c1c4e7",
+                    "inverse-surface": "#213145",
+                    "secondary": "#595c7b",
+                    "on-secondary-container": "#5b5f7d",
+                    "surface-container-low": "#eff4ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "section-gap": "64px",
+                    "margin-desktop": "48px",
+                    "base": "8px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .ambient-shadow { box-shadow: 0 8px 32px -4px rgba(7, 94, 161, 0.08); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-icon { font-variation-settings: 'FILL' 1; }
+        
+        @keyframes grow { from { height: 0; } to { height: 100%; } }
+        .animate-grow { animation: grow 1s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface/80 backdrop-blur-xl shadow-sm shadow-primary/10">
+<div class="flex items-center gap-3">
+<img alt="VendelyPro Logo" class="h-10 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_lyNF0ruDsUmsZsHauhYG3H9ix2B9gRH7voqlKk1j6mNWcuQzbPXWH2J3hLTEUQip9EtLiux2ii_Lro4z1ASg-ur7PyJWt_Dqgs8sEU4P367bzynst9y1GfMoDtdNE58cZU27GghVfC9tkqRgsJ1W_NZjIOATPUHBn5v8K6O990VOSa6_33e18GCEoX3Opc-yici5uV9B-SMEwktiDjcc3jFnBIaYWOK-qZZC6qSGV8gQFlp77uQMrV0t_T-u4o8ksg">
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">VendelyPro</h1>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary-container/10 transition-colors active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="pt-20 px-4 md:px-margin-desktop max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="mb-8">
+<p class="font-label-md text-label-md text-primary mb-1">Análisis de Negocio</p>
+<h2 class="font-headline-lg text-headline-lg text-on-background">Panel de Reportes</h2>
+</div>
+<!-- Key Metrics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
+<!-- Metric Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow border border-outline-variant/30 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="p-2 bg-primary/10 text-primary rounded-lg material-symbols-outlined">payments</span>
+<span class="text-green-600 font-label-md text-xs bg-green-50 px-2 py-1 rounded-full">+12.5%</span>
+</div>
+<p class="text-on-surface-variant font-label-md text-sm">Ingresos Totales</p>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">$45,230.00</h3>
+</div>
+</div>
+<!-- Metric Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow border border-outline-variant/30 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="p-2 bg-primary/10 text-primary rounded-lg material-symbols-outlined">confirmation_number</span>
+<span class="text-green-600 font-label-md text-xs bg-green-50 px-2 py-1 rounded-full">+5.2%</span>
+</div>
+<p class="text-on-surface-variant font-label-md text-sm">Ticket Promedio</p>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">$1,240.00</h3>
+</div>
+</div>
+<!-- Metric Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow border border-outline-variant/30 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="p-2 bg-primary/10 text-primary rounded-lg material-symbols-outlined">shopping_bag</span>
+<span class="text-red-600 font-label-md text-xs bg-red-50 px-2 py-1 rounded-full">-2.4%</span>
+</div>
+<p class="text-on-surface-variant font-label-md text-sm">Pedidos Totales</p>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">148</h3>
+</div>
+</div>
+<!-- Metric Card 4 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow border border-outline-variant/30 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<span class="p-2 bg-primary/10 text-primary rounded-lg material-symbols-outlined">group</span>
+<span class="text-green-600 font-label-md text-xs bg-green-50 px-2 py-1 rounded-full">+18.1%</span>
+</div>
+<p class="text-on-surface-variant font-label-md text-sm">Nuevos Clientes</p>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">32</h3>
+</div>
+</div>
+</div>
+<!-- Main Analytics Section (Bento Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Sales Chart (Large Card) -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-xl ambient-shadow border border-outline-variant/30">
+<div class="flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
+<div>
+<h4 class="font-headline-md text-on-surface">Ventas por Día</h4>
+<p class="text-on-surface-variant text-label-md">Tendencia de ingresos en la última semana</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface-variant font-label-md text-xs hover:bg-primary-container/10 transition-colors">Mensual</button>
+<button class="px-4 py-2 rounded-lg bg-primary text-white font-label-md text-xs shadow-md shadow-primary/20 transition-all active:scale-95">Semanal</button>
+</div>
+</div>
+<!-- Custom Bar Chart Simulation -->
+<div class="relative h-64 w-full flex items-end justify-between gap-2 md:gap-4 border-b border-outline-variant">
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-[#387bc0]/20 rounded-t-lg group-hover:bg-[#387bc0]/40 transition-all h-[40%] animate-grow"></div>
+<span class="mt-2 text-[10px] md:text-xs text-on-surface-variant font-medium">LUN</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-[#387bc0]/40 rounded-t-lg group-hover:bg-[#387bc0]/60 transition-all h-[65%] animate-grow" style="animation-delay: 0.1s;"></div>
+<span class="mt-2 text-[10px] md:text-xs text-on-surface-variant font-medium">MAR</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-[#387bc0]/30 rounded-t-lg group-hover:bg-[#387bc0]/50 transition-all h-[50%] animate-grow" style="animation-delay: 0.2s;"></div>
+<span class="mt-2 text-[10px] md:text-xs text-on-surface-variant font-medium">MIE</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-[#387bc0] rounded-t-lg group-hover:opacity-80 transition-all h-[95%] animate-grow" style="animation-delay: 0.3s;"></div>
+<span class="mt-2 text-[10px] md:text-xs text-primary font-bold">JUE</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-[#387bc0]/50 rounded-t-lg group-hover:bg-[#387bc0]/70 transition-all h-[75%] animate-grow" style="animation-delay: 0.4s;"></div>
+<span class="mt-2 text-[10px] md:text-xs text-on-surface-variant font-medium">VIE</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-[#387bc0]/25 rounded-t-lg group-hover:bg-[#387bc0]/45 transition-all h-[45%] animate-grow" style="animation-delay: 0.5s;"></div>
+<span class="mt-2 text-[10px] md:text-xs text-on-surface-variant font-medium">SAB</span>
+</div>
+<div class="flex-1 flex flex-col items-center group">
+<div class="w-full bg-[#387bc0]/15 rounded-t-lg group-hover:bg-[#387bc0]/35 transition-all h-[30%] animate-grow" style="animation-delay: 0.6s;"></div>
+<span class="mt-2 text-[10px] md:text-xs text-on-surface-variant font-medium">DOM</span>
+</div>
+</div>
+</div>
+<!-- Top Products (Side Card) -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow border border-outline-variant/30 h-full">
+<div class="mb-6">
+<h4 class="font-headline-md text-on-surface">Top Productos</h4>
+<p class="text-on-surface-variant text-label-md">Más vendidos este periodo</p>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="High quality professional studio photograph of a premium leather laptop sleeve on a minimalist desk environment with soft side lighting and corporate blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyEbgR0PLWB3TxTDCdWpC9gCD0OYlT-bpZeVDhW5lTNOz3RwIKYC3mX5Z7vha26yiOZePWWJcQiPqFNGyotBxwKbxaCOgzJ50I56H8G71bLHCNhcfrfN2x1uG58FnXDDhF9cPlJnvX6SeQXPV9dT0oGMJZqdqAGNmmFOgxXow2kECPXnlZAkwLicL-by2Idt-evw6u-xKcnZyYV5mqxMkjAD6Sw3gIBEOWsegVXkosaiMtsuHHseA0">
+</div>
+<div class="flex-1">
+<p class="font-label-md text-sm text-on-surface">Funda Laptop Pro</p>
+<p class="text-xs text-on-surface-variant">84 Unidades</p>
+</div>
+<p class="font-bold text-primary">$2,450</p>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Minimalist professional mousepad and wireless ergonomic mouse setup on a clean white surface with sharp shadows and a professional corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfK-uBAg7J-t5BxjXSzCHuZ76q3PEFVNq3adw5pFP9HcmrGnV5xuAZBJwenYhyI5pKH-RcJfenfmwkJgPEIRnOP1QfDkP-kuFVKuPpIkHQf7NsFI5Z1MYBHcSY8GUtS9p7wit5Rdo0CBXFZqDCrlUq00gMzC72j0hLgNy0vTFcRQwFFnccx69kp1IJIFm2N1cbaUGHGvgPB1v0a1NYL6kd64SbINFqYdxOwezhPfgW8XAx7K0dwRnf">
+</div>
+<div class="flex-1">
+<p class="font-label-md text-sm text-on-surface">Mousepad Ergo</p>
+<p class="text-xs text-on-surface-variant">62 Unidades</p>
+</div>
+<p class="font-bold text-primary">$890</p>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="High tech minimalist mechanical keyboard with aluminum frame and subtle blue backlighting, macro photography focused on the switches, premium feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGHAdT6gNv3wIk0jD6zMnRwf7R4hceget9R5R8pPC5H_xhAcMCiW9K449Cf4vzPigfIxZZKqeTT4Cqx16UzxRyfse28jS-xKUnhq0zSSt4NJcCSKpxg1eF8vTjD9rJIS4JChek-9zuopIqb5nMqp3D4SF8LSBCCPnqYD8otszGpbig8Vg7FepfHgPOc6sew71UNaUDJxEqfYu-G210yl2Iutm0wfhq3gI0SfObixVmtevp49SzYVZN">
+</div>
+<div class="flex-1">
+<p class="font-label-md text-sm text-on-surface">Teclado V-Core</p>
+<p class="text-xs text-on-surface-variant">45 Unidades</p>
+</div>
+<p class="font-bold text-primary">$5,200</p>
+</div>
+</div>
+<button class="w-full mt-6 py-3 border border-primary/20 text-primary font-label-md text-sm rounded-xl hover:bg-primary/5 transition-all active:scale-95">
+                    Ver Inventario Completo
+                </button>
+</div>
+</div>
+<!-- Category Distribution & Detailed Table -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter mt-gutter">
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow border border-outline-variant/30">
+<h4 class="font-headline-md text-on-surface mb-6">Desempeño de Categorías</h4>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between font-label-md text-sm">
+<span>Electrónica</span>
+<span class="text-primary font-bold">45%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 45%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-label-md text-sm">
+<span>Accesorios</span>
+<span class="text-primary font-bold">30%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary/70 rounded-full" style="width: 30%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between font-label-md text-sm">
+<span>Software</span>
+<span class="text-primary font-bold">25%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary/40 rounded-full" style="width: 25%;"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl ambient-shadow border border-outline-variant/30 overflow-hidden">
+<div class="p-6 border-b border-outline-variant/30 flex justify-between items-center">
+<h4 class="font-headline-md text-on-surface">Pedidos Recientes</h4>
+<span class="text-xs text-primary font-bold cursor-pointer hover:underline">Exportar CSV</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low text-on-surface-variant font-label-md text-xs">
+<tr>
+<th class="px-6 py-3">ID Pedido</th>
+<th class="px-6 py-3">Estado</th>
+<th class="px-6 py-3 text-right">Monto</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20">
+<tr class="hover:bg-surface-container-high/30 transition-colors">
+<td class="px-6 py-4 font-label-md text-sm">#ORD-9021</td>
+<td class="px-6 py-4">
+<span class="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-[10px] font-bold">Entregado</span>
+</td>
+<td class="px-6 py-4 text-right font-bold text-sm">$1,250.00</td>
+</tr>
+<tr class="hover:bg-surface-container-high/30 transition-colors">
+<td class="px-6 py-4 font-label-md text-sm">#ORD-9022</td>
+<td class="px-6 py-4">
+<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-lg text-[10px] font-bold">En Camino</span>
+</td>
+<td class="px-6 py-4 text-right font-bold text-sm">$890.00</td>
+</tr>
+<tr class="hover:bg-surface-container-high/30 transition-colors">
+<td class="px-6 py-4 font-label-md text-sm">#ORD-9023</td>
+<td class="px-6 py-4">
+<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-lg text-[10px] font-bold">Procesando</span>
+</td>
+<td class="px-6 py-4 text-right font-bold text-sm">$3,420.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<!-- active_navigation: "Reportes" matches current screen intent -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface/90 backdrop-blur-3xl rounded-t-xl shadow-[0_-4px_12px_rgba(7,94,161,0.08)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl">menu_book</span>
+<span class="font-label-md text-[10px] mt-1">Catálogo</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl">shopping_cart</span>
+<span class="font-label-md text-[10px] mt-1">Carrito</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl">receipt_long</span>
+<span class="font-label-md text-[10px] mt-1">Pedidos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl">inventory_2</span>
+<span class="font-label-md text-[10px] mt-1">Productos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/10 rounded-xl px-3 py-1 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl active-icon">analytics</span>
+<span class="font-label-md text-[10px] mt-1">Reportes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<span class="font-label-md text-[10px] mt-1">Ajustes</span>
+</a>
+</nav>
+</body></html>

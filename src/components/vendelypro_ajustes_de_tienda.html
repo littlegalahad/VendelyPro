@@ -1,0 +1,333 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ajustes - VendelyPro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "outline": "#717782",
+                        "primary-container": "#3377bc",
+                        "tertiary": "#585d61",
+                        "secondary-fixed": "#dfe0ff",
+                        "primary-fixed-dim": "#a1c9ff",
+                        "on-tertiary-fixed-variant": "#42474b",
+                        "tertiary-fixed": "#dfe3e8",
+                        "surface-variant": "#d3e4fe",
+                        "on-surface-variant": "#414750",
+                        "on-tertiary-container": "#fcfcff",
+                        "surface-container": "#e5eeff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed-variant": "#00487f",
+                        "outline-variant": "#c1c7d2",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#d8dafe",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#c3c7cc",
+                        "primary": "#075ea1",
+                        "on-tertiary-fixed": "#171c20",
+                        "primary-fixed": "#d2e4ff",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#001c37",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#414562",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-fixed": "#151934",
+                        "surface": "#f8f9ff",
+                        "on-primary-container": "#fdfcff",
+                        "surface-tint": "#0e61a4",
+                        "on-background": "#0b1c30",
+                        "surface-dim": "#cbdbf5",
+                        "background": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-primary": "#a1c9ff",
+                        "tertiary-container": "#707579",
+                        "secondary-fixed-dim": "#c1c4e7",
+                        "inverse-surface": "#213145",
+                        "secondary": "#595c7b",
+                        "on-secondary-container": "#5b5f7d",
+                        "surface-container-low": "#eff4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "section-gap": "64px",
+                        "margin-desktop": "48px",
+                        "base": "8px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .ambient-shadow {
+            box-shadow: 0 10px 30px -5px rgba(7, 94, 161, 0.08);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+<!-- Top AppBar (JSON Content) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-surface/80 backdrop-blur-xl shadow-sm shadow-primary/10">
+<div class="flex items-center gap-3">
+<img alt="VendelyPro Logo" class="h-10 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfkm8oQAsmYS_Up2XaSqwDrLBmVxk5hIEAh1lV4d7rskrs1OFCqUToLyl8Bc8IpXZdOQD5mAYZ0JypiPf-zGSvwy0AADf7wn4YKj0ZAh3p8iPrpXdOMVU-4vyLwVq3IifFu-11bkf0cASLu4LHJI083tMu51hUl7T_OFiG1SIlZFGcN0lp_Q7IUVbZ7qzetQh-NY0CMmwoxGAfjOVeU5XvuBTXyUgqQ77AwEYHkYVoIW2jSPCEp3xsCRMe56wbT3zotw">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Ajustes</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-primary-container/10 rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center border-2 border-surface shadow-sm overflow-hidden" data-alt="A professional headshot of a smiling business executive with short hair, wearing a navy blazer and a crisp white shirt. The lighting is soft and corporate, set against a clean, out-of-focus office background with blue and gray tones. The style is modern, sharp, and authoritative, matching a high-end SaaS platform aesthetic.">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1uu8mXhjt4088YD4ro7JV3qBKhe-I8Spku8OqPt192VSISV4PcmoCvMEEExsvC0UbSHULan6wn_xpTFh3W5CIzVxWbQrnKA-RXgzIQMzS1Cl2L24TioLPJnBL2xAzzsIzgTXXLspBoaCuUijbX81yb3pb3TvswmJHZKUlsOzasxFEbNas_M-VF35a9yFLMoo0n0ETz43lv-gW6FQKbxnqpt786rVeBlYMNu8OfG7XvdGLUD0olHYK">
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pt-24 px-margin-mobile max-w-screen-md mx-auto">
+<!-- User Profile Quick Card -->
+<div class="glass-card ambient-shadow rounded-xl p-6 mb-8 flex items-center gap-4 transition-transform hover:scale-[1.01]">
+<div class="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">storefront</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">TechSolutions Pro S.A.</h2>
+<p class="text-on-surface-variant font-label-md">Plan Enterprise • ID: #VP-88219</p>
+</div>
+<button class="ml-auto p-2 text-primary hover:bg-primary-container/10 rounded-full transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<!-- Categories -->
+<div class="space-y-6">
+<!-- Store Profile -->
+<section>
+<h3 class="text-on-surface-variant font-label-md uppercase tracking-wider mb-3 px-2">Perfil de la Tienda</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">info</span>
+<span class="font-body-md text-on-surface">Información Básica</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<div class="h-[1px] bg-outline-variant mx-4"></div>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">location_on</span>
+<span class="font-body-md text-on-surface">Direcciones y Sucursales</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<div class="h-[1px] bg-outline-variant mx-4"></div>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">schedule</span>
+<span class="font-body-md text-on-surface">Horarios de Atención</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Payments -->
+<section>
+<h3 class="text-on-surface-variant font-label-md uppercase tracking-wider mb-3 px-2">Pagos y Facturación</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">credit_card</span>
+<span class="font-body-md text-on-surface">Métodos de Pago</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-primary-container/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Activo</span>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+</button>
+<div class="h-[1px] bg-outline-variant mx-4"></div>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">receipt_long</span>
+<span class="font-body-md text-on-surface">Facturas y Suscripción</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<div class="h-[1px] bg-outline-variant mx-4"></div>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">currency_exchange</span>
+<span class="font-body-md text-on-surface">Moneda e Impuestos</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Design -->
+<section>
+<h3 class="text-on-surface-variant font-label-md uppercase tracking-wider mb-3 px-2">Diseño y Personalización</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">palette</span>
+<span class="font-body-md text-on-surface">Colores y Tipografía</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<div class="h-[1px] bg-outline-variant mx-4"></div>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">web</span>
+<span class="font-body-md text-on-surface">Banner y Hero Section</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<div class="h-[1px] bg-outline-variant mx-4"></div>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">language</span>
+<span class="font-body-md text-on-surface">Dominio Personalizado</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Account -->
+<section>
+<h3 class="text-on-surface-variant font-label-md uppercase tracking-wider mb-3 px-2">Cuenta y Seguridad</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">lock</span>
+<span class="font-body-md text-on-surface">Seguridad y Contraseña</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<div class="h-[1px] bg-outline-variant mx-4"></div>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">group</span>
+<span class="font-body-md text-on-surface">Gestión de Equipo</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<div class="h-[1px] bg-outline-variant mx-4"></div>
+<button class="w-full flex items-center justify-between p-4 hover:bg-red-50 transition-colors group">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-error group-hover:scale-110 transition-transform">logout</span>
+<span class="font-body-md text-error">Cerrar Sesión</span>
+</div>
+</button>
+</div>
+</section>
+</div>
+<!-- App Info -->
+<div class="mt-12 mb-8 text-center">
+<p class="text-outline text-label-md">VendelyPro v3.2.4 (Build 4482)</p>
+<p class="text-outline-variant text-label-md mt-1">Hecho con ❤️ para emprendedores</p>
+</div>
+</main>
+<!-- Bottom Navigation Bar (JSON Content + Logic) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface/90 backdrop-blur-3xl shadow-[0_-4px_12px_rgba(7,94,161,0.08)] rounded-t-xl">
+<!-- Catálogo -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md mt-1">Catálogo</span>
+</a>
+<!-- Carrito -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-label-md text-label-md mt-1">Carrito</span>
+</a>
+<!-- Pedidos -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md text-label-md mt-1">Pedidos</span>
+</a>
+<!-- Productos (Context addition) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-md text-label-md mt-1">Productos</span>
+</a>
+<!-- Reportes -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md mt-1">Reportes</span>
+</a>
+<!-- Ajustes (ACTIVE) -->
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/10 rounded-xl px-3 py-1 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-md text-label-md mt-1">Ajustes</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction: Hover effects for list items
+        document.querySelectorAll('button.w-full').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                const icon = btn.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+            });
+            btn.addEventListener('mouseleave', () => {
+                const icon = btn.querySelector('.material-symbols-outlined');
+                // Only reset if it's not the active one or doesn't mandate fill
+                if (!icon.closest('.text-error')) {
+                   icon.style.fontVariationSettings = "'FILL' 0";
+                }
+            });
+        });
+
+        // Simple scale animation on click for feedback
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('button, a');
+            if (target) {
+                target.classList.add('scale-95');
+                setTimeout(() => target.classList.remove('scale-95'), 100);
+            }
+        });
+    </script>
+</body></html>
