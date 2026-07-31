@@ -1756,8 +1756,8 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
   if (customTextColor) containerStyle.color = customTextColor;
 
   const containerClass = store.custom_bg_color
-    ? `min-h-screen ${customTextColor ? '' : theme.text} flex justify-center`
-    : `min-h-screen bg-gradient-to-br ${theme.gradientBg} ${customTextColor ? '' : theme.text} flex justify-center`;
+    ? `h-screen overflow-hidden ${customTextColor ? '' : theme.text} flex justify-center`
+    : `h-screen overflow-hidden bg-gradient-to-br ${theme.gradientBg} ${customTextColor ? '' : theme.text} flex justify-center`;
 
   const addToCart = (product: Product) => {
     setCart(prev => {
@@ -1771,7 +1771,7 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
 
   return (
     <div className={containerClass} style={containerStyle}>
-      <div className="w-full max-w-md min-h-screen flex flex-col relative shadow-2xl">
+      <div className="w-full max-w-md h-full flex flex-col relative shadow-2xl">
         <header className={`sticky top-0 z-40 ${theme.nav} px-3.5 py-3 shadow-md flex items-center justify-between border-b`}>
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center shadow-md shrink-0 bg-white/5 border border-white/10">
