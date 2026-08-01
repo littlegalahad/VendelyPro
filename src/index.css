@@ -2,6 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Material Symbols icon font */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* MD3 color tokens — VendelyPro brand */
+:root {
+  --md-primary: #075ea1;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #d2e4ff;
+  --md-on-primary-container: #075ea1;
+  --md-surface: #f8f9ff;
+  --md-surface-container-lowest: #ffffff;
+  --md-surface-container-low: #f0f3fa;
+  --md-surface-container: #e8edf5;
+  --md-surface-container-high: #dde3ed;
+  --md-surface-container-highest: #d2dae6;
+  --md-on-surface: #0b1c30;
+  --md-on-surface-variant: #414750;
+  --md-outline: #717579;
+  --md-outline-variant: #c1c7d2;
+  --md-secondary: #5b5f71;
+  --md-secondary-container: #e0e1f9;
+  --md-on-secondary-container: #181a2c;
+  --md-error: #ba1a1a;
+  --md-error-container: #ffdad6;
+  --md-on-error-container: #410002;
+  --md-tertiary: #6d5676;
+  --md-tertiary-fixed: #f3daff;
+  --md-on-tertiary-fixed-variant: #533254;
+}
+
 /* Ocultar scrollbars en toda la app sin perder la funcionalidad de scroll */
 * {
   scrollbar-width: none !important;
@@ -12,4 +56,42 @@
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.glass-effect {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.premium-shadow {
+  box-shadow: 0 4px 24px rgba(7, 94, 161, 0.08), 0 1px 4px rgba(7, 94, 161, 0.04);
+}
+.shadow-ambient {
+  box-shadow: 0 2px 12px rgba(7, 94, 161, 0.06);
+}
+.ambient-shadow {
+  box-shadow: 0 4px 20px rgba(7, 94, 161, 0.06);
+}
+.active-tab-indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--md-primary);
+}
+
+/* Dark theme overrides for glass-card */
+.dark-theme .glass-card {
+  background: rgba(15, 29, 51, 0.85);
+}
+.dark-theme .glass-effect {
+  backdrop-filter: blur(16px);
 }

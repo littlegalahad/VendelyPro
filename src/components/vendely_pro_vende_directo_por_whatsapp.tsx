@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Trash2, Pencil, X, ImageIcon, Tag, Lock, Store as StoreIcon, Palette,
-  Type, MessageCircle, ChevronRight, CheckCircle, ArrowLeft,
+  Type, MessageCircle, ChevronRight, ChevronLeft, CheckCircle, ArrowLeft,
   Truck, ShoppingBag, Search, FolderPlus, Layers, Check, Zap, Crown,
   Send,
   Package, CheckCircle2, QrCode, Settings, Clock, Smartphone,
@@ -10,7 +10,7 @@ import {
   LayoutGrid, Rows3, Columns3, Image as ImageIconBanner, Droplet, AlignLeft,
   KeyRound, Grid2x2, Grid3x3, List, GalleryVerticalEnd, Square, BookOpen,
   Phone, Upload, MapPin, User, Receipt, Sparkles, ZoomIn, FileText, TrendingUp, Calendar, DollarSign, ShoppingCart,
-  CloudCog
+  CloudCog, RefreshCw
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import type { Store, Product, Category, Banner, Order, OrderItem, CartItem, PlanType } from '@/lib/types';
@@ -503,8 +503,8 @@ const PlansView: React.FC<PlansViewProps> = ({ currentPlan, productCount, banner
         </div>
         <div>
           <div className={`flex justify-between text-[11px] mb-1 font-semibold ${theme.subtext}`}>
-            <span>Productos: {productCount} / {PLAN_LIMITS[currentPlan].maxProducts === Infinity ? '\u221e' : PLAN_LIMITS[currentPlan].maxProducts}</span>
-            <span>Banners: {bannerCount} / {PLAN_LIMITS[currentPlan].maxBanners === Infinity ? '\u221e' : PLAN_LIMITS[currentPlan].maxBanners}</span>
+            <span>Productos: {productCount} / {PLAN_LIMITS[currentPlan].maxProducts === Infinity ? '∞' : PLAN_LIMITS[currentPlan].maxProducts}</span>
+            <span>Banners: {bannerCount} / {PLAN_LIMITS[currentPlan].maxBanners === Infinity ? '∞' : PLAN_LIMITS[currentPlan].maxBanners}</span>
           </div>
           <div className={`w-full ${theme.sectionBg} h-2 rounded-full overflow-hidden`}>
             <div className={`h-full transition-all ${productCount >= PLAN_LIMITS[currentPlan].maxProducts ? 'bg-amber-500' : theme.accentSolid}`}
@@ -942,95 +942,68 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      <div>
-        <p className={`text-xs font-bold ${theme.accent} mb-1 uppercase tracking-wider`}>Análisis de Negocio</p>
-        <h2 className="text-2xl font-bold tracking-tight">Panel de Pedidos</h2>
-      </div>
-
-      {/* Key metrics grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
-          <div className="flex justify-between items-start mb-3">
-            <span className={`p-2 ${theme.accentBg} ${theme.cardRadius} ${theme.accent}`}><DollarSign size={18} /></span>
-          </div>
-          <p className={`text-xs ${theme.subtext}`}>Ingresos Totales</p>
-          <h3 className={`text-lg font-bold mt-1 ${theme.accent}`}>{store.currency_symbol}{totalRevenue.toFixed(2)}</h3>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-on-surface">Gestión de Pedidos</h1>
+          <p className="text-sm text-on-surface-variant mt-1">Revisa y gestiona los pedidos recibidos vía WhatsApp.</p>
         </div>
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
-          <div className="flex justify-between items-start mb-3">
-            <span className={`p-2 ${theme.accentBg} ${theme.cardRadius} ${theme.accent}`}><ShoppingCart size={18} /></span>
-          </div>
-          <p className={`text-xs ${theme.subtext}`}>Pedidos Totales</p>
-          <h3 className="text-lg font-bold mt-1">{orders.length}</h3>
-        </div>
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
-          <div className="flex justify-between items-start mb-3">
-            <span className={`p-2 ${theme.accentBg} ${theme.cardRadius} ${theme.accent}`}><Receipt size={18} /></span>
-          </div>
-          <p className={`text-xs ${theme.subtext}`}>Ticket Promedio</p>
-          <h3 className={`text-lg font-bold mt-1 ${theme.accent}`}>{store.currency_symbol}{avgTicket.toFixed(2)}</h3>
-        </div>
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
-          <div className="flex justify-between items-start mb-3">
-            <span className={`p-2 ${theme.accentBg} ${theme.cardRadius} ${theme.accent}`}><CheckCircle2 size={18} /></span>
-          </div>
-          <p className={`text-xs ${theme.subtext}`}>Entregados</p>
-          <h3 className="text-lg font-bold mt-1">{deliveredCount}</h3>
-        </div>
+        <button onClick={onRefresh} className="flex items-center gap-2 px-4 py-2 bg-surface-container-low text-primary font-bold text-xs rounded-xl hover:bg-surface-container transition-all border border-primary/10 active:scale-95">
+          <RefreshCw size={16} /> Actualizar
+        </button>
       </div>
 
       {/* Status filter */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {(['all', 'pending', 'preparing', 'shipped', 'delivered'] as const).map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
-            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all active:scale-95 ${statusFilter === s ? theme.primary : `${theme.card} ${theme.borderSubtle} opacity-60`}`}>
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${statusFilter === s ? 'bg-primary text-white shadow-md' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-highest'}`}>
             {s === 'all' ? 'Todos' : STATUS_LABELS[s]}
           </button>
         ))}
       </div>
 
       {filteredOrders.length === 0 ? (
-        <div className={`text-center py-16 space-y-3 opacity-50 ${theme.subtext}`}><Clock size={40} className="mx-auto" /><p className="text-xs font-medium">No hay pedidos {statusFilter !== 'all' ? 'con este estado' : 'todavía'}.</p></div>
+        <div className="text-center py-16 space-y-3 opacity-50 text-on-surface-variant"><Clock size={40} className="mx-auto" /><p className="text-xs font-medium">No hay pedidos {statusFilter !== 'all' ? 'con este estado' : 'todavía'}.</p></div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredOrders.map(order => {
             const statusIcon = order.status === 'pending' ? <MessageCircle size={20} /> : order.status === 'shipped' ? <Truck size={20} /> : order.status === 'delivered' ? <CheckCircle2 size={20} /> : <Clock size={20} />;
-            const statusBg = order.status === 'pending' ? 'bg-[#25D366]/10 text-[#25D366]' : order.status === 'shipped' ? `${theme.accentBg} ${theme.accent}` : order.status === 'delivered' ? 'bg-green-100 text-green-600' : `${theme.sectionBg} ${theme.subtext}`;
+            const statusBg = order.status === 'pending' ? 'bg-[#25D366]/10 text-[#25D366]' : order.status === 'shipped' ? 'bg-primary/10 text-primary' : order.status === 'delivered' ? 'bg-green-100 text-green-600' : 'bg-surface-container text-on-surface-variant';
+            const badgeCls = order.status === 'pending' ? 'bg-error-container text-on-error-container' : order.status === 'shipped' ? 'bg-secondary-container text-on-secondary-container' : order.status === 'delivered' ? 'bg-surface-container-highest text-primary' : 'bg-surface-container text-on-surface-variant';
             return (
               <div key={order.id}
-                className={`${theme.card} border ${theme.borderSubtle} ${theme.cardRadius} p-5 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col`}>
+                className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-5 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${statusBg}`}>{statusIcon}</div>
                     <div>
-                      <p className={`text-[10px] font-bold ${theme.subtext} uppercase tracking-wider`}>#{order.id.slice(-5)}</p>
-                      <h4 className="font-bold text-sm leading-tight">{order.customer_name}</h4>
+                      <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">#{order.id.slice(-5)}</p>
+                      <h4 className="font-bold text-sm leading-tight text-on-surface">{order.customer_name}</h4>
                     </div>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap ${STATUS_COLORS[order.status]}`}>{STATUS_LABELS[order.status]}</span>
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase whitespace-nowrap ${badgeCls}`}>{STATUS_LABELS[order.status]}</span>
                 </div>
                 <div className="space-y-1.5 mb-4 flex-grow">
                   <div className="flex justify-between text-xs">
-                    <span className={theme.subtext}>Productos:</span>
-                    <span className="font-medium">{order.items.length} items</span>
+                    <span className="text-on-surface-variant">Productos:</span>
+                    <span className="font-medium text-on-surface">{order.items.length} items</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className={theme.subtext}>Pago:</span>
-                    <span className="font-medium uppercase">{order.payment_method}</span>
+                    <span className="text-on-surface-variant">Pago:</span>
+                    <span className="font-medium text-on-surface uppercase">{order.payment_method}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className={theme.subtext}>Total:</span>
-                    <span className={`font-bold ${theme.accent}`}>{store.currency_symbol}{Number(order.total).toFixed(2)}</span>
+                    <span className="text-on-surface-variant">Total:</span>
+                    <span className="font-bold text-primary">{store.currency_symbol}{Number(order.total).toFixed(2)}</span>
                   </div>
                 </div>
-                <div className={`pt-3 border-t ${theme.borderSubtle} flex gap-2`}>
-                  <button onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }}
-                    className={`flex-1 py-2.5 ${theme.cardRadius} text-xs font-bold border ${theme.borderSubtle} ${theme.accent} hover:bg-[#075ea1]/5 transition-colors`}>
+                <div className="pt-3 border-t border-outline-variant/20 flex gap-2">
+                  <button onClick={() => setSelectedOrder(order)}
+                    className="flex-1 py-2.5 text-primary font-bold text-xs border border-primary rounded-lg hover:bg-primary/5 transition-colors">
                     Ver Detalles
                   </button>
                   <a href={`https://wa.me/${order.phone?.replace(/[^0-9]/g, '') || ''}`} target="_blank" rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className={`w-10 h-10 flex items-center justify-center bg-[#25D366] text-white ${theme.cardRadius} active:scale-90 transition-transform shrink-0`}>
+                    className="w-10 h-10 flex items-center justify-center bg-[#25D366] text-white rounded-lg active:scale-90 transition-transform shrink-0">
                     <Send size={16} />
                   </a>
                 </div>
@@ -1086,216 +1059,72 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       <div>
-        <p className={`text-xs font-bold ${theme.accent} mb-1 uppercase tracking-wider`}>Configuración</p>
-        <h2 className="text-2xl font-bold tracking-tight">Ajustes</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-on-surface">Ajustes</h2>
       </div>
 
-      {/* Store profile quick card - matching mockup */}
-      <div className={`${theme.card} ${theme.cardRadius} p-5 flex items-center gap-4 shadow-md hover:scale-[1.01] transition-transform border ${theme.borderSubtle}`}>
-        <div className={`w-16 h-16 rounded-full ${theme.sectionBg} flex items-center justify-center ${theme.accent} shrink-0 overflow-hidden`}>
+      {/* Store profile quick card - matching Ajustes.html mockup */}
+      <div className="glass-card ambient-shadow rounded-xl p-5 mb-2 flex items-center gap-4 transition-transform hover:scale-[1.01] border border-outline-variant/30">
+        <div className="w-16 h-16 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container shrink-0 overflow-hidden">
           {store.logo ? <img src={store.logo} alt={store.name} className="w-full h-full object-cover" /> : <StoreIcon size={28} />}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-base truncate">{store.name}</h3>
-          <p className={`text-xs ${theme.subtext}`}>Plan {PLAN_LIMITS[store.plan].name} &bull; ID: #{store.id.slice(-6)}</p>
+          <h3 className="font-bold text-base text-on-surface truncate">{store.name}</h3>
+          <p className="text-xs text-on-surface-variant">Plan {PLAN_LIMITS[store.plan].name} &bull; ID: #{store.id.slice(-6)}</p>
         </div>
-        <button onClick={onUpgrade} className={`${theme.primary} px-3.5 py-2 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform shrink-0`}><Crown size={14} className="text-amber-400" /> Cambiar</button>
+        <button onClick={onUpgrade} className="bg-primary text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform shrink-0"><Crown size={14} className="text-amber-400" /> Cambiar</button>
       </div>
 
       {/* Section: Perfil de la Tienda */}
       <section>
-        <h3 className={`text-xs font-bold ${theme.subtext} uppercase tracking-wider mb-3 px-1`}>Perfil de la Tienda</h3>
-        <div className={`${theme.card} ${theme.cardRadius} border ${theme.borderSubtle} overflow-hidden shadow-md`}>
+        <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-3 px-1">Perfil de la Tienda</h3>
+        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-md">
           <div className="p-4 space-y-3.5">
-            <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Información de la tienda</p>
+            <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Información de la tienda</p>
             <div>
-              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Nombre de la tienda</label>
-              <input type="text" value={store.name} onChange={e => update({ name: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+              <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Nombre de la tienda</label>
+              <input type="text" value={store.name} onChange={e => update({ name: e.target.value })} className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
             </div>
             <div>
-              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Eslogan</label>
-              <input type="text" value={store.slogan} onChange={e => update({ slogan: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+              <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Eslogan</label>
+              <input type="text" value={store.slogan} onChange={e => update({ slogan: e.target.value })} className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
             </div>
             <div>
-              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Rubro / Giro</label>
-              <input type="text" value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })} placeholder="Ej: Ropa, Comida, Tecnología..." className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+              <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Rubro / Giro</label>
+              <input type="text" value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })} placeholder="Ej: Ropa, Comida, Tecnología..." className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
             </div>
             <div>
-              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>País</label>
+              <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">País</label>
               <select value={store.country || 'US'} onChange={e => {
                 const country = COUNTRIES.find(c => c.code === e.target.value);
                 update({ country: e.target.value, currency_symbol: country?.currency || '$' });
               }}
                 style={selectStyle(theme, customTextColor)}
-                className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1] font-medium`}>
+                className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
                 {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
               </select>
             </div>
             <div>
-              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Número de WhatsApp</label>
-              <input type="tel" inputMode="tel" value={store.whatsapp} onChange={e => update({ whatsapp: e.target.value })} placeholder="+51 999 888 777" className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+              <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Número de WhatsApp</label>
+              <input type="tel" inputMode="tel" value={store.whatsapp} onChange={e => update({ whatsapp: e.target.value })} placeholder="+51 999 888 777" className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
             </div>
             <div>
-              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Moneda</label>
-              <input type="text" value={store.currency_symbol} onChange={e => update({ currency_symbol: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+              <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Moneda</label>
+              <input type="text" value={store.currency_symbol} onChange={e => update({ currency_symbol: e.target.value })} className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section: Diseño y Personalización */}
-      <section>
-        <h3 className={`text-xs font-bold ${theme.subtext} uppercase tracking-wider mb-3 px-1`}>Diseño y Personalización</h3>
-        <div className="space-y-4">
-      {/* Logo de la tienda */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><ImageIcon size={14} /> Logo de la tienda</p>
-        <p className={`text-[11px] ${theme.subtext}`}>Sube el logo de tu tienda. Se mostrará en el encabezado de tu catálogo.</p>
-        <div className="flex items-center gap-3">
-          <div className={`w-20 h-20 ${theme.cardRadius} border-2 ${theme.borderSubtle} overflow-hidden flex items-center justify-center shrink-0 bg-black/10`}>
-            {store.logo ? <img src={store.logo} alt="Logo" className="w-full h-full object-cover" /> : <ImageIcon size={28} className={theme.subtext} />}
-          </div>
-          <div className="flex-1 space-y-2">
-            <label className={`${theme.primary} px-4 py-2.5 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 transition-opacity`}>
-              {logoUploading ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={15} />}
-              {logoUploading ? 'Subiendo...' : 'Subir logo'}
-              <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-            </label>
-            {store.logo && (
-              <button onClick={() => update({ logo: '' })} className={`w-full text-[10px] text-red-400 hover:underline font-bold`}>Quitar logo</button>
-            )}
-          </div>
-        </div>
+      {/* App info */}
+      <div className="text-center pt-4 pb-2">
+        <p className="text-outline text-xs">VendelyPro v3.2.4</p>
+        <p className="text-outline-variant text-xs mt-1">Hecho para emprendedores</p>
       </div>
-
-      {/* Pagos */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><CreditCard size={14} /> Métodos de pago</p>
-        <div className={`p-3 rounded-2xl ${theme.sectionBg} border ${theme.borderSubtle} space-y-2`}>
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold flex items-center gap-2"><Wallet size={14} className={theme.accent} /> Billetera digital</label>
-            <input type="checkbox" checked={payments.acceptsYape !== false} onChange={e => update({ payments: { ...payments, acceptsYape: e.target.checked } })} className="rounded focus:ring-0" />
-          </div>
-          <input type="text" placeholder="Número de billetera (ej. +1 555 0123)" value={payments.yapePlinNumber || ''} onChange={e => update({ payments: { ...payments, yapePlinNumber: e.target.value } })} className={`w-full ${theme.selectBg} border rounded-2xl p-2.5 text-xs outline-none`} />
-        </div>
-        <div className={`p-3 rounded-2xl ${theme.sectionBg} border ${theme.borderSubtle} space-y-2`}>
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold flex items-center gap-2"><CreditCard size={14} className={theme.accent} /> Tarjeta / Enlace de pago</label>
-            <input type="checkbox" checked={!!payments.acceptsCard} onChange={e => update({ payments: { ...payments, acceptsCard: e.target.checked } })} className="rounded focus:ring-0" />
-          </div>
-          <input type="text" placeholder="Stripe, PayPal, MercadoPago..." value={payments.cardPaymentLink || ''} onChange={e => update({ payments: { ...payments, cardPaymentLink: e.target.value } })} className={`w-full ${theme.selectBg} border rounded-2xl p-2.5 text-xs outline-none`} />
-        </div>
-        <div className={`p-3 rounded-2xl ${theme.sectionBg} border ${theme.borderSubtle} space-y-2`}>
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold flex items-center gap-2"><Building2 size={14} className={theme.accent} /> Transferencia bancaria</label>
-            <input type="checkbox" checked={payments.acceptsBankTransfer !== false} onChange={e => update({ payments: { ...payments, acceptsBankTransfer: e.target.checked } })} className="rounded focus:ring-0" />
-          </div>
-          <textarea rows={2} placeholder="Nombre del banco y número de cuenta" value={payments.bankAccountDetails || ''} onChange={e => update({ payments: { ...payments, bankAccountDetails: e.target.value } })} className={`w-full ${theme.selectBg} border rounded-2xl p-2.5 text-xs outline-none resize-none`} />
-        </div>
-        <div className={`p-3 rounded-2xl ${theme.sectionBg} border ${theme.borderSubtle} flex items-center justify-between`}>
-          <label className="text-xs font-bold flex items-center gap-2"><Banknote size={14} className={theme.accent} /> Pago contra entrega</label>
-          <input type="checkbox" checked={payments.acceptsCash !== false} onChange={e => update({ payments: { ...payments, acceptsCash: e.target.checked } })} className="rounded focus:ring-0" />
-        </div>
-      </div>
-
-      {/* Banners */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><ImageIconBanner size={14} /> Banners promocionales ({banners.length}/{planLimits.maxBanners === Infinity ? '\u221e' : planLimits.maxBanners})</p>
-        <label className={`flex items-center justify-center gap-2 ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold cursor-pointer hover:opacity-90 transition-opacity`}>
-          <ImageIcon size={16} /> Subir banner desde tu dispositivo
-          <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
-        </label>
-        {banners.length > 0 && (
-          <div className="space-y-2">
-            {banners.map(b => (
-              <div key={b.id} className={`relative ${theme.cardRadius} overflow-hidden border ${theme.borderSubtle} group`}>
-                <img src={b.image_url} alt="Banner" className="w-full h-20 object-cover" />
-                <button onClick={() => handleDeleteBanner(b.id)} className="absolute top-1.5 right-1.5 bg-red-500/80 text-white p-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12} /></button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Tipografía */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Type size={14} /> Tipografía</p>
-        <select value={store.font} onChange={e => update({ font: e.target.value })}
-          style={selectStyle(theme, customTextColor)}
-          className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none font-medium`}>
-          {AVAILABLE_FONTS.map(f => <option key={f.id} value={f.id} style={{ fontFamily: f.family }}>{f.name}</option>)}
-        </select>
-      </div>
-
-      {/* Tema visual */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Palette size={14} /> Tema visual</p>
-        <div className="grid grid-cols-2 gap-2.5">
-          {ALL_THEMES.map(t => (
-            <button key={t.id} onClick={() => update({ theme: t.id, custom_bg_color: null, custom_text_color: null, custom_accent_color: null })}
-              className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center justify-between transition-all ${store.theme === t.id && !store.custom_bg_color ? `${theme.accentBg} ring-2 ring-[#1E6FFF]/30` : `${theme.borderSubtle} hover:opacity-80`}`}>
-              <span className="truncate pr-1">{t.name}</span><span className="w-4 h-4 rounded-full border shadow-sm shrink-0" style={{ backgroundColor: t.color }} />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Colores personalizados */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Droplet size={14} /> Colores personalizados</p>
-        <p className={`text-[11px] ${theme.subtext}`}>Personaliza los colores de tu tienda. Estos anulan el tema seleccionado arriba.</p>
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-bold">Color de fondo</label>
-            <div className="flex items-center gap-2">
-              <input type="color" value={store.custom_bg_color || '#0A1628'} onChange={e => update({ custom_bg_color: e.target.value })} className="w-9 h-9 rounded-lg border-0 cursor-pointer bg-transparent" />
-              <button onClick={() => update({ custom_bg_color: null })} className={`text-[10px] ${theme.subtext} underline`}>Restablecer</button>
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-bold">Color del texto</label>
-            <div className="flex items-center gap-2">
-              <input type="color" value={store.custom_text_color || '#F1F5F9'} onChange={e => update({ custom_text_color: e.target.value })} className="w-9 h-9 rounded-lg border-0 cursor-pointer bg-transparent" />
-              <button onClick={() => update({ custom_text_color: null })} className={`text-[10px] ${theme.subtext} underline`}>Restablecer</button>
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-bold">Color de acento</label>
-            <div className="flex items-center gap-2">
-              <input type="color" value={store.custom_accent_color || '#1E6FFF'} onChange={e => update({ custom_accent_color: e.target.value })} className="w-9 h-9 rounded-lg border-0 cursor-pointer bg-transparent" />
-              <button onClick={() => update({ custom_accent_color: null })} className={`text-[10px] ${theme.subtext} underline`}>Restablecer</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Modelo de catálogo */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><LayoutGrid size={14} /> Modelo de catálogo</p>
-        <div className="grid grid-cols-2 gap-2.5">
-          {CATALOG_LAYOUTS.map(layout => {
-            const Icon = layout.icon;
-            return (
-              <button key={layout.id} onClick={() => update({ catalog_layout: layout.id })}
-                className={`p-3 ${theme.cardRadius} border text-left transition-all ${store.catalog_layout === layout.id ? `${theme.accentBg} ring-2 ring-[#1E6FFF]/30` : `${theme.borderSubtle} hover:opacity-80`}`}>
-                <Icon size={18} className={theme.accent} />
-                <p className="font-bold text-xs mt-1.5">{layout.name}</p>
-                <p className={`text-[10px] ${theme.subtext}`}>{layout.desc}</p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <CategoryManagerModal isOpen={showCatModal} onClose={() => setShowCatModal(false)} categories={categories} storeId={store.id} theme={theme} onSaved={onRefresh} customTextColor={customTextColor} />
-        </div>
-      </section>
     </div>
   );
 };
 
 // ============ VISTA CARRITO ============
-
 interface CartViewProps {
   cart: CartItem[]; store: Store; theme: ThemeDef;
   onUpdateQty: (id: string, delta: number) => void; onRemove: (id: string) => void;
@@ -1304,135 +1133,79 @@ interface CartViewProps {
 
 const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, onRemove, onClear, onBack, onOrder }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
-  const [address, setAddress] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'yape' | 'card' | 'cash' | 'bank'>('yape');
+  const [address, setAddress] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('delivery');
+  const [paymentMethod, setPaymentMethod] = useState('yape');
   const [paymentProof, setPaymentProof] = useState<string | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
-  const [orderSent, setOrderSent] = useState(false);
 
   const payments = store.payments || {};
   const subtotal = cart.reduce((sum, item) => {
     const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
-    return sum + price * item.quantity;
+    return sum + (price * item.quantity);
   }, 0);
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
 
-  const availableMethods: { id: 'yape' | 'card' | 'cash' | 'bank'; label: string; icon: any }[] = [];
-  if (payments.acceptsYape !== false) availableMethods.push({ id: 'yape', label: 'Billetera', icon: Wallet });
-  if (payments.acceptsCard) availableMethods.push({ id: 'card', label: 'Tarjeta', icon: CreditCard });
-  if (payments.acceptsBankTransfer !== false) availableMethods.push({ id: 'bank', label: 'Banco', icon: Building2 });
-  if (payments.acceptsCash !== false) availableMethods.push({ id: 'cash', label: 'Efectivo', icon: Banknote });
+  const availableMethods = [
+    { id: 'yape', label: 'Billetera', icon: Wallet, show: payments.acceptsYape !== false },
+    { id: 'bank', label: 'Transferencia', icon: Building2, show: payments.acceptsBankTransfer !== false },
+    { id: 'card', label: 'Tarjeta', icon: CreditCard, show: !!payments.acceptsCard },
+    { id: 'cash', label: 'Efectivo', icon: Banknote, show: payments.acceptsCash !== false },
+  ].filter(m => m.show);
+
+  const canProceedStep1 = customerName.trim().length > 0 && (deliveryMethod === 'pickup' || address.trim().length > 0);
 
   const handleProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { alert('La imagen es muy grande (máx 5MB)'); return; }
+    if (file.size > 2 * 1024 * 1024) { alert('La imagen no debe pesar más de 2MB.'); return; }
     setProofFile(file);
     const reader = new FileReader();
     reader.onload = () => setPaymentProof(reader.result as string);
     reader.readAsDataURL(file);
   };
 
-  const canProceedStep1 = customerName.trim().length >= 2 && (deliveryMethod === 'pickup' || address.trim().length >= 5);
-  const canProceedStep2 = availableMethods.length > 0;
-  const canSend = canProceedStep1 && canProceedStep2 && (paymentMethod !== 'cash' || true);
-
-  const payLabel = paymentMethod === 'yape' ? 'Billetera digital' : paymentMethod === 'card' ? 'Tarjeta' : paymentMethod === 'cash' ? 'Efectivo' : 'Transferencia bancaria';
-
-  const buildWhatsAppText = (paymentProofUrl?: string | null) => {
-    let text = `*NUEVO PEDIDO - ${store.name.toUpperCase()}*\n\n`;
-    text += `*Cliente:* ${customerName}\n`;
-    if (customerPhone) text += `*Teléfono:* ${customerPhone}\n`;
-    text += `*Entrega:* ${deliveryMethod === 'delivery' ? 'Delivery' : 'Recojo en tienda'}\n`;
-    if (deliveryMethod === 'delivery' && address) text += `*Dirección:* ${address}\n`;
-    text += `*Pago:* ${payLabel}\n`;
-    if (paymentProofUrl) text += `*Comprobante de pago:* ${paymentProofUrl}\n`;
-    text += `\n*DETALLE DEL PEDIDO:*\n`;
-    text += `${'─'.repeat(24)}\n`;
-    cart.forEach(item => {
-      const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
-      const lineTotal = price * item.quantity;
-      text += `${item.quantity}x ${item.name}\n   ${store.currency_symbol}${lineTotal.toFixed(2)}\n`;
-    });
-    text += `${'─'.repeat(24)}\n`;
-    text += `*TOTAL: ${store.currency_symbol}${subtotal.toFixed(2)}*\n\n`;
-    text += `*DATOS DE PAGO:*\n`;
-    if (paymentMethod === 'yape' && payments.yapePlinNumber) {
-      text += `Billetera: ${payments.yapePlinNumber}\n`;
-      if (payments.yapePlinHolder) text += `Titular: ${payments.yapePlinHolder}\n`;
-    }
-    if (paymentMethod === 'bank' && payments.bankAccountDetails) {
-      text += `Cuenta: ${payments.bankAccountDetails}\n`;
-    }
-    if (paymentMethod === 'card' && payments.cardPaymentLink) {
-      text += `Pagar con tarjeta: ${payments.cardPaymentLink}\n`;
-    }
-    if (paymentMethod === 'cash') {
-      text += `Pago en efectivo al momento de la entrega/recojo.\n`;
-    }
-    text += `\n_Pedido generado desde ${store.name}_`;
-    return text;
-  };
-
   const handleSend = async () => {
-    if (!canSend) return;
+    if (cart.length === 0) return;
     setSending(true);
-    let proofUrl: string | null = null;
-    if (proofFile) {
-      try {
-        proofUrl = await uploadPaymentProof(proofFile);
-      } catch {
-        setSending(false);
-        alert('No se pudo subir el comprobante. Intenta de nuevo.');
-        return;
-      }
-    }
-    const newOrder: Omit<Order, 'id' | 'store_id' | 'created_at'> = {
-      customer_name: customerName || 'Cliente WhatsApp',
-      phone: customerPhone || null,
-      delivery_method: deliveryMethod,
-      address: deliveryMethod === 'delivery' ? address : null,
-      payment_method: paymentMethod,
-      items: cart.map(i => ({ id: i.id, name: i.name, price: (i.is_offer && i.offer_price) ? i.offer_price : i.price, quantity: i.quantity, image: i.image })),
-      total: subtotal, payment_proof: proofUrl, status: 'pending'
-    };
     try {
-      await onOrder(newOrder);
-      const text = buildWhatsAppText(proofUrl);
-      const cleanPhone = store.whatsapp.replace(/[^0-9]/g, '');
-      window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
-      setOrderSent(true);
-      setSending(false);
-    } catch {
-      setSending(false);
+      const itemsText = cart.map(i => {
+        const price = (i.is_offer && i.offer_price) ? i.offer_price : i.price;
+        return `• ${i.quantity}x ${i.name} - ${store.currency_symbol}${(price * i.quantity).toFixed(2)}`;
+      }).join('%0A');
+      const proofNote = paymentProof ? '%0A%0A*Comprobante adjunto en la app.*' : '';
+      const msg = `*Nuevo Pedido - ${store.name}*%0A%0A*Cliente:* ${customerName}%0A*Teléfono:* ${customerPhone || 'No proporcionado'}%0A*Entrega:* ${deliveryMethod === 'delivery' ? 'Delivery' : 'Recojo'}%0A${deliveryMethod === 'delivery' ? '*Dirección:* ' + address : ''}%0A%0A*Productos:*%0A${itemsText}%0A%0A*Total: ${store.currency_symbol}${subtotal.toFixed(2)}*%0A*Método de pago:* ${paymentMethod.toUpperCase()}${proofNote}`;
+      const waNumber = store.whatsapp.replace(/[^0-9]/g, '');
+      const orderData: Omit<Order, 'id' | 'store_id' | 'created_at'> = {
+        customer_name: customerName,
+        phone: customerPhone,
+        address: deliveryMethod === 'delivery' ? address : 'Recojo en tienda',
+        items: cart.map(i => ({ product_id: i.id, name: i.name, quantity: i.quantity, price: (i.is_offer && i.offer_price) ? i.offer_price : i.price, image: i.image })),
+        total: subtotal,
+        payment_method: paymentMethod,
+        status: 'pending',
+        delivery_method: deliveryMethod,
+      };
+      await onOrder(orderData);
+      window.open(`https://wa.me/${waNumber}?text=${msg}`, '_blank');
+      setStep(1); setCustomerName(''); setCustomerPhone(''); setAddress(''); setPaymentProof(null); setProofFile(null);
+      onClear();
+    } catch (err) {
       alert('Error al enviar el pedido. Intenta de nuevo.');
+    } finally {
+      setSending(false);
     }
   };
-
-  if (orderSent) {
-    return (
-      <div className="text-center py-16 space-y-4 animate-in fade-in zoom-in-95 duration-300">
-        <div className={`w-24 h-24 mx-auto ${theme.accentBg} rounded-full flex items-center justify-center animate-in zoom-in-50 duration-500`}>
-          <Check size={48} className={theme.accent} strokeWidth={3} />
-        </div>
-        <h3 className="font-black text-xl">¡Pedido enviado!</h3>
-        <p className={`text-xs max-w-xs mx-auto ${theme.subtext}`}>Te redirigimos a WhatsApp para confirmar tu pedido con el vendedor. Revisa que se haya abierto el chat.</p>
-        <button onClick={() => { onClear(); onBack(); }} className={`${theme.primary} px-6 py-3 ${theme.cardRadius} text-xs font-bold inline-flex items-center gap-2 active:scale-95`}><ArrowLeft size={16} /> Volver al catálogo</button>
-      </div>
-    );
-  }
 
   if (cart.length === 0) {
     return (
-      <div className="text-center py-16 space-y-4 animate-in fade-in duration-200">
-        <div className={`w-20 h-20 mx-auto ${theme.sectionBg} rounded-full flex items-center justify-center ${theme.subtext} border ${theme.borderSubtle}`}><ShoppingBag size={36} /></div>
-        <h3 className="font-bold text-base">Tu carrito está vacío</h3>
-        <p className={`text-xs max-w-xs mx-auto ${theme.subtext}`}>Explora el catálogo y agrega tus productos.</p>
-        <button onClick={onBack} className={`${theme.primary} px-5 py-3 ${theme.cardRadius} text-xs font-bold inline-flex items-center gap-2`}><ArrowLeft size={16} /> Ver productos</button>
+      <div className="text-center py-20 space-y-4 animate-in fade-in duration-200">
+        <div className="w-20 h-20 rounded-full bg-surface-container flex items-center justify-center mx-auto"><ShoppingBag size={36} className="text-on-surface-variant" /></div>
+        <div><h3 className="text-lg font-bold text-on-surface">Tu carrito está vacío</h3><p className="text-sm text-on-surface-variant mt-1">Añade productos desde el catálogo para empezar.</p></div>
+        <button onClick={onBack} className="bg-primary text-white px-6 py-3 rounded-xl text-sm font-bold inline-flex items-center gap-2 active:scale-95 transition-transform"><ChevronLeft size={16} /> Volver al catálogo</button>
       </div>
     );
   }
@@ -1440,191 +1213,183 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
   return (
     <div className="space-y-6 animate-in fade-in duration-200 pb-24">
       <div className="mb-2">
-        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2"><ShoppingBag size={22} className={theme.accent} /> Tu Carrito</h2>
-        <p className={`text-sm ${theme.subtext} mt-1`}>Revisa tus productos seleccionados antes de finalizar el pedido.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-on-surface">Tu Carrito</h2>
+        <p className="text-sm text-on-surface-variant mt-1">Revisa tus productos seleccionados antes de finalizar el pedido.</p>
       </div>
 
-      {/* Stepper */}
       <div className="flex items-center gap-1.5">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center flex-1">
-            <div className={`flex items-center gap-2 ${step >= s ? theme.accent : theme.subtext}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step >= s ? theme.accentBg : `${theme.sectionBg} border ${theme.borderSubtle}`}`}>
+            <div className={`flex items-center gap-2 ${step >= s ? 'text-primary' : 'text-on-surface-variant'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step >= s ? 'bg-primary text-white' : 'bg-surface-container border border-outline-variant'}`}>
                 {step > s ? <Check size={15} /> : s}
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wide hidden sm:block">{s === 1 ? 'Datos' : s === 2 ? 'Confirmar' : 'Pago'}</span>
             </div>
-            {s < 3 && <div className={`flex-1 h-0.5 mx-2 rounded-full transition-all ${step > s ? theme.accent.replace('text-', 'bg-') : theme.borderSubtle}`} />}
+            {s < 3 && <div className={`flex-1 h-0.5 mx-2 rounded-full transition-all ${step > s ? 'bg-primary' : 'bg-outline-variant'}`} />}
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Cart items column */}
         <div className="lg:col-span-8 space-y-3">
           {cart.map(item => {
             const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
             return (
-              <div key={item.id} className={`${theme.card} p-4 ${theme.cardRadius} border border-opacity-30 flex gap-4 shadow-md hover:scale-[1.01] transition-transform`}>
-                <div className={`w-24 h-24 ${theme.cardRadius} overflow-hidden shrink-0 ${theme.sectionBg}`}>
+              <div key={item.id} className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 flex gap-4 shadow-md hover:scale-[1.01] transition-transform">
+                <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-surface-container">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
-                      <h4 className="font-bold text-sm truncate">{item.name}</h4>
-                      <p className={`text-xs ${theme.subtext} mt-0.5`}>{store.currency_symbol}{price.toFixed(2)} c/u</p>
+                      <h4 className="font-bold text-sm text-on-surface truncate">{item.name}</h4>
+                      <p className="text-xs text-on-surface-variant mt-0.5">{store.currency_symbol}{price.toFixed(2)} c/u</p>
                     </div>
-                    <button onClick={() => onRemove(item.id)} className="text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-colors shrink-0"><Trash2 size={16} /></button>
+                    <button onClick={() => onRemove(item.id)} className="text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors shrink-0"><Trash2 size={16} /></button>
                   </div>
                   <div className="flex justify-between items-center mt-2">
-                    <div className={`flex items-center gap-1 ${theme.sectionBg} rounded-xl p-1 border ${theme.borderSubtle}`}>
-                      <button onClick={() => onUpdateQty(item.id, -1)} className={`w-8 h-8 flex items-center justify-center rounded-lg ${theme.card} ${theme.accent} font-bold text-sm hover:opacity-80 active:scale-90 transition-all`}>-</button>
-                      <span className="px-4 font-bold text-sm">{item.quantity}</span>
-                      <button onClick={() => onUpdateQty(item.id, 1)} className={`w-8 h-8 flex items-center justify-center rounded-lg ${theme.card} ${theme.accent} font-bold text-sm hover:opacity-80 active:scale-90 transition-all`}>+</button>
+                    <div className="flex items-center gap-1 bg-surface-container rounded-lg p-1">
+                      <button onClick={() => onUpdateQty(item.id, -1)} className="w-8 h-8 flex items-center justify-center rounded-md bg-surface-container-lowest text-primary hover:bg-primary-fixed transition-colors active:scale-90 font-bold text-sm">-</button>
+                      <span className="px-4 font-bold text-sm text-on-surface">{item.quantity}</span>
+                      <button onClick={() => onUpdateQty(item.id, 1)} className="w-8 h-8 flex items-center justify-center rounded-md bg-surface-container-lowest text-primary hover:bg-primary-fixed transition-colors active:scale-90 font-bold text-sm">+</button>
                     </div>
-                    <span className={`text-lg font-black ${theme.accent}`}>{store.currency_symbol}{(price * item.quantity).toFixed(2)}</span>
+                    <span className="text-lg font-black text-primary">{store.currency_symbol}{(price * item.quantity).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
             );
           })}
-          <button onClick={onClear} className="text-xs text-red-400 hover:underline font-bold pt-1">Vaciar carrito</button>
+          <button onClick={onClear} className="text-xs text-error hover:underline font-bold pt-1">Vaciar carrito</button>
         </div>
 
-        {/* Summary column */}
         <div className="lg:col-span-4">
-          <div className={`${theme.sectionBg} ${theme.cardRadius} p-5 shadow-md sticky top-24 border ${theme.borderSubtle}`}>
-            <h3 className="font-bold text-base mb-4">Resumen</h3>
+          <div className="bg-surface-container-low rounded-2xl p-5 shadow-md sticky top-20 border border-outline-variant/20 space-y-4">
+            <h3 className="font-bold text-base text-on-surface">Resumen</h3>
             <div className="space-y-2.5 mb-4">
-              <div className={`flex justify-between text-sm ${theme.subtext}`}><span>Subtotal ({totalItems} items)</span><span className="font-medium">{store.currency_symbol}{subtotal.toFixed(2)}</span></div>
-              <div className={`flex justify-between text-sm ${theme.subtext}`}><span>Envío</span><span className={theme.accent}>Se coordina</span></div>
+              <div className="flex justify-between text-sm text-on-surface-variant"><span>Subtotal ({totalItems} items)</span><span className="font-medium text-on-surface">{store.currency_symbol}{subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between text-sm text-on-surface-variant"><span>Envío</span><span className="text-primary">Se coordina</span></div>
             </div>
-            <div className={`h-px ${theme.borderSubtle} my-3`} />
+            <div className="h-px bg-outline-variant/40 my-3" />
             <div className="flex justify-between items-baseline mb-4">
-              <span className="font-bold">Total</span>
-              <span className={`text-2xl font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</span>
+              <span className="font-bold text-on-surface">Total</span>
+              <span className="text-2xl font-extrabold text-primary">{store.currency_symbol}{subtotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* STEP 1: Datos de entrega */}
       {step === 1 && (
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200`}>
-          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><User size={12} /> Datos de entrega</p>
+        <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/30 space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200">
+          <p className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5"><User size={14} /> Datos de entrega</p>
           <div>
-            <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Nombre completo *</label>
-            <input type="text" placeholder="Ej: María García" value={customerName} onChange={e => setCustomerName(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
+            <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Nombre completo *</label>
+            <input type="text" placeholder="Ej: María García" value={customerName} onChange={e => setCustomerName(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
           </div>
           <div>
-            <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Teléfono (opcional)</label>
-            <input type="tel" inputMode="tel" placeholder="Ej: +51 999 888 777" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
+            <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Teléfono (opcional)</label>
+            <input type="tel" inputMode="tel" placeholder="Ej: +51 999 888 777" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
           </div>
           <div>
-            <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Tipo de entrega</label>
+            <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Tipo de entrega</label>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setDeliveryMethod('delivery')} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center justify-center gap-2 transition-all ${deliveryMethod === 'delivery' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><Truck size={16} /> Delivery</button>
-              <button onClick={() => setDeliveryMethod('pickup')} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center justify-center gap-2 transition-all ${deliveryMethod === 'pickup' ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}><StoreIcon size={16} /> Recojo</button>
+              <button onClick={() => setDeliveryMethod('delivery')} className={`p-3 rounded-lg border text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${deliveryMethod === 'delivery' ? 'bg-primary text-white border-primary' : 'bg-surface-container-lowest border-outline-variant/30 text-on-surface-variant'}`}><Truck size={16} /> Delivery</button>
+              <button onClick={() => setDeliveryMethod('pickup')} className={`p-3 rounded-lg border text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${deliveryMethod === 'pickup' ? 'bg-primary text-white border-primary' : 'bg-surface-container-lowest border-outline-variant/30 text-on-surface-variant'}`}><StoreIcon size={16} /> Recojo</button>
             </div>
           </div>
           {deliveryMethod === 'delivery' && (
             <div>
-              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Dirección de entrega *</label>
-              <input type="text" placeholder="Ej: Av. Principal 123, Ref. Frente al parque" value={address} onChange={e => setAddress(e.target.value)} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
+              <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Dirección de entrega *</label>
+              <input type="text" placeholder="Ej: Av. Principal 123, Ref. Frente al parque" value={address} onChange={e => setAddress(e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
             </div>
           )}
-          <button onClick={() => canProceedStep1 && setStep(2)} disabled={!canProceedStep1} className={`w-full ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 transition-all`}>Continuar <ChevronRight size={16} /></button>
+          <button onClick={() => canProceedStep1 && setStep(2)} disabled={!canProceedStep1} className="w-full bg-primary text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 transition-all">Continuar <ChevronRight size={16} /></button>
         </div>
       )}
 
-      {/* STEP 2: Confirmación del pedido antes de pago */}
       {step === 2 && (
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200`}>
-          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Receipt size={12} /> Confirmar tu pedido</p>
-          <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between"><span className={theme.subtext}>Cliente</span><span className="font-bold">{customerName}</span></div>
-            {customerPhone && <div className="flex justify-between"><span className={theme.subtext}>Teléfono</span><span className="font-bold">{customerPhone}</span></div>}
-            <div className="flex justify-between"><span className={theme.subtext}>Entrega</span><span className="font-bold">{deliveryMethod === 'delivery' ? 'Delivery' : 'Recojo'}</span></div>
-            {deliveryMethod === 'delivery' && address && <div className="flex justify-between gap-2"><span className={theme.subtext}>Dirección</span><span className="font-bold text-right">{address}</span></div>}
+        <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/30 space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200">
+          <p className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5"><Receipt size={14} /> Confirmar tu pedido</p>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-on-surface-variant">Cliente</span><span className="font-bold text-on-surface">{customerName}</span></div>
+            {customerPhone && <div className="flex justify-between"><span className="text-on-surface-variant">Teléfono</span><span className="font-bold text-on-surface">{customerPhone}</span></div>}
+            <div className="flex justify-between"><span className="text-on-surface-variant">Entrega</span><span className="font-bold text-on-surface">{deliveryMethod === 'delivery' ? 'Delivery' : 'Recojo'}</span></div>
+            {deliveryMethod === 'delivery' && address && <div className="flex justify-between gap-2"><span className="text-on-surface-variant">Dirección</span><span className="font-bold text-right text-on-surface">{address}</span></div>}
           </div>
-          <div className={`border-t ${theme.borderSubtle} pt-3 space-y-1`}>
+          <div className="border-t border-outline-variant/20 pt-3 space-y-1">
             {cart.map(item => {
               const price = (item.is_offer && item.offer_price) ? item.offer_price : item.price;
-              return <div key={item.id} className="flex justify-between text-[11px]"><span className={theme.subtext}>{item.quantity}x {item.name}</span><span className="font-bold">{store.currency_symbol}{(price * item.quantity).toFixed(2)}</span></div>;
+              return <div key={item.id} className="flex justify-between text-xs"><span className="text-on-surface-variant">{item.quantity}x {item.name}</span><span className="font-bold text-on-surface">{store.currency_symbol}{(price * item.quantity).toFixed(2)}</span></div>;
             })}
           </div>
-          <div className={`flex justify-between items-center border-t ${theme.borderSubtle} pt-3`}>
-            <span className="text-sm font-bold">Total</span>
-            <span className={`text-xl font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</span>
+          <div className="flex justify-between items-center border-t border-outline-variant/20 pt-3">
+            <span className="text-sm font-bold text-on-surface">Total</span>
+            <span className="text-xl font-black text-primary">{store.currency_symbol}{subtotal.toFixed(2)}</span>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setStep(1)} className={`flex-1 ${theme.badge} py-3 ${theme.cardRadius} text-xs font-bold`}>Editar pedido</button>
-            <button onClick={() => setStep(3)} className={`flex-1 ${theme.primary} py-3 ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-2 active:scale-95`}>Ir a pagar <ChevronRight size={16} /></button>
+            <button onClick={() => setStep(1)} className="flex-1 bg-surface-container text-on-surface-variant py-3 rounded-xl text-xs font-bold hover:bg-surface-container-high transition-colors">Editar pedido</button>
+            <button onClick={() => setStep(3)} className="flex-1 bg-primary text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition-all">Ir a pagar <ChevronRight size={16} /></button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: Método de pago + comprobante */}
       {step === 3 && (
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200`}>
-          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><Wallet size={12} /> Método de pago</p>
+        <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/30 space-y-4 shadow-md animate-in fade-in slide-in-from-right-4 duration-200">
+          <p className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5"><Wallet size={14} /> Método de pago</p>
           <div className="grid grid-cols-2 gap-2">
             {availableMethods.map(m => {
               const Icon = m.icon;
               return (
-                <button key={m.id} onClick={() => setPaymentMethod(m.id)} className={`p-3 ${theme.cardRadius} border text-xs font-bold flex items-center gap-2 transition-all ${paymentMethod === m.id ? theme.accentBg : `${theme.borderSubtle} opacity-70`}`}>
+                <button key={m.id} onClick={() => setPaymentMethod(m.id)} className={`p-3 rounded-lg border text-xs font-bold flex items-center gap-2 transition-all active:scale-95 ${paymentMethod === m.id ? 'bg-primary text-white border-primary' : 'bg-surface-container-lowest border-outline-variant/30 text-on-surface-variant'}`}>
                   <Icon size={16} /> {m.label}
                 </button>
               );
             })}
           </div>
 
-          {/* Payment details box */}
-          <div className={`${theme.sectionBg} ${theme.cardRadius} border ${theme.borderSubtle} p-3.5 space-y-2`}>
+          <div className="bg-surface-container-low rounded-lg border border-outline-variant/20 p-4 space-y-2">
             {paymentMethod === 'yape' && (
               <>
-                <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Datos de billetera</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Datos de billetera</p>
                 {payments.yapePlinNumber ? (
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-mono font-bold">{payments.yapePlinNumber}</span>
-                      <button onClick={() => navigator.clipboard?.writeText(payments.yapePlinNumber || '')} className={`p-1.5 ${theme.badge} rounded-lg`}><Copy size={12} /></button>
+                      <span className="text-sm font-mono font-bold text-on-surface">{payments.yapePlinNumber}</span>
+                      <button onClick={() => navigator.clipboard?.writeText(payments.yapePlinNumber || '')} className="p-1.5 bg-surface-container text-primary rounded-lg"><Copy size={14} /></button>
                     </div>
-                    {payments.yapePlinHolder && <p className="text-[11px] opacity-70">Titular: {payments.yapePlinHolder}</p>}
+                    {payments.yapePlinHolder && <p className="text-xs text-on-surface-variant">Titular: {payments.yapePlinHolder}</p>}
                   </div>
-                ) : <p className="text-[11px] opacity-60">El vendedor no configuró el número. Contáctalo por WhatsApp.</p>}
+                ) : <p className="text-xs text-on-surface-variant">El vendedor no configuró el número. Contáctalo por WhatsApp.</p>}
               </>
             )}
             {paymentMethod === 'bank' && (
               <>
-                <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Cuenta bancaria</p>
-                {payments.bankAccountDetails ? <p className="text-[11px] whitespace-pre-line">{payments.bankAccountDetails}</p> : <p className="text-[11px] opacity-60">El vendedor no configuró la cuenta. Contáctalo por WhatsApp.</p>}
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Cuenta bancaria</p>
+                {payments.bankAccountDetails ? <p className="text-xs whitespace-pre-line text-on-surface">{payments.bankAccountDetails}</p> : <p className="text-xs text-on-surface-variant">El vendedor no configuró la cuenta. Contáctalo por WhatsApp.</p>}
               </>
             )}
             {paymentMethod === 'card' && (
               <>
-                <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Pago con tarjeta</p>
-                {payments.cardPaymentLink ? <a href={payments.cardPaymentLink} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 ${theme.primary} px-3 py-2 ${theme.cardRadius} text-xs font-bold`}><ExternalLink size={13} /> Ir a pagar</a> : <p className="text-[11px] opacity-60">El vendedor no configuró el enlace. Contáctalo por WhatsApp.</p>}
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Pago con tarjeta</p>
+                {payments.cardPaymentLink ? <a href={payments.cardPaymentLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-2 rounded-lg text-xs font-bold"><ExternalLink size={13} /> Ir a pagar</a> : <p className="text-xs text-on-surface-variant">El vendedor no configuró el enlace. Contáctalo por WhatsApp.</p>}
               </>
             )}
-            {paymentMethod === 'cash' && <p className="text-[11px] opacity-70">Pagarás en efectivo al momento de la entrega o recojo.</p>}
+            {paymentMethod === 'cash' && <p className="text-xs text-on-surface-variant">Pagarás en efectivo al momento de la entrega o recojo.</p>}
           </div>
 
-          {/* Payment proof upload */}
           {paymentMethod !== 'cash' && (
             <div>
-              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1.5`}>Comprobante de pago (opcional)</label>
+              <label className="block text-[10px] font-semibold text-on-surface-variant mb-1.5">Comprobante de pago (opcional)</label>
               {paymentProof ? (
                 <div className="relative">
-                  <img src={paymentProof} alt="Comprobante" className={`w-full max-h-48 object-contain ${theme.cardRadius} border ${theme.borderSubtle}`} />
-                  <button onClick={() => { setPaymentProof(null); setProofFile(null); }} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg shadow-lg"><X size={14} /></button>
+                  <img src={paymentProof} alt="Comprobante" className="w-full max-h-48 object-contain rounded-lg border border-outline-variant/30" />
+                  <button onClick={() => { setPaymentProof(null); setProofFile(null); }} className="absolute top-2 right-2 p-1.5 bg-error text-white rounded-lg shadow-lg"><X size={14} /></button>
                 </div>
               ) : (
-                <label className={`flex flex-col items-center justify-center gap-2 p-6 ${theme.sectionBg} ${theme.cardRadius} border-2 border-dashed ${theme.borderSubtle} cursor-pointer hover:border-[#1E6FFF] transition-colors`}>
-                  <Upload size={22} className={theme.subtext} />
-                  <span className="text-[11px] font-semibold opacity-70">Toca para subir captura del comprobante</span>
-                  <span className="text-[9px] opacity-50">JPG, PNG · máx 2MB</span>
+                <label className="flex flex-col items-center justify-center gap-2 p-6 bg-surface-container-low rounded-lg border-2 border-dashed border-outline-variant/40 cursor-pointer hover:border-primary transition-colors">
+                  <Upload size={22} className="text-on-surface-variant" />
+                  <span className="text-xs font-semibold text-on-surface-variant">Toca para subir captura del comprobante</span>
+                  <span className="text-[10px] text-outline">JPG, PNG · máx 2MB</span>
                   <input type="file" accept="image/*" onChange={handleProofUpload} className="hidden" />
                 </label>
               )}
@@ -1632,23 +1397,22 @@ const CartView: React.FC<CartViewProps> = ({ cart, store, theme, onUpdateQty, on
           )}
 
           <div className="flex gap-2">
-            <button onClick={() => setStep(2)} className={`flex-1 ${theme.badge} py-3 ${theme.cardRadius} text-xs font-bold`}>Atrás</button>
-            <button onClick={handleSend} disabled={sending} className={`flex-[2] ${theme.primary} py-3.5 ${theme.cardRadius} text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50`}>
+            <button onClick={() => setStep(2)} className="flex-1 bg-surface-container text-on-surface-variant py-3 rounded-xl text-xs font-bold hover:bg-surface-container-high transition-colors">Atrás</button>
+            <button onClick={handleSend} disabled={sending} className="flex-[2] bg-primary text-white py-3.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50">
               {sending ? <Loader2 size={18} className="animate-spin" /> : <><MessageCircle size={18} /> ENVIAR A WHATSAPP</>}
             </button>
           </div>
-          <p className={`text-center text-[10px] ${theme.subtext} flex items-center justify-center gap-1`}><ShieldCheck size={11} /> Tu pedido se envía seguro por WhatsApp</p>
+          <p className="text-center text-[10px] text-on-surface-variant flex items-center justify-center gap-1"><ShieldCheck size={11} /> Tu pedido se envía seguro por WhatsApp</p>
         </div>
       )}
 
-      {/* Floating total bar on mobile */}
-      <div className={`fixed bottom-0 left-0 right-0 ${theme.card} border-t ${theme.borderSubtle} p-3 flex items-center justify-between shadow-2xl z-30 sm:hidden`}>
-        <div><span className={`text-[10px] ${theme.subtext}`}>Total</span><p className={`text-lg font-black ${theme.accent}`}>{store.currency_symbol}{subtotal.toFixed(2)}</p></div>
+      <div className="fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant/30 p-3 flex items-center justify-between shadow-2xl z-30 sm:hidden">
+        <div><span className="text-[10px] text-on-surface-variant">Total</span><p className="text-lg font-black text-primary">{store.currency_symbol}{subtotal.toFixed(2)}</p></div>
         <button onClick={() => {
           if (step === 1 && canProceedStep1) setStep(2);
           else if (step === 2) setStep(3);
           else if (step === 3) handleSend();
-        }} disabled={(step === 1 && !canProceedStep1) || sending} className={`${theme.primary} px-5 py-2.5 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 disabled:opacity-50`}>{step === 3 ? <><MessageCircle size={15} /> Enviar</> : <>Continuar <ChevronRight size={15} /></>}</button>
+        }} disabled={(step === 1 && !canProceedStep1) || sending} className="bg-primary text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50 active:scale-95 transition-all">{step === 3 ? <><MessageCircle size={15} /> Enviar</> : <>Continuar <ChevronRight size={15} /></>}</button>
       </div>
     </div>
   );
@@ -1921,33 +1685,29 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
   return (
     <div className={containerClass} style={containerStyle}>
       <div className="w-full max-w-md h-full flex flex-col relative shadow-2xl">
-        <header className={`sticky top-0 z-40 ${theme.nav} px-4 py-3 flex items-center justify-between border-b`}>
+        <header className={`sticky top-0 z-40 ${theme.nav} px-4 h-14 flex items-center justify-between border-b`}>
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center shadow-md shrink-0 bg-white/5 border border-white/10">
-              <img src="/image copy.png" alt="Vendely Pro" className="w-full h-full object-contain p-0.5" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shrink-0 bg-white/5">
+              <img src="/image copy.png" alt="VendelyPro" className="w-full h-full object-contain p-0.5" />
             </div>
-            <div className="min-w-0">
-              <h1 className="font-bold text-sm leading-tight truncate" style={customTextColor ? { color: customTextColor } : undefined}>{store.name}</h1>
-              <p className={`text-[10px] ${theme.subtext} truncate max-w-[120px]`}>{store.slogan}</p>
-            </div>
+            <h1 className="font-bold text-sm leading-tight truncate" style={customTextColor ? { color: customTextColor } : undefined}>{store.name}</h1>
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            {onBackToAdmin && <button onClick={onBackToAdmin} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`} title="Volver al panel"><ArrowLeft size={16} /></button>}
+            {onBackToAdmin && <button onClick={onBackToAdmin} className={`p-2 rounded-full hover:bg-primary-container/10 transition-colors ${theme.subtext}`} title="Volver al panel"><ArrowLeft size={18} /></button>}
             {isAdmin && onOpenStoreSwitcher && (
-              <button onClick={onOpenStoreSwitcher} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors flex items-center gap-1`} title="Mis catálogos">
-                <Layers size={16} />
-                {storeCount && storeCount > 1 && <span className="text-[9px] font-bold">{storeCount}</span>}
+              <button onClick={onOpenStoreSwitcher} className={`p-2 rounded-full hover:bg-primary-container/10 transition-colors ${theme.subtext}`} title="Mis catálogos">
+                <Layers size={18} />
               </button>
             )}
-            {isAdmin && onOpenQR && <button onClick={onOpenQR} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`} title="Código QR"><QrCode size={16} /></button>}
-            <button onClick={() => setActiveTab('cart')} className={`relative p-2 ${theme.sectionBg} ${theme.cardRadius} transition-colors`}>
+            {isAdmin && onOpenQR && <button onClick={onOpenQR} className={`p-2 rounded-full hover:bg-primary-container/10 transition-colors ${theme.subtext}`} title="Código QR"><QrCode size={18} /></button>}
+            <button onClick={() => setActiveTab('cart')} className={`relative p-2 rounded-full hover:bg-primary-container/10 transition-colors ${theme.subtext}`}>
               <ShoppingBag size={18} style={customTextColor ? { color: customTextColor } : undefined} />
-              {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}
+              {cart.length > 0 && <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-md">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}
             </button>
-            {isAdmin && onSignOut && <button onClick={onSignOut} className={`p-2 ${theme.sectionBg} ${theme.cardRadius} hover:text-red-400 transition-colors`} title="Cerrar sesión"><LogOut size={16} /></button>}
+            {isAdmin && onSignOut && <button onClick={onSignOut} className={`p-2 rounded-full hover:bg-red-500/10 hover:text-red-400 transition-colors ${theme.subtext}`} title="Cerrar sesión"><LogOut size={18} /></button>}
           </div>
         </header>
-        <main className="flex-1 p-4 pb-20 overflow-y-auto overscroll-contain">
+        <main className="flex-1 px-4 pt-4 pb-20 overflow-y-auto overscroll-contain">
           {activeTab === 'catalog' && <CatalogView products={products} store={store} theme={theme} banners={banners} addToCart={addToCart} />}
           {activeTab === 'cart' && <CartView cart={cart} store={store} theme={theme} onUpdateQty={(id, delta) => setCart(prev => prev.map(i => i.id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i))} onRemove={id => setCart(prev => prev.filter(c => c.id !== id))} onClear={() => setCart([])} onBack={() => setActiveTab('catalog')} onOrder={onOrder} />}
           {isAdmin && activeTab === 'products' && <AdminProducts products={products} store={store} theme={theme} categories={categories} onRefresh={onRefresh} onUpgrade={onUpgrade || (() => {})} customTextColor={customTextColor} />}
@@ -1956,14 +1716,31 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
           {isAdmin && activeTab === 'plans' && <PlansView currentPlan={store.plan} productCount={products.length} bannerCount={banners.length} theme={theme} onSelectPlan={async (plan) => { if (onUpdateStore) { try { await api.updatePlan(store.id, plan); await onUpdateStore({}); } catch { alert('Error al cambiar de plan'); } } }} />}
           {isAdmin && activeTab === 'settings' && onUpdateStore && <AdminSettings store={store} theme={theme} categories={categories} onUpdate={onUpdateStore} onUpgrade={onUpgrade || (() => {})} onOpenQR={onOpenQR || (() => {})} onRefresh={onRefresh} customTextColor={customTextColor} />}
         </main>
-        <nav className={`fixed bottom-0 left-0 right-0 ${theme.nav} border-t px-2 py-2 z-40 backdrop-blur-xl rounded-t-2xl shadow-[0_-4px_12px_rgba(7,94,161,0.08)]`}>
-          <div className={`max-w-md mx-auto grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-2'} gap-0.5 text-center`}>
-            <button onClick={() => setActiveTab('catalog')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all active:scale-90 ${activeTab === 'catalog' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'catalog')}><StoreIcon size={18} /><span className="text-[9px]">Catálogo</span></button>
-            <button onClick={() => setActiveTab('cart')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all relative active:scale-90 ${activeTab === 'cart' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'cart')}><ShoppingBag size={18} /><span className="text-[9px]">Carrito</span>{cart.length > 0 && <span className="absolute top-0.5 right-3 bg-red-500 text-white text-[7px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}</button>
-            {isAdmin && <button onClick={() => setActiveTab('products')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all active:scale-90 ${activeTab === 'products' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'products')}><Package size={18} /><span className="text-[9px]">Productos</span></button>}
-            {isAdmin && <button onClick={() => setActiveTab('orders')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all relative active:scale-90 ${activeTab === 'orders' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'orders')}><Clock size={18} /><span className="text-[9px]">Pedidos</span>{orders.filter(o => o.status === 'pending').length > 0 && <span className="absolute top-0.5 right-3 bg-red-500 text-white text-[7px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">{orders.filter(o => o.status === 'pending').length}</span>}</button>}
-            {isAdmin && <button onClick={() => setActiveTab('reports')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all active:scale-90 ${activeTab === 'reports' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'reports')}><TrendingUp size={18} /><span className="text-[9px]">Reportes</span></button>}
-            {isAdmin && <button onClick={() => setActiveTab('settings')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all active:scale-90 ${activeTab === 'settings' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'settings')}><Settings size={18} /><span className="text-[9px]">Ajustes</span></button>}
+        <nav className={`fixed bottom-0 left-0 right-0 ${theme.nav} px-2 py-2.5 z-40 backdrop-blur-xl rounded-t-2xl shadow-[0_-4px_12px_rgba(7,94,161,0.08)]`}>
+          <div className={`max-w-md mx-auto flex justify-around items-center`}>
+            {[
+              { id: 'catalog', label: 'Catálogo', Icon: StoreIcon },
+              { id: 'cart', label: 'Carrito', Icon: ShoppingBag, badge: cart.length > 0 ? cart.reduce((s, i) => s + i.quantity, 0) : 0 },
+              ...(isAdmin ? [
+                { id: 'orders', label: 'Pedidos', Icon: Clock, badge: orders.filter(o => o.status === 'pending').length },
+                { id: 'products', label: 'Productos', Icon: Package },
+                { id: 'reports', label: 'Reportes', Icon: TrendingUp },
+                { id: 'settings', label: 'Ajustes', Icon: Settings },
+              ] : []),
+            ].map(({ id, label, Icon, badge }: { id: string; label: string; Icon: typeof StoreIcon; badge?: number }) => {
+              const isActive = activeTab === id;
+              return (
+                <button key={id} onClick={() => setActiveTab(id as typeof activeTab)}
+                  className={`relative flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all active:scale-90 ${isActive ? `${theme.activeText} font-bold` : 'opacity-50'}`}
+                  style={navBtnStyle(isActive)}>
+                  <div className={`p-1.5 rounded-full transition-colors ${isActive ? theme.accentBg : ''}`}>
+                    <Icon size={18} />
+                    {badge !== undefined && badge > 0 && <span className="absolute -top-0.5 right-0.5 bg-red-500 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md">{badge}</span>}
+                  </div>
+                  <span className="text-[9px]">{label}</span>
+                </button>
+              );
+            })}
           </div>
         </nav>
       </div>
@@ -2042,63 +1819,148 @@ const ReportsView: React.FC<ReportsViewProps> = ({ orders, store, theme }) => {
     win.document.close();
   };
 
+  const recentOrders = [...filtered].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 4);
+
+  const statusBadge = (status: string) => {
+    if (status === 'pending') return { label: 'Nuevo', cls: 'text-[10px] uppercase font-bold text-primary bg-primary-fixed px-2 py-0.5 rounded-full' };
+    if (status === 'shipped') return { label: 'En Proceso', cls: 'text-[10px] uppercase font-bold text-on-secondary-container bg-secondary-container px-2 py-0.5 rounded-full' };
+    if (status === 'delivered') return { label: 'Enviado', cls: 'text-[10px] uppercase font-bold text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full' };
+    return { label: status, cls: 'text-[10px] uppercase font-bold text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded-full' };
+  };
+
+  const weekDays = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+  const dayRevenue = weekDays.map((_, i) => {
+    const dayOrders = orders.filter(o => {
+      const d = new Date(o.created_at);
+      const dayOfWeek = (d.getDay() + 6) % 7;
+      return dayOfWeek === i && o.status === 'delivered';
+    });
+    return dayOrders.reduce((s, o) => s + Number(o.total), 0);
+  });
+  const maxRevenue = Math.max(...dayRevenue, 1);
+
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
-      <div className={`flex items-center justify-between border-b ${theme.borderSubtle} pb-3`}>
-        <div><h2 className="text-lg font-bold">Reportes</h2><p className={`text-xs ${theme.subtext}`}>Análisis de tus ventas</p></div>
-        <button onClick={exportReportPDF} className={`${theme.accentBg} px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5`}><FileText size={14} /> PDF</button>
+    <div className="space-y-6 animate-in fade-in duration-200">
+      <div>
+        <h2 className="text-2xl font-bold text-on-surface">¡Hola de nuevo!</h2>
+        <p className="text-sm text-on-surface-variant">Aquí tienes el pulso de tu negocio hoy.</p>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         {(['today', 'week', 'month', 'all'] as const).map(p => (
-          <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap border transition-all ${period === p ? theme.primary : `${theme.card} ${theme.borderSubtle} opacity-60`}`}>
+          <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${period === p ? 'bg-primary text-white shadow-md' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-highest'}`}>
             {p === 'today' ? 'Hoy' : p === 'week' ? 'Semana' : p === 'month' ? 'Mes' : 'Todo'}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
-          <div className="flex items-center gap-2 mb-1"><DollarSign size={14} className={theme.accent} /><span className={`text-[10px] font-bold ${theme.subtext} uppercase`}>Ingresos</span></div>
-          <p className={`text-2xl font-black ${theme.accent}`}>{store.currency_symbol}{totalRevenue.toFixed(2)}</p>
-          <p className="text-[10px] opacity-50">Solo pedidos entregados</p>
+      <div className="grid grid-cols-1 gap-4">
+        <div className="glass-card p-5 rounded-xl border border-outline-variant/30 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2.5 bg-primary/10 rounded-lg text-primary"><DollarSign size={20} /></div>
+            <span className="text-[10px] font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">Entregados</span>
+          </div>
+          <p className="text-xs text-on-surface-variant mb-1">Ventas de hoy</p>
+          <p className="text-xl font-bold text-on-surface">{store.currency_symbol}{totalRevenue.toFixed(2)}</p>
         </div>
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
-          <div className="flex items-center gap-2 mb-1"><TrendingUp size={14} className={theme.accent} /><span className={`text-[10px] font-bold ${theme.subtext} uppercase`}>Ticket prom.</span></div>
-          <p className="text-2xl font-black">{store.currency_symbol}{avgTicket.toFixed(2)}</p>
-          <p className="text-[10px] opacity-50">Por pedido entregado</p>
+
+        <div className="glass-card p-5 rounded-xl border border-outline-variant/30 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2.5 bg-secondary-container/40 rounded-lg text-secondary"><Clock size={20} /></div>
+            <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">{pendingCount} nuevos</span>
+          </div>
+          <p className="text-xs text-on-surface-variant mb-1">Pedidos pendientes</p>
+          <p className="text-xl font-bold text-on-surface">{pendingCount} pendientes</p>
         </div>
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
-          <div className="flex items-center gap-2 mb-1"><ShoppingCart size={14} className={theme.accent} /><span className={`text-[10px] font-bold ${theme.subtext} uppercase`}>Entregados</span></div>
-          <p className="text-2xl font-black">{deliveredCount}</p>
-          <p className="text-[10px] opacity-50">{filtered.length} pedidos total</p>
+
+        <div className="glass-card p-5 rounded-xl border border-outline-variant/30 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2.5 bg-tertiary-fixed rounded-lg text-on-tertiary-fixed-variant"><TrendingUp size={20} /></div>
+            <span className="text-[10px] font-semibold text-on-surface-variant bg-surface-variant/50 px-2 py-1 rounded-full">Total</span>
+          </div>
+          <p className="text-xs text-on-surface-variant mb-1">Pedidos totales</p>
+          <p className="text-xl font-bold text-on-surface">{filtered.length} hoy</p>
         </div>
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md`}>
-          <div className="flex items-center gap-2 mb-1"><Clock size={14} className={theme.accent} /><span className={`text-[10px] font-bold ${theme.subtext} uppercase`}>Pendientes</span></div>
-          <p className="text-2xl font-black">{pendingCount}</p>
-          <p className="text-[10px] opacity-50">{store.currency_symbol}{pendingRevenue.toFixed(2)} en espera</p>
+      </div>
+
+      <div>
+        <h3 className="text-xs text-on-surface-variant uppercase tracking-widest mb-3 font-medium">Accesos Rápidos</h3>
+        <div className="grid grid-cols-4 gap-3">
+          <button onClick={() => onRefresh?.()} className="flex flex-col items-center justify-center p-3 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95">
+            <Plus size={20} className="mb-1" /><span className="text-[10px] font-medium">Actualizar</span>
+          </button>
+          <button onClick={() => setActiveTab('orders')} className="flex flex-col items-center justify-center p-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl hover:bg-surface-variant transition-all active:scale-95">
+            <FileText size={20} className="mb-1 text-primary" /><span className="text-[10px] font-medium text-on-surface">Pedidos</span>
+          </button>
+          <button onClick={() => setActiveTab('settings')} className="flex flex-col items-center justify-center p-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl hover:bg-surface-variant transition-all active:scale-95">
+            <QrCode size={20} className="mb-1 text-primary" /><span className="text-[10px] font-medium text-on-surface">QR</span>
+          </button>
+          <button onClick={exportReportPDF} className="flex flex-col items-center justify-center p-3 bg-surface-container-lowest border border-outline-variant/50 rounded-xl hover:bg-surface-variant transition-all active:scale-95">
+            <FileText size={20} className="mb-1 text-primary" /><span className="text-[10px] font-medium text-on-surface">PDF</span>
+          </button>
+        </div>
+      </div>
+
+      {recentOrders.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs text-on-surface-variant uppercase tracking-widest font-medium">Pedidos Recientes</h3>
+            <button onClick={() => setActiveTab('orders')} className="text-primary text-xs font-medium hover:underline">Ver todos</button>
+          </div>
+          <div className="glass-card rounded-xl border border-outline-variant/30 overflow-hidden">
+            {recentOrders.map((o, i) => {
+              const badge = statusBadge(o.status);
+              return (
+                <div key={o.id} className={`flex items-center justify-between p-4 ${i < recentOrders.length - 1 ? 'border-b border-outline-variant/20' : ''} hover:bg-primary/5 transition-colors cursor-pointer`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-700">
+                      <MessageCircle size={18} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-on-surface">{o.customer_name}</p>
+                      <p className="text-[10px] text-on-surface-variant">{o.items.length} items • WhatsApp</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-on-surface">{store.currency_symbol}{Number(o.total).toFixed(2)}</p>
+                    <span className={badge.cls}>{badge.label}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="glass-card rounded-2xl border border-outline-variant/30 p-5">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-bold text-on-surface">Rendimiento Semanal</h3>
+          <div className="flex gap-1">
+            <button className="text-[10px] px-2.5 py-1 rounded-full bg-primary text-white">7d</button>
+            <button className="text-[10px] px-2.5 py-1 rounded-full text-on-surface-variant hover:bg-surface-variant">30d</button>
+          </div>
+        </div>
+        <div className="w-full h-36 flex items-end justify-between gap-1.5">
+          {dayRevenue.map((rev, i) => {
+            const heightPct = maxRevenue > 0 ? (rev / maxRevenue) * 100 : 0;
+            const isToday = (new Date().getDay() + 6) % 7 === i;
+            return (
+              <div key={i} className={`w-full rounded-t-lg transition-all ${isToday ? 'bg-primary animate-pulse' : 'bg-primary/20'}`} style={{ height: `${Math.max(heightPct, 8)}%` }} />
+            );
+          })}
+        </div>
+        <div className="flex justify-between mt-3 text-[9px] text-on-surface-variant font-bold uppercase tracking-widest">
+          {weekDays.map(d => <span key={d}>{d}</span>)}
         </div>
       </div>
 
       {topProducts.length > 0 && (
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md space-y-3`}>
-          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Top productos</p>
+        <div className="glass-card p-4 rounded-xl border border-outline-variant/30 space-y-3">
+          <p className="text-xs font-bold text-primary uppercase tracking-wider">Top productos</p>
           {topProducts.map((p, i) => (
             <div key={i} className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2"><span className={`w-5 h-5 rounded-full ${theme.accentBg} flex items-center justify-center text-[9px] font-black`}>{i + 1}</span><span className="font-bold line-clamp-1">{p.name}</span></div>
-              <div className="text-right shrink-0 ml-2"><span className="font-bold">{p.qty} vend.</span><span className={`text-[10px] ${theme.subtext} block`}>{store.currency_symbol}{p.revenue.toFixed(2)}</span></div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {Object.keys(paymentBreakdown).length > 0 && (
-        <div className={`${theme.card} p-4 ${theme.cardRadius} border shadow-md space-y-3`}>
-          <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Por método de pago</p>
-          {Object.entries(paymentBreakdown).map(([m, v]) => (
-            <div key={m} className="flex items-center justify-between text-xs">
-              <span className="font-bold uppercase">{m}</span>
-              <span>{v.count} pedidos &bull; <strong>{store.currency_symbol}{v.total.toFixed(2)}</strong></span>
+              <div className="flex items-center gap-2"><span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-black text-primary">{i + 1}</span><span className="font-bold line-clamp-1 text-on-surface">{p.name}</span></div>
+              <div className="text-right shrink-0 ml-2"><span className="font-bold text-on-surface">{p.qty} vend.</span><span className="text-[10px] text-on-surface-variant block">{store.currency_symbol}{p.revenue.toFixed(2)}</span></div>
             </div>
           ))}
         </div>
