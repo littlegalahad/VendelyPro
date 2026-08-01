@@ -646,9 +646,9 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
         </div>
       </div>
       {!canAddMore && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 flex items-center gap-2.5 text-amber-200 text-xs">
-          <Lock size={16} className="text-amber-400 shrink-0" />
-          <p>Alcanzaste el límite del plan Starter. <button onClick={onUpgrade} className="font-bold underline text-amber-300">Mejora tu plan</button> para productos ilimitados.</p>
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-center gap-2.5 text-amber-700 text-xs">
+          <Lock size={16} className="text-amber-600 shrink-0" />
+          <p>Alcanzaste el límite del plan Starter. <button onClick={onUpgrade} className="font-bold underline text-amber-600">Mejora tu plan</button> para productos ilimitados.</p>
         </div>
       )}
       <div className="space-y-2.5">
@@ -661,8 +661,8 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h4 className="font-bold text-xs truncate">{p.name}</h4>
-                {p.is_offer && <span className="bg-red-500/20 text-red-400 text-[8px] font-bold px-2 py-0.5 rounded-full border border-red-500/30">OFERTA</span>}
-                {p.is_featured && <span className="bg-amber-500/20 text-amber-300 text-[8px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">TOP</span>}
+                {p.is_offer && <span className="bg-red-100 text-red-700 text-[8px] font-bold px-2 py-0.5 rounded-full border border-red-200">OFERTA</span>}
+                {p.is_featured && <span className="bg-amber-100 text-amber-700 text-[8px] font-bold px-2 py-0.5 rounded-full border border-amber-200">TOP</span>}
               </div>
               <div className="flex gap-1.5 mt-1 flex-wrap">
                 <span className={`text-[9px] font-medium ${theme.accentBg} px-2 py-0.5 rounded-full`}>{p.category}</span>
@@ -672,10 +672,10 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ products, store, theme, c
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="text-right">
-                {p.is_offer && p.offer_price ? (<><span className="text-red-400 font-bold text-xs block">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[9px] opacity-40 line-through">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></>) : (<span className={`font-bold text-xs ${theme.accent}`}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
+                {p.is_offer && p.offer_price ? (<><span className="text-red-600 font-bold text-xs block">{store.currency_symbol}{Number(p.offer_price).toFixed(2)}</span><span className="text-[9px] opacity-40 line-through">{store.currency_symbol}{Number(p.price).toFixed(2)}</span></>) : (<span className={`font-bold text-xs ${theme.accent}`}>{store.currency_symbol}{Number(p.price).toFixed(2)}</span>)}
               </div>
               <button onClick={() => openEdit(p)} className={`p-1.5 ${theme.subtext} hover:opacity-70 ${theme.cardRadius}`}><Pencil size={14} /></button>
-              <button onClick={() => handleDelete(p.id)} className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-xl"><Trash2 size={14} /></button>
+              <button onClick={() => handleDelete(p.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 size={14} /></button>
             </div>
           </div>
         ))}
@@ -767,10 +767,10 @@ const STATUS_LABELS: Record<Order['status'], string> = {
   pending: 'Pendiente', preparing: 'Preparando', shipped: 'Enviado', delivered: 'Entregado',
 };
 const STATUS_COLORS: Record<Order['status'], string> = {
-  pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  preparing: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  shipped: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  delivered: 'bg-[#1E6FFF]/20 text-[#5B9BFF] border-[#1E6FFF]/30',
+  pending: 'bg-red-100 text-red-700 border-red-200',
+  preparing: 'bg-blue-100 text-blue-700 border-blue-200',
+  shipped: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  delivered: 'bg-green-100 text-green-700 border-green-200',
 };
 
 const generateOrderPDF = (order: Order, store: Store) => {
@@ -1027,7 +1027,7 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
                   </button>
                   <a href={`https://wa.me/${order.phone?.replace(/[^0-9]/g, '') || ''}`} target="_blank" rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="w-10 h-10 flex items-center justify-center bg-[#25D366] text-white ${theme.cardRadius} active:scale-90 transition-transform shrink-0">
+                    className={`w-10 h-10 flex items-center justify-center bg-[#25D366] text-white ${theme.cardRadius} active:scale-90 transition-transform shrink-0`}>
                     <Send size={16} />
                   </a>
                 </div>
