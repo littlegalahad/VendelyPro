@@ -514,7 +514,7 @@ const PlansView: React.FC<PlansViewProps> = ({ currentPlan, productCount, banner
       </div>
 
       {/* 3-column pricing grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+      <div className="grid grid-cols-1 gap-4">
         {planOrder.map((planKey, idx) => {
           const plan = PLAN_LIMITS[planKey];
           const isCurrent = currentPlan === planKey;
@@ -834,6 +834,9 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
   };
 
   const filteredOrders = statusFilter === 'all' ? orders : orders.filter(o => o.status === statusFilter);
+  const totalRevenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + Number(o.total), 0);
+  const deliveredCount = orders.filter(o => o.status === 'delivered').length;
+  const avgTicket = orders.length > 0 ? orders.reduce((sum, o) => sum + Number(o.total), 0) / orders.length : 0;
 
   if (selectedOrder) {
     return (
