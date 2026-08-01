@@ -3,6 +3,7 @@ import {
   Plus, Trash2, Pencil, X, ImageIcon, Tag, Lock, Store as StoreIcon, Palette,
   Type, MessageCircle, ChevronRight, CheckCircle, ArrowLeft,
   Truck, ShoppingBag, Search, FolderPlus, Layers, Check, Zap, Crown,
+  Send,
   Package, CheckCircle2, QrCode, Settings, Clock, Smartphone,
   ArrowUpDown, Copy, ExternalLink, Banknote, CreditCard, Building2,
   ShieldCheck, LogOut, Loader2, AlertCircle, Wallet, Eye, EyeOff,
@@ -117,6 +118,7 @@ const PRESET_IMAGES = [
 ];
 
 const ALL_THEMES = [
+  { id: 'corporateLight', name: 'Corporativo Pro', color: '#075ea1', bg: '#f8f9ff', isDark: false },
   { id: 'proDark', name: 'Azul Marca', color: '#1E6FFF', bg: '#0A1628', isDark: true },
   { id: 'elegante', name: 'Púrpura Noir', color: '#8B5CF6', bg: '#0B0914', isDark: true },
   { id: 'goldLuxury', name: 'Lujo Dorado', color: '#F59E0B', bg: '#0F1115', isDark: true },
@@ -136,6 +138,19 @@ interface ThemeDef {
 }
 
 const THEMES: Record<string, ThemeDef> = {
+  corporateLight: {
+    bg: 'bg-[#f8f9ff]', card: 'bg-white/80 border-[#c1c7d2]/30 text-[#0b1c30] backdrop-blur-xl shadow-sm',
+    primary: 'bg-[#075ea1] hover:bg-[#064f87] text-white shadow-md shadow-[#075ea1]/20',
+    accent: 'text-[#075ea1]', accentBg: 'bg-[#d2e4ff] text-[#075ea1] border border-[#a1c9ff]/40',
+    accentSolid: 'bg-[#075ea1] text-white',
+    badge: 'bg-[#eff4ff] text-[#414750] border border-[#c1c7d2]/30', text: 'text-[#0b1c30]',
+    subtext: 'text-[#414750]', nav: 'bg-[#f8f9ff]/90 border-[#c1c7d2]/30 backdrop-blur-xl',
+    selectBg: 'bg-white text-[#0b1c30] border-[#c1c7d2]/30', gradientBg: 'from-[#f8f9ff] via-[#eff4ff] to-[#dce9ff]',
+    cardRadius: 'rounded-xl', cardHover: 'hover:border-[#075ea1]/30 hover:shadow-md hover:shadow-[#075ea1]/10',
+    borderSubtle: 'border-[#c1c7d2]/30', sectionBg: 'bg-[#eff4ff]', activeText: 'text-[#075ea1]',
+    overlayBg: 'from-[#f8f9ff]/85', modalBg: 'bg-white border-[#c1c7d2]/30 text-[#0b1c30]',
+    modalInputBg: 'bg-[#eff4ff] border-[#c1c7d2]/30', isDark: false
+  },
   proDark: {
     bg: 'bg-[#0A1628]', card: 'bg-[#0F1D33]/90 border-[#1E2D45] text-slate-100 backdrop-blur-md',
     primary: 'bg-gradient-to-r from-[#1E6FFF] to-[#0052CC] text-white shadow-lg shadow-[#1E6FFF]/30 hover:from-[#2E7FFF] hover:to-[#1060DD]',
@@ -974,34 +989,51 @@ const OrdersView: React.FC<OrdersViewProps> = ({ orders, store, theme, onRefresh
       {filteredOrders.length === 0 ? (
         <div className={`text-center py-16 space-y-3 opacity-50 ${theme.subtext}`}><Clock size={40} className="mx-auto" /><p className="text-xs font-medium">No hay pedidos {statusFilter !== 'all' ? 'con este estado' : 'todavía'}.</p></div>
       ) : (
-        <div className="space-y-3">
-          {filteredOrders.map(order => (
-            <div key={order.id} onClick={() => setSelectedOrder(order)}
-              className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3 shadow-md cursor-pointer hover:shadow-lg hover:border-[#1E6FFF]/30 transition-all`}>
-              <div className={`flex justify-between items-start border-b ${theme.borderSubtle} pb-2.5`}>
-                <div>
-                  <span className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Pedido #{order.id.slice(-5)}</span>
-                  <h4 className="font-bold text-xs mt-0.5">{order.customer_name}</h4>
-                  <p className="text-[10px] opacity-60">{new Date(order.created_at).toLocaleString('es-ES')} &bull; Pago: <strong className="uppercase">{order.payment_method}</strong></p>
-                </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${STATUS_COLORS[order.status]}`}>{STATUS_LABELS[order.status]}</span>
-                  <span className="text-[10px] opacity-50">{order.items.length} productos</span>
-                </div>
-              </div>
-              <div className="space-y-1 text-xs">
-                {order.items.slice(0, 3).map((item: OrderItem, idx: number) => (
-                  <div key={idx} className="flex justify-between text-[11px] opacity-80">
-                    <span>{item.quantity}x {item.name}</span><span>{store.currency_symbol}{(item.price * item.quantity).toFixed(2)}</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredOrders.map(order => {
+            const statusIcon = order.status === 'pending' ? <MessageCircle size={20} /> : order.status === 'shipped' ? <Truck size={20} /> : order.status === 'delivered' ? <CheckCircle2 size={20} /> : <Clock size={20} />;
+            const statusBg = order.status === 'pending' ? 'bg-[#25D366]/10 text-[#25D366]' : order.status === 'shipped' ? `${theme.accentBg} ${theme.accent}` : order.status === 'delivered' ? 'bg-green-100 text-green-600' : `${theme.sectionBg} ${theme.subtext}`;
+            return (
+              <div key={order.id}
+                className={`${theme.card} border ${theme.borderSubtle} ${theme.cardRadius} p-5 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col`}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${statusBg}`}>{statusIcon}</div>
+                    <div>
+                      <p className={`text-[10px] font-bold ${theme.subtext} uppercase tracking-wider`}>#{order.id.slice(-5)}</p>
+                      <h4 className="font-bold text-sm leading-tight">{order.customer_name}</h4>
+                    </div>
                   </div>
-                ))}
-                {order.items.length > 3 && <p className="text-[10px] opacity-50 italic">+ {order.items.length - 3} producto(s) más...</p>}
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap ${STATUS_COLORS[order.status]}`}>{STATUS_LABELS[order.status]}</span>
+                </div>
+                <div className="space-y-1.5 mb-4 flex-grow">
+                  <div className="flex justify-between text-xs">
+                    <span className={theme.subtext}>Productos:</span>
+                    <span className="font-medium">{order.items.length} items</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className={theme.subtext}>Pago:</span>
+                    <span className="font-medium uppercase">{order.payment_method}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className={theme.subtext}>Total:</span>
+                    <span className={`font-bold ${theme.accent}`}>{store.currency_symbol}{Number(order.total).toFixed(2)}</span>
+                  </div>
+                </div>
+                <div className={`pt-3 border-t ${theme.borderSubtle} flex gap-2`}>
+                  <button onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }}
+                    className={`flex-1 py-2.5 ${theme.cardRadius} text-xs font-bold border ${theme.borderSubtle} ${theme.accent} hover:bg-[#075ea1]/5 transition-colors`}>
+                    Ver Detalles
+                  </button>
+                  <a href={`https://wa.me/${order.phone?.replace(/[^0-9]/g, '') || ''}`} target="_blank" rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-10 h-10 flex items-center justify-center bg-[#25D366] text-white ${theme.cardRadius} active:scale-90 transition-transform shrink-0">
+                    <Send size={16} />
+                  </a>
+                </div>
               </div>
-              <div className={`flex justify-between items-center border-t ${theme.borderSubtle} pt-2 text-xs font-bold`}>
-                <span className="opacity-70">Total:</span><span className={`${theme.accent} text-sm`}>{store.currency_symbol}{Number(order.total).toFixed(2)}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -1050,59 +1082,68 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      <div className={`flex justify-between items-center border-b ${theme.borderSubtle} pb-3`}>
+      <div>
+        <p className={`text-xs font-bold ${theme.accent} mb-1 uppercase tracking-wider`}>Configuración</p>
         <h2 className="text-2xl font-bold tracking-tight">Ajustes</h2>
-        <button onClick={onOpenQR} className={`${theme.accentBg} px-3.5 py-2 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform`}><QrCode size={14} /> Enlace QR</button>
       </div>
 
-      {/* Store profile quick card */}
+      {/* Store profile quick card - matching mockup */}
       <div className={`${theme.card} ${theme.cardRadius} p-5 flex items-center gap-4 shadow-md hover:scale-[1.01] transition-transform border ${theme.borderSubtle}`}>
         <div className={`w-16 h-16 rounded-full ${theme.sectionBg} flex items-center justify-center ${theme.accent} shrink-0 overflow-hidden`}>
           {store.logo ? <img src={store.logo} alt={store.name} className="w-full h-full object-cover" /> : <StoreIcon size={28} />}
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="font-bold text-base truncate">{store.name}</h3>
-          <p className={`text-xs ${theme.subtext}`}>Plan {PLAN_LIMITS[store.plan].name}</p>
+          <p className={`text-xs ${theme.subtext}`}>Plan {PLAN_LIMITS[store.plan].name} &bull; ID: #{store.id.slice(-6)}</p>
         </div>
         <button onClick={onUpgrade} className={`${theme.primary} px-3.5 py-2 ${theme.cardRadius} text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform shrink-0`}><Crown size={14} className="text-amber-400" /> Cambiar</button>
       </div>
 
-      {/* Info tienda */}
-      <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
-        <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>1. Información de la tienda</p>
-        <div>
-          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Nombre de la tienda</label>
-          <input type="text" value={store.name} onChange={e => update({ name: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
+      {/* Section: Perfil de la Tienda */}
+      <section>
+        <h3 className={`text-xs font-bold ${theme.subtext} uppercase tracking-wider mb-3 px-1`}>Perfil de la Tienda</h3>
+        <div className={`${theme.card} ${theme.cardRadius} border ${theme.borderSubtle} overflow-hidden shadow-md`}>
+          <div className="p-4 space-y-3.5">
+            <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider`}>Información de la tienda</p>
+            <div>
+              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Nombre de la tienda</label>
+              <input type="text" value={store.name} onChange={e => update({ name: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+            </div>
+            <div>
+              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Eslogan</label>
+              <input type="text" value={store.slogan} onChange={e => update({ slogan: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+            </div>
+            <div>
+              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Rubro / Giro</label>
+              <input type="text" value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })} placeholder="Ej: Ropa, Comida, Tecnología..." className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+            </div>
+            <div>
+              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>País</label>
+              <select value={store.country || 'US'} onChange={e => {
+                const country = COUNTRIES.find(c => c.code === e.target.value);
+                update({ country: e.target.value, currency_symbol: country?.currency || '$' });
+              }}
+                style={selectStyle(theme, customTextColor)}
+                className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1] font-medium`}>
+                {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Número de WhatsApp</label>
+              <input type="tel" inputMode="tel" value={store.whatsapp} onChange={e => update({ whatsapp: e.target.value })} placeholder="+51 999 888 777" className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+            </div>
+            <div>
+              <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Moneda</label>
+              <input type="text" value={store.currency_symbol} onChange={e => update({ currency_symbol: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#075ea1]`} />
+            </div>
+          </div>
         </div>
-        <div>
-          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Eslogan</label>
-          <input type="text" value={store.slogan} onChange={e => update({ slogan: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
-        </div>
-        <div>
-          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Rubro / Giro</label>
-          <input type="text" value={store.rubro || ''} onChange={e => update({ rubro: e.target.value })} placeholder="Ej: Ropa, Comida, Tecnología..." className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
-        </div>
-        <div>
-          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>País</label>
-          <select value={store.country || 'US'} onChange={e => {
-            const country = COUNTRIES.find(c => c.code === e.target.value);
-            update({ country: e.target.value, currency_symbol: country?.currency || '$' });
-          }}
-            style={selectStyle(theme, customTextColor)}
-            className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF] font-medium`}>
-            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Número de WhatsApp</label>
-          <input type="tel" inputMode="tel" value={store.whatsapp} onChange={e => update({ whatsapp: e.target.value })} placeholder="+51 999 888 777" className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
-        </div>
-        <div>
-          <label className={`block text-[10px] font-semibold ${theme.subtext} mb-1`}>Moneda</label>
-          <input type="text" value={store.currency_symbol} onChange={e => update({ currency_symbol: e.target.value })} className={`w-full ${theme.selectBg} border ${theme.cardRadius} p-3 text-xs outline-none focus:border-[#1E6FFF]`} />
-        </div>
-      </div>
+      </section>
 
+      {/* Section: Diseño y Personalización */}
+      <section>
+        <h3 className={`text-xs font-bold ${theme.subtext} uppercase tracking-wider mb-3 px-1`}>Diseño y Personalización</h3>
+        <div className="space-y-4">
       {/* Logo de la tienda */}
       <div className={`${theme.card} p-4 ${theme.cardRadius} border space-y-3.5 shadow-md`}>
         <p className={`text-[10px] font-bold ${theme.accent} uppercase tracking-wider flex items-center gap-1.5`}><ImageIcon size={14} /> Logo de la tienda</p>
@@ -1244,6 +1285,8 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ store, theme, categories,
       </div>
 
       <CategoryManagerModal isOpen={showCatModal} onClose={() => setShowCatModal(false)} categories={categories} storeId={store.id} theme={theme} onSaved={onRefresh} customTextColor={customTextColor} />
+        </div>
+      </section>
     </div>
   );
 };
@@ -1845,7 +1888,7 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
   store, products, categories, banners, orders, cart, setCart, activeTab, setActiveTab,
   onRefresh, onOrder, onUpdateStore, onUpgrade, onSignOut, onOpenQR, onOpenStoreSwitcher, storeCount, isAdmin, onBackToAdmin
 }) => {
-  const theme = THEMES[store.theme] || THEMES.proDark;
+  const theme = THEMES[store.theme] || THEMES.corporateLight;
   const fontObj = AVAILABLE_FONTS.find(f => f.id === store.font) || AVAILABLE_FONTS[0];
   const customTextColor = store.custom_text_color || undefined;
   const accentColor = store.custom_accent_color || undefined;
@@ -1875,13 +1918,13 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
   return (
     <div className={containerClass} style={containerStyle}>
       <div className="w-full max-w-md h-full flex flex-col relative shadow-2xl">
-        <header className={`sticky top-0 z-40 ${theme.nav} px-3.5 py-3 shadow-md flex items-center justify-between border-b`}>
+        <header className={`sticky top-0 z-40 ${theme.nav} px-4 py-3 flex items-center justify-between border-b`}>
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center shadow-md shrink-0 bg-white/5 border border-white/10">
               <img src="/image copy.png" alt="Vendely Pro" className="w-full h-full object-contain p-0.5" />
             </div>
             <div className="min-w-0">
-              <h1 className="font-black text-sm leading-tight truncate" style={customTextColor ? { color: customTextColor } : undefined}>{store.name}</h1>
+              <h1 className="font-bold text-sm leading-tight truncate" style={customTextColor ? { color: customTextColor } : undefined}>{store.name}</h1>
               <p className={`text-[10px] ${theme.subtext} truncate max-w-[120px]`}>{store.slogan}</p>
             </div>
           </div>
@@ -1910,14 +1953,14 @@ const StoreContainer: React.FC<StoreContainerProps> = ({
           {isAdmin && activeTab === 'plans' && <PlansView currentPlan={store.plan} productCount={products.length} bannerCount={banners.length} theme={theme} onSelectPlan={async (plan) => { if (onUpdateStore) { try { await api.updatePlan(store.id, plan); await onUpdateStore({}); } catch { alert('Error al cambiar de plan'); } } }} />}
           {isAdmin && activeTab === 'settings' && onUpdateStore && <AdminSettings store={store} theme={theme} categories={categories} onUpdate={onUpdateStore} onUpgrade={onUpgrade || (() => {})} onOpenQR={onOpenQR || (() => {})} onRefresh={onRefresh} customTextColor={customTextColor} />}
         </main>
-        <nav className={`fixed bottom-0 left-0 right-0 ${theme.nav} border-t px-1.5 py-1.5 z-40 backdrop-blur-lg`}>
+        <nav className={`fixed bottom-0 left-0 right-0 ${theme.nav} border-t px-2 py-2 z-40 backdrop-blur-xl rounded-t-2xl shadow-[0_-4px_12px_rgba(7,94,161,0.08)]`}>
           <div className={`max-w-md mx-auto grid ${isAdmin ? 'grid-cols-6' : 'grid-cols-2'} gap-0.5 text-center`}>
-            <button onClick={() => setActiveTab('catalog')} className={`py-1.5 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all ${activeTab === 'catalog' ? `${theme.activeText} font-bold` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'catalog')}><StoreIcon size={16} /><span className="text-[8px]">Catálogo</span></button>
-            <button onClick={() => setActiveTab('cart')} className={`py-1.5 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all relative ${activeTab === 'cart' ? `${theme.activeText} font-bold` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'cart')}><ShoppingBag size={16} /><span className="text-[8px]">Carrito</span>{cart.length > 0 && <span className="absolute top-0.5 right-2 bg-red-500 text-white text-[7px] font-bold w-3 h-3 rounded-full flex items-center justify-center">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}</button>
-            {isAdmin && <button onClick={() => setActiveTab('products')} className={`py-1.5 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all ${activeTab === 'products' ? `${theme.activeText} font-bold` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'products')}><Package size={16} /><span className="text-[8px]">Productos</span></button>}
-            {isAdmin && <button onClick={() => setActiveTab('orders')} className={`py-1.5 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all relative ${activeTab === 'orders' ? `${theme.activeText} font-bold` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'orders')}><Clock size={16} /><span className="text-[8px]">Pedidos</span>{orders.filter(o => o.status === 'pending').length > 0 && <span className="absolute top-0.5 right-2 bg-red-500 text-white text-[7px] font-bold w-3 h-3 rounded-full flex items-center justify-center">{orders.filter(o => o.status === 'pending').length}</span>}</button>}
-            {isAdmin && <button onClick={() => setActiveTab('reports')} className={`py-1.5 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all ${activeTab === 'reports' ? `${theme.activeText} font-bold` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'reports')}><TrendingUp size={16} /><span className="text-[8px]">Reportes</span></button>}
-            {isAdmin && <button onClick={() => setActiveTab('settings')} className={`py-1.5 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all ${activeTab === 'settings' ? `${theme.activeText} font-bold` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'settings')}><Settings size={16} /><span className="text-[8px]">Ajustes</span></button>}
+            <button onClick={() => setActiveTab('catalog')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all active:scale-90 ${activeTab === 'catalog' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'catalog')}><StoreIcon size={18} /><span className="text-[9px]">Catálogo</span></button>
+            <button onClick={() => setActiveTab('cart')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all relative active:scale-90 ${activeTab === 'cart' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'cart')}><ShoppingBag size={18} /><span className="text-[9px]">Carrito</span>{cart.length > 0 && <span className="absolute top-0.5 right-3 bg-red-500 text-white text-[7px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">{cart.reduce((s, i) => s + i.quantity, 0)}</span>}</button>
+            {isAdmin && <button onClick={() => setActiveTab('products')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all active:scale-90 ${activeTab === 'products' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'products')}><Package size={18} /><span className="text-[9px]">Productos</span></button>}
+            {isAdmin && <button onClick={() => setActiveTab('orders')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all relative active:scale-90 ${activeTab === 'orders' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'orders')}><Clock size={18} /><span className="text-[9px]">Pedidos</span>{orders.filter(o => o.status === 'pending').length > 0 && <span className="absolute top-0.5 right-3 bg-red-500 text-white text-[7px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center">{orders.filter(o => o.status === 'pending').length}</span>}</button>}
+            {isAdmin && <button onClick={() => setActiveTab('reports')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all active:scale-90 ${activeTab === 'reports' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'reports')}><TrendingUp size={18} /><span className="text-[9px]">Reportes</span></button>}
+            {isAdmin && <button onClick={() => setActiveTab('settings')} className={`py-1.5 px-2 ${theme.cardRadius} flex flex-col items-center gap-0.5 transition-all active:scale-90 ${activeTab === 'settings' ? `${theme.activeText} font-bold ${theme.accentBg}` : 'opacity-50'}`} style={navBtnStyle(activeTab === 'settings')}><Settings size={18} /><span className="text-[9px]">Ajustes</span></button>}
           </div>
         </nav>
       </div>
@@ -2168,7 +2211,7 @@ const AdminApp: React.FC = () => {
   return (
     <>
       <StoreContainer store={store} products={products} categories={categories} banners={banners} orders={orders} cart={cart} setCart={setCart} activeTab={activeTab} setActiveTab={setActiveTab} onRefresh={refreshAll} onOrder={handleOrder} onUpdateStore={handleUpdateStore} onUpgrade={() => setActiveTab('plans')} onSignOut={signOut} onOpenQR={() => setShowQR(true)} isAdmin={true} onOpenStoreSwitcher={() => setShowStoreSwitcher(true)} storeCount={stores.length} />
-      <QRModal isOpen={showQR} onClose={() => setShowQR(false)} storeId={store.id} storeName={store.name} theme={THEMES[store.theme] || THEMES.proDark} />
+      <QRModal isOpen={showQR} onClose={() => setShowQR(false)} storeId={store.id} storeName={store.name} theme={THEMES[store.theme] || THEMES.corporateLight} />
       {showStoreSwitcher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowStoreSwitcher(false)}>
           <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-[90%] max-w-md space-y-4" onClick={e => e.stopPropagation()}>
