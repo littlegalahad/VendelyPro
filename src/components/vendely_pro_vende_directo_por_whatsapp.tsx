@@ -1664,20 +1664,17 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
   const layout = store.catalog_layout || 'grid2';
   const accentColor = store.custom_accent_color || undefined;
 
-  // Shared "Add" button — consistent across all layouts
-  const AddButton = ({ product, size = 'md' }: { product: Product; size?: 'sm' | 'md' | 'lg' }) => {
-    const sizes = {
-      sm: 'text-[9px] px-2 py-1 gap-0.5',
-      md: 'text-[10px] px-3 py-1.5 gap-1',
-      lg: 'text-xs px-4 py-2.5 gap-1.5',
-    };
-    const iconSize = size === 'sm' ? 10 : size === 'lg' ? 16 : 13;
+  // Floating add-to-cart button — used across all layouts
+  const FloatingAdd = ({ product, size = 'md' }: { product: Product; size?: 'sm' | 'md' | 'lg' }) => {
+    const dims = size === 'sm' ? 'w-8 h-8 rounded-lg' : size === 'lg' ? 'w-11 h-11 rounded-2xl' : 'w-9 h-9 rounded-xl';
+    const icon = size === 'sm' ? 16 : size === 'lg' ? 22 : 18;
     return (
       <button
-        onClick={() => addToCart(product)}
-        className={`${theme.primary} ${sizes[size]} font-bold ${theme.cardRadius} flex items-center justify-center active:scale-95 transition-transform shadow-sm whitespace-nowrap shrink-0`}
+        onClick={(e: React.MouseEvent) => { e.stopPropagation(); e.preventDefault(); addToCart(product); }}
+        className={`absolute bottom-2 right-2 z-30 ${dims} flex items-center justify-center shadow-lg shadow-black/30 active:scale-90 transition-all duration-150 ${theme.primary}`}
+        aria-label="Agregar al carrito"
       >
-        <Plus size={iconSize} /> Agregar
+        <Plus size={icon} strokeWidth={2.5} />
       </button>
     );
   };
@@ -1709,17 +1706,17 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
 
     if (layoutType === 'lista') {
       return (
-        <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-md flex items-center gap-3 p-2.5 ${theme.cardHover} transition-all group`}>
+        <div key={p.id} className={`${theme.card} border border-outline-variant/20 ${theme.cardRadius} overflow-hidden shadow-sm flex items-center gap-3 p-2.5 transition-all hover:shadow-md duration-200 group`}>
           <div className="relative shrink-0">
             <ProductImage src={p.image} alt={p.name} className={`w-20 h-20 object-cover ${theme.cardRadius} group-hover:scale-105 transition-transform`} />
-            {p.is_offer && <span className="absolute top-1 left-1 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">OFERTA</span>}
+            {p.is_offer && p.offer_price && <span className="absolute top-1 left-1 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-sm z-10">-{Math.round((1 - p.offer_price / p.price) * 100)}%</span>}
+            <FloatingAdd product={p} size="sm" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-xs line-clamp-1">{p.name}</h3>
             <p className={`text-[10px] ${theme.subtext} line-clamp-1`}>{p.description}</p>
-            <div className="flex items-center justify-between mt-1.5">
+            <div className="mt-1.5">
               <PriceTag p={p} size="sm" />
-              <AddButton product={p} size="sm" />
             </div>
           </div>
         </div>
@@ -1728,18 +1725,18 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
 
     if (layoutType === 'magazine') {
       return (
-        <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-lg flex flex-col ${theme.cardHover} transition-all group`}>
-          <div className="relative">
+        <div key={p.id} className={`${theme.card} border border-outline-variant/20 ${theme.cardRadius} overflow-hidden shadow-sm flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-md duration-200 group`}>
+          <div className="relative overflow-hidden">
             <ProductImage src={p.image} alt={p.name} className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300" />
-            {p.is_offer && <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg"><Tag size={11} /> OFERTA</span>}
-            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-3 pt-8 pointer-events-none`}>
-              <h3 className="font-black text-sm text-white line-clamp-1">{p.name}</h3>
+            {p.is_offer && p.offer_price && <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md z-10">-{Math.round((1 - p.offer_price / p.price) * 100)}%</span>}
+            <FloatingAdd product={p} size="lg" />
+            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-3 pt-8 pointer-events-none z-10`}>
+              <h3 className="font-black text-sm text-white line-clamp-1 drop-shadow-lg">{p.name}</h3>
               <p className="text-[10px] text-white/80 line-clamp-1">{p.description}</p>
             </div>
           </div>
-          <div className="p-3 flex items-center justify-between">
+          <div className="px-3 py-3">
             <PriceTag p={p} size="lg" />
-            <AddButton product={p} size="lg" />
           </div>
         </div>
       );
@@ -1747,15 +1744,15 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
 
     if (layoutType === 'compact') {
       return (
-        <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-sm flex flex-col ${theme.cardHover} transition-all group`}>
-          <div className="relative">
+        <div key={p.id} className={`${theme.card} border border-outline-variant/20 ${theme.cardRadius} overflow-hidden shadow-sm flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-md duration-200 group`}>
+          <div className="relative overflow-hidden">
             <ProductImage src={p.image} alt={p.name} className="w-full h-24 object-cover group-hover:scale-105 transition-transform" />
-            {p.is_offer && <span className="absolute top-1 left-1 bg-red-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full">OFERTA</span>}
+            {p.is_offer && p.offer_price && <span className="absolute top-1 left-1 bg-red-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full shadow-sm z-10">-{Math.round((1 - p.offer_price / p.price) * 100)}%</span>}
+            <FloatingAdd product={p} size="sm" />
           </div>
-          <div className="p-2 flex-1 flex flex-col justify-between gap-1">
+          <div className="p-2 flex-1 flex flex-col gap-0.5">
             <h3 className="font-bold text-[10px] line-clamp-1">{p.name}</h3>
             <PriceTag p={p} size="sm" />
-            <AddButton product={p} size="sm" />
           </div>
         </div>
       );
@@ -1763,40 +1760,36 @@ const CatalogView: React.FC<CatalogViewProps> = ({ products, store, theme, banne
 
     if (layoutType === 'gallery') {
       return (
-        <div key={p.id} className={`${theme.card} border ${theme.cardRadius} overflow-hidden shadow-lg flex flex-col ${theme.cardHover} transition-all group`}>
-          <div className="relative">
+        <div key={p.id} className={`${theme.card} border border-outline-variant/20 ${theme.cardRadius} overflow-hidden shadow-sm flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-md duration-200 group`}>
+          <div className="relative overflow-hidden">
             <ProductImage src={p.image} alt={p.name} className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" />
-            {p.is_offer && <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full flex items-center gap-1 shadow-lg"><Tag size={11} /> OFERTA</span>}
-            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-4 pt-12 pointer-events-none`}>
-              <h3 className="font-black text-base text-white line-clamp-1">{p.name}</h3>
-              <p className="text-[11px] text-white/80 line-clamp-2">{p.description}</p>
+            {p.is_offer && p.offer_price && <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md z-10">-{Math.round((1 - p.offer_price / p.price) * 100)}%</span>}
+            <FloatingAdd product={p} size="lg" />
+            <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t ${theme.overlayBg} p-4 pt-12 pointer-events-none z-10`}>
+              <h3 className="font-black text-base text-white line-clamp-1 drop-shadow-lg">{p.name}</h3>
+              <p className="text-[11px] text-white/80 line-clamp-1">{p.description}</p>
             </div>
           </div>
-          <div className="p-3 flex items-center justify-between">
+          <div className="px-4 py-3">
             <PriceTag p={p} size="lg" />
-            <AddButton product={p} size="lg" />
           </div>
         </div>
       );
     }
 
-    // grid2 o grid3 — premium card style matching catalog mockup
+    // grid2 / grid3 — premium card
     return (
-      <div key={p.id} className={`${theme.card} border border-opacity-20 ${theme.cardRadius} overflow-hidden shadow-md flex flex-col transition-all hover:-translate-y-1 hover:shadow-xl duration-300 group`}>
-        <div className="relative aspect-square overflow-hidden bg-[#eff4ff]">
+      <div key={p.id} className={`${theme.card} border border-outline-variant/20 ${theme.cardRadius} overflow-hidden shadow-sm flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-md duration-200 group`}>
+        <div className="relative overflow-hidden" style={{ aspectRatio: '1 / 1' }}>
           <ProductImage src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          {p.is_offer && <span className="absolute top-3 right-3 bg-red-100 text-red-700 px-2.5 py-1 rounded-lg text-xs font-bold">-{Math.round((1 - (p.offer_price || 0) / p.price) * 100)}%</span>}
-          {p.is_new && <span className="absolute top-3 left-3 bg-[#3377bc] text-white px-2.5 py-1 rounded-lg text-xs font-bold">Nuevo</span>}
+          {p.is_offer && p.offer_price && <span className="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md z-10">-{Math.round((1 - p.offer_price / p.price) * 100)}%</span>}
+          {p.is_new && <span className="absolute top-2 right-2 bg-primary text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md z-10">Nuevo</span>}
+          <FloatingAdd product={p} size="md" />
         </div>
-        <div className="p-4 flex flex-col flex-grow gap-2">
-          <span className={`text-xs ${theme.subtext}`}>{p.category}</span>
-          <h3 className="font-bold text-sm line-clamp-1">{p.name}</h3>
-          <div className="flex items-center gap-2 mb-1">
-            <PriceTag p={p} size="md" />
-          </div>
-          <button onClick={() => addToCart(p)} className={`mt-auto w-full py-2.5 ${theme.primary} ${theme.cardRadius} text-xs font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all`}>
-            <ShoppingCart size={15} /> Añadir al carrito
-          </button>
+        <div className="px-3 pt-2.5 pb-3 flex flex-col gap-0.5">
+          <span className={`text-[10px] font-medium ${theme.subtext} truncate`}>{p.category}</span>
+          <h3 className="font-bold text-xs leading-snug line-clamp-2">{p.name}</h3>
+          <PriceTag p={p} size="sm" />
         </div>
       </div>
     );
